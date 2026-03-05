@@ -1,0 +1,52 @@
+{
+	"name": "bun-astrokoolam",
+	"version": "1.0.50",
+	"scripts": {
+		"dev": "bun run --watch src/index.ts",
+		"build": "bun build src/index.ts --outdir ./build --target=node",
+		"start": "NODE_ENV=production bun build/index.js",
+		"test": "bun --watch src/test/test.ts",
+		"mtgen": "bun run --watch src/utils/mongoose-ts-gen.ts",
+		"push": "bun run build && git add . && git commit -m 'bug fixes' && git push origin main_v2",
+		"pull": "git pull origin $(git branch --show-current)"
+	},
+	"dependencies": {
+		"@elysiajs/bearer": "0.8.0",
+		"@elysiajs/cookie": "^0.8.0",
+		"@elysiajs/cors": "^0.8.0",
+		"@elysiajs/html": "0.8.0",
+		"@elysiajs/static": "^1.1.1",
+		"@elysiajs/swagger": "^1.1.6",
+		"@periskope/periskope-client": "^1.1.0",
+		"@typegoose/typegoose": "^12.9.1",
+		"@types/bcryptjs": "^2.4.6",
+		"@types/jsonwebtoken": "^9.0.7",
+		"agenda": "^5.0.0",
+		"agora-token": "^2.0.3",
+		"axios": "^1.7.9",
+		"bcryptjs": "^2.4.3",
+		"bullmq": "^5.58.4",
+		"cron": "^3.2.1",
+		"dotenv": "^16.4.6",
+		"elysia": "^1.1.25",
+		"elysia-helmet": "^1.0.2",
+		"firebase": "^10.14.1",
+		"form-data": "^4.0.1",
+		"ioredis": "^5.5.0",
+		"jsonwebtoken": "^9.0.2",
+		"moment": "^2.30.1",
+		"mongoose": "^8.8.3",
+		"node-appwrite": "^22.0.0",
+		"nodemailer": "^6.9.16",
+		"tesseract.js": "^6.0.1",
+		"uuid": "^13.0.0"
+	},
+	"devDependencies": {
+		"@types/nodemailer": "^6.4.17",
+		"@webpack-cli/generators": "^3.0.7",
+		"bun-types": "latest",
+		"mongoose-tsgen": "^9.5.0",
+		"webpack-cli": "^5.1.4"
+	},
+	"module": "src/index.js"
+}

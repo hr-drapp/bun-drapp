@@ -1,0 +1,30 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    root /var/www/html;
+
+    index index.html index.htm index.php;
+
+    server_name _;
+
+    # to boost I/O on HDD we can disable access logs
+    access_log off;
+
+    gzip on;
+    gzip_proxied any;
+    gzip_types text/plain text/xml text/css application/x-javascript;
+    gzip_vary on;
+    gzip_disable “MSIE [1-6]\.(?!.*SV1)”;
+
+    large_client_header_buffers 4 16k;
+
+    # Node Server
+    location ^~ / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
