@@ -35,9 +35,4 @@ export default {
 	origin: "*",
 	masterPass: "",
 	secret: "C582FCCF4AF6F14433E2736F8331A",
-
-	payStackSecret: {
-		live: "",
-		test: "",
-	},
 };
