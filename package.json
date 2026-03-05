@@ -7,7 +7,7 @@
 		"start": "NODE_ENV=production bun build/index.js",
 		"test": "bun --watch src/test/test.ts",
 		"mtgen": "bun run --watch src/utils/mongoose-ts-gen.ts",
-		"push": "bun run build && git add . && git commit -m 'bug fixes' && git push origin main_v2",
+		"push": "bun run build && git add . && git commit -m 'bug fixes' && git push origin main",
 		"pull": "git pull origin $(git branch --show-current)"
 	},
 	"dependencies": {

@@ -33,11 +33,11 @@ export default {
 	larave_event_secret: process.env.LARAVEL_EVENT_SECRET as string,
 
 	origin: "*",
-	masterPass: "$2a$10$uuM6IQFVLuPsPlgCfp5CWug7CjLwADbpDcIEmX/tnoohQIqsaThue",
+	masterPass: "",
 	secret: "C582FCCF4AF6F14433E2736F8331A",
 
 	payStackSecret: {
-		live: "sk_live_4b8157f1687113e9b755ea6d75dfe816fd050b50",
-		test: "sk_test_9c2798afd31bc214d4863851985d4596df73ef5c",
+		live: "",
+		test: "",
 	},
 };

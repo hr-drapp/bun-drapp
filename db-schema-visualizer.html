@@ -24,7 +24,7 @@
       background: radial-gradient(circle at 10% 10%, #fef8f1 0%, #f5f3ef 40%, #ece8e0 100%);
       min-height: 100vh;
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
     }
     header {
       padding: 14px 20px;
@@ -64,6 +64,53 @@
       font-size: 11px;
       color: var(--muted);
       white-space: nowrap;
+    }
+    .controls {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 20px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      background: #fff7ed;
+    }
+    .controls label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      margin-bottom: 3px;
+      display: block;
+    }
+    .controls input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--ink);
+    }
+    .controls button {
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      align-self: end;
+    }
+    .controls button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .status {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+    .status.bad {
+      color: var(--warn);
     }
     main {
       min-height: 0;
@@ -257,6 +304,9 @@
         flex-direction: column;
         align-items: flex-start;
       }
+      .controls {
+        grid-template-columns: 1fr;
+      }
       main {
         display: block;
       }
@@ -274,10 +324,19 @@
   <header>
     <div class="title">
       <h1>MongoDB Schema Visualizer</h1>
-      <p id="subtitle"></p>
+      <p id="subtitle">Loading schema data...</p>
     </div>
     <div class="stats" id="stats"></div>
   </header>
+
+  <div class="controls">
+    <div>
+      <label for="apiUrl">Schema API URL</label>
+      <input id="apiUrl" type="text" />
+      <div id="status" class="status"></div>
+    </div>
+    <button id="reloadBtn">Reload</button>
+  </div>
 
   <main>
     <aside>
@@ -298,14 +357,15 @@
     <div class="detail" id="detail"></div>
   </main>
 
-  <script>
-    const schemaData = {"generatedAt":"2026-03-05T13:33:15.223Z","database":"drapp_v1","importedModelFiles":["src/models/AccessGrant.ts","src/models/Address.ts","src/models/Admin.ts","src/models/AdminRequest.ts","src/models/AstroOrder.ts","src/models/Astrologer.ts","src/models/AstrologerInsights.ts","src/models/Bank.ts","src/models/Cart.ts","src/models/Category.ts","src/models/ChatRoom.ts","src/models/Client.ts","src/models/Country.ts","src/models/Example.ts","src/models/Game.ts","src/models/GameCategory.ts","src/models/GameNumber.ts","src/models/GameTime.ts","src/models/Group.ts","src/models/GroupAdmin.ts","src/models/GroupGameTime.ts","src/models/HisabCommision.ts","src/models/JodiMixHisabCommision.ts","src/models/Kyc.ts","src/models/Market.ts","src/models/Message.ts","src/models/MessageQueue.ts","src/models/MessageReactQueue.ts","src/models/Notice.ts","src/models/NumberEntryShare.ts","src/models/NumberEntryTransection.ts","src/models/Numbers.ts","src/models/NumbersEntry.ts","src/models/Order.ts","src/models/Payment.ts","src/models/Product.ts","src/models/ProductCategory.ts","src/models/Result.ts","src/models/Role.ts","src/models/SattaEntry.ts","src/models/SattaNumberEntry.ts","src/models/SattaNumberEntryShare.ts","src/models/SattaResult.ts","src/models/Setting.ts","src/models/SpinnerMarket.ts","src/models/Tenant.ts","src/models/User.ts","src/models/Wallet.ts","src/models/WalletAllocation.ts","src/models/WalletPlan.ts","src/models/WalletTransaction.ts","src/models/drapp/Appointment.ts","src/models/drapp/AutoIncementalId.ts","src/models/drapp/Clinic.ts","src/models/drapp/Doctor.ts","src/models/drapp/DoctorSlot.ts","src/models/drapp/Patient.ts","src/models/drapp/Record.ts"],"modelCount":58,"edgeCount":96,"models":[{"model":"AccessGrantClass","collection":"accessgrants","timestamps":true,"fields":[{"path":"grantee","type":"ObjectId","required":true,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"granted_by","type":"ObjectId","required":true,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"resource","type":"Mixed","required":true,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"resource_ids","type":"Array<ObjectId>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":"[]"},{"path":"filters","type":"Array<Mixed>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":"[]"},{"path":"tenant","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"TenantClass","array":false,"default":null},{"path":"expires_at","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"expires_at":1},"options":{"background":true}},{"spec":{"granted_by":1,"resource":1},"options":{"background":true}},{"spec":{"grantee":1,"resource":1},"options":{"background":true}}],"count":0},{"model":"AddressClass","collection":"address","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"address","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"city","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"state","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"pin","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"user","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"UserClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"AdminClass","collection":"admins","timestamps":true,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"phone","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"email","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"password","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"password_unhashed","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"password_changed","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"role_id","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"super_admin","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"role","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"RoleClass","array":false,"default":null},{"path":"parent","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"tenant","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"TenantClass","array":false,"default":null},{"path":"default_game","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"expire_at","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"children_count","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"admin_create_limit","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"ip","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"otp","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"permissions","type":"Mixed","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"[Function anonymous]"},{"path":"default_type","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":""},{"path":"is_customer","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"games","type":"Array<Mixed>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"phone":1},"options":{"unique":true,"background":true}},{"spec":{"email":1},"options":{"unique":true,"background":true}}],"count":2},{"model":"AdminRequestClass","collection":"admin_requests","timestamps":true,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"phone","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"email","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"phone":1},"options":{"unique":true,"background":true}},{"spec":{"email":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"AppointmentClass","collection":"appointment","timestamps":true,"fields":[{"path":"id","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"token","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"clinic","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"ClinicClass","array":false,"default":null},{"path":"tenant","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"TenantClass","array":false,"default":null},{"path":"patient","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"PatientClass","array":false,"default":null},{"path":"doctor","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"DoctorClass","array":false,"default":null},{"path":"slot","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"DoctorSlotClass","array":false,"default":null},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"followUpDate","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"type","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"source","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"complaint","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"AstrologerClass","collection":"astrologers","timestamps":false,"fields":[{"path":"fname","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"lname","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"email","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"phone","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"password","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"profile_level","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"gender","type":"String","required":false,"unique":false,"index":false,"enumValues":["M","F"],"ref":null,"array":false,"default":null},{"path":"dob","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"pob","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"address","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"photo","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"country","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"CountryClass","array":false,"default":null},{"path":"state","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"distric","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"city","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"pin_code","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"company_name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"category","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"CategoryClass","array":false,"default":null},{"path":"sub_category","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"CategoryClass","array":false,"default":null},{"path":"experience","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"languages","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"degree","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"introduction","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"service_charge","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"online","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"true"},{"path":"verified","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"true"},{"path":"astrologer_insights","type":"Mixed","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"AstrologerInsightsClass","collection":"astrologer_insights","timestamps":true,"fields":[{"path":"astrologer","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AstrologerClass","array":false,"default":null},{"path":"total_time","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"total_count","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"vc_time","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"vc_count","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"ac_time","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"ac_count","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"chat_count","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"rating_overview","type":"Array<Mixed>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":"[0,0,0,0,0]"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"AstroOrder","collection":"astro_orders","timestamps":true,"fields":[{"path":"astrologer","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AstrologerClass","array":false,"default":null},{"path":"user","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"UserClass","array":false,"default":null},{"path":"type","type":"String","required":false,"unique":false,"index":false,"enumValues":["VIDEO_CALL","AUDIO_CALL","CHAT"],"ref":null,"array":false,"default":null},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":["pending","confirmed","completed","canceled"],"ref":null,"array":false,"default":null},{"path":"scheduled_at","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"2026-03-05T19:03:13+05:30"},{"path":"total_duration","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"actual_duration","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"AutoIncementalIdClass","collection":"autoincrementalid","timestamps":true,"fields":[{"path":"id","type":"Number","required":true,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"seq","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"id":1},"options":{"unique":true,"background":true}},{"spec":{"seq":1},"options":{"background":true}}],"count":2},{"model":"BankClass","collection":"banks","timestamps":false,"fields":[{"path":"user","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"UserClass","array":false,"default":null},{"path":"account_holder","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"account_number","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"ifsc","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":["PENDING","REJECTED","APPROVED"],"ref":null,"array":false,"default":"PENDING"},{"path":"description","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"your bank details are pending for approval."},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"account_number":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"CartClass","collection":"cart","timestamps":true,"fields":[{"path":"user","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"UserClass","array":false,"default":null},{"path":"items","type":"Array<Mixed>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":"[]"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"CategoryClass","collection":"categories","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"photo","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"parent","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"CategoryClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"name":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"ChatRoom","collection":"chat_rooms","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"astrologer","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AstrologerClass","array":false,"default":null},{"path":"user","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"UserClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"ClientClass","collection":"clients","timestamps":true,"fields":[{"path":"name","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"name":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"ClinicClass","collection":"clinic","timestamps":true,"fields":[{"path":"id","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"logo","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"default","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":2},{"model":"CountryClass","collection":"countries","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"name":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"DoctorClass","collection":"doctor","timestamps":true,"fields":[{"path":"id","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"clinic","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"ClinicClass","array":false,"default":null},{"path":"tenant","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"TenantClass","array":false,"default":null},{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"profilePic","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"pictures","type":"Array<Mixed>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":"[]"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":1},{"model":"DoctorSlotClass","collection":"doctor_slot","timestamps":true,"fields":[{"path":"id","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"clinic","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"ClinicClass","array":false,"default":null},{"path":"tenant","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"TenantClass","array":false,"default":null},{"path":"doctor","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"DoctorClass","array":false,"default":null},{"path":"start","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"end","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"GameCategoryClass","collection":"game_category","timestamps":true,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"total_count","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"GameClass","collection":"games","timestamps":true,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"game_category","type":"ObjectId","required":true,"unique":false,"index":false,"enumValues":[],"ref":"GameCategoryClass","array":false,"default":null},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"GameNumberClass","collection":"game_number","timestamps":true,"fields":[{"path":"game","type":"ObjectId","required":true,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"number","type":"ObjectId","required":true,"unique":false,"index":false,"enumValues":[],"ref":"NumbersClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"game":1,"number":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"GameTimeClass","collection":"games_time","timestamps":true,"fields":[{"path":"game","type":"ObjectId","required":true,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"start","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"end","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"entry_margin","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"result_margin","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"auto_result","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"win_margin","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"result_updated_at","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"result_status","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"result_processing","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"game":1,"start":1,"end":1},"options":{"background":true}},{"spec":{"game":1},"options":{"background":true}},{"spec":{"start":1,"end":1},"options":{"background":true}}],"count":0},{"model":"GroupAdminClass","collection":"group_admin","timestamps":true,"fields":[{"path":"group","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"groupClass","array":false,"default":null},{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"group":1,"admin":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"groupClass","collection":"group","timestamps":true,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"game_time_count","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"admin_count","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"type","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"messageId","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"groupId","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"beat_type","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"GroupGameTimeClass","collection":"group_game_time","timestamps":true,"fields":[{"path":"group","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"groupClass","array":false,"default":null},{"path":"game_time","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameTimeClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"group":1,"game_time":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"HisabComissonClass","collection":"comission","timestamps":true,"fields":[{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"comission","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1"},{"path":"multiplyer","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"JodiHisabComissonClass","collection":"Jodicomission","timestamps":true,"fields":[{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"commision","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1"},{"path":"andar","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1"},{"path":"bahar","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1"},{"path":"total","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1"},{"path":"jodi","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"KycClass","collection":"kycs","timestamps":false,"fields":[{"path":"user","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"UserClass","array":false,"default":null},{"path":"dob","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"address","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"id_number","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"document","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":["PENDING","REJECTED","APPROVED"],"ref":null,"array":false,"default":"PENDING"},{"path":"description","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"your kyc details are pending for approval."},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"id_number":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"MarketClass","collection":"markets","timestamps":true,"fields":[{"path":"type","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1"},{"path":"client_name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"single","type":"Array<ObjectId>","required":false,"unique":false,"index":false,"enumValues":[],"ref":"SattaEntryClass","array":true,"default":null},{"path":"jodi","type":"Array<ObjectId>","required":false,"unique":false,"index":false,"enumValues":[],"ref":"SattaEntryClass","array":true,"default":null},{"path":"andar","type":"Array<ObjectId>","required":false,"unique":false,"index":false,"enumValues":[],"ref":"SattaEntryClass","array":true,"default":null},{"path":"bahar","type":"Array<ObjectId>","required":false,"unique":false,"index":false,"enumValues":[],"ref":"SattaEntryClass","array":true,"default":null},{"path":"total","type":"Array<ObjectId>","required":false,"unique":false,"index":false,"enumValues":[],"ref":"SattaEntryClass","array":true,"default":null},{"path":"pana","type":"Array<ObjectId>","required":false,"unique":false,"index":false,"enumValues":[],"ref":"SattaEntryClass","array":true,"default":null},{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"game","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1772649000000"},{"path":"token","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"payment_completed","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"MessageClass","collection":"message","timestamps":true,"fields":[{"path":"text","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"messageId","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"group","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"groupClass","array":false,"default":null},{"path":"quotedId","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":["pending","success"],"ref":null,"array":false,"default":null},{"path":"user","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"MessageQueueClass","collection":"message_queue","timestamps":true,"fields":[{"path":"text","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"messageId","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"reaction","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"group","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"quotedId","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"PENDING"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"MessageReactQueueClass","collection":"message_react_queue","timestamps":true,"fields":[{"path":"reaction","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"message_id","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":["PENDING","RESERVED","REACTED","COMPLETED"],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"NoExample","collection":"examples","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"name":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"Notice","collection":"notices","timestamps":true,"fields":[{"path":"text","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"game_time","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameTimeClass","array":false,"default":null},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"[Function now]"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"NumberEntryClass","collection":"numbers_entry","timestamps":true,"fields":[{"path":"amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"number","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"NumbersClass","array":false,"default":null},{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"game","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"game_time","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameTimeClass","array":false,"default":null},{"path":"source","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"default"},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1772649000000"},{"path":"market","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"total_amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"messageId","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"NumberEntryShareClass","collection":"number_entry_share","timestamps":true,"fields":[{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"game","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"game_time","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameTimeClass","array":false,"default":null},{"path":"category","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1772649000000"},{"path":"team_member","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"team_member_share","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"team_member_share_type","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"master","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"master_share","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"master_share_type","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"super_admin","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"super_admin_share","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"super_admin_share_type","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"NumberEntryTransectionClass","collection":"number_entry_transection","timestamps":true,"fields":[{"path":"amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"numbers","type":"Array<ObjectId>","required":false,"unique":false,"index":false,"enumValues":[],"ref":"NumbersClass","array":true,"default":null},{"path":"numbers_map","type":"Mixed","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"[Function anonymous]"},{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"game","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"game_time","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameTimeClass","array":false,"default":null},{"path":"source","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"default"},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1772649000000"},{"path":"market","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"total_amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"messageId","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"text","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"NumbersClass","collection":"numberEntries","timestamps":true,"fields":[{"path":"text","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1"},{"path":"type","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"texts","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"OrderClass","collection":"cart","timestamps":true,"fields":[{"path":"user","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"UserClass","array":false,"default":null},{"path":"items","type":"Array<Mixed>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":"[]"},{"path":"total_order_amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"delivery_charge","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"tax","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"total_amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":["Payment Pending","Payment Processed","Processing","Shipped","Out for Delivery","Delivered","Canceled","On Hold","Refunded","Returned","Partially Shipped","Awaiting Fulfillment","Awaiting Payment"],"ref":null,"array":false,"default":null},{"path":"payment","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"PaymentClass","array":false,"default":null},{"path":"address","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AddressClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"PatientClass","collection":"patient","timestamps":true,"fields":[{"path":"id","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"clinic","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"ClinicClass","array":false,"default":null},{"path":"tenant","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"TenantClass","array":false,"default":null},{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"phone","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"age","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"gender","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdBy","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"profilePic","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"PaymentClass","collection":"payments","timestamps":true,"fields":[{"path":"user","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"UserClass","array":false,"default":null},{"path":"reference_id","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"type","type":"String","required":false,"unique":false,"index":false,"enumValues":["ORDER","DEPOSIT"],"ref":null,"array":false,"default":null},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":["PENDING","FAILED","SUCCESS","REFUNDED"],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"ProductCategoryClass","collection":"product_categories","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":true,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"photo","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"parent","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"ProductCategoryClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"name":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"ProductClass","collection":"products","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"description","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"price","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"discount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"images","type":"Array<Mixed>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":"[]"},{"path":"category","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"ProductCategoryClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"RecordClass","collection":"record","timestamps":true,"fields":[{"path":"id","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"clinic","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"ClinicClass","array":false,"default":null},{"path":"tenant","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"TenantClass","array":false,"default":null},{"path":"patient","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"PatientClass","array":false,"default":null},{"path":"doctor","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"DoctorClass","array":false,"default":null},{"path":"appointment","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AppointmentClass","array":false,"default":null},{"path":"status","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"type","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"attachments","type":"Array<Mixed>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":"[]"},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"ResultClass","collection":"result","timestamps":true,"fields":[{"path":"game_time","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameTimeClass","array":false,"default":null},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"[Function default]"},{"path":"number","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"NumbersClass","array":false,"default":null},{"path":"end","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"RoleClass","collection":"roles","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"permissions","type":"Mixed","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"order","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"super_admin","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"total_admins","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"level","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"3"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":4},{"model":"SattaEntryClass","collection":"satta_entry","timestamps":true,"fields":[{"path":"text","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"total_amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"numbers","type":"Array<Mixed>","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":true,"default":"[]"},{"path":"numbers_map","type":"Mixed","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"[Function anonymous]"},{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"game","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"category","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"type","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"source","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"default"},{"path":"market","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1772649000000"},{"path":"messageId","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"result_pana","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"result_ank","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"SattaNumberEntryClass","collection":"satta_number_entry","timestamps":true,"fields":[{"path":"amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"number","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"satta_entry","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"SattaEntryClass","array":false,"default":null},{"path":"game","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"category","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"source","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"default"},{"path":"market","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1772649000000"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"SattaNumberEntryShareClass","collection":"satta_number_entry_share","timestamps":true,"fields":[{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"game","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"category","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1772649000000"},{"path":"team_member","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"team_member_share","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"team_member_share_type","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"master","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"master_share","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"master_share_type","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"super_admin","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"super_admin_share","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"super_admin_share_type","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"SattaResult","collection":"satta_result","timestamps":true,"fields":[{"path":"game","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameClass","array":false,"default":null},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"[Function default]"},{"path":"result_pana","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"result_ank","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"SettingClass","collection":"setting","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"key","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"value","type":"Mixed","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"SpinnerMarketClass","collection":"spinner_market","timestamps":true,"fields":[{"path":"client_name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"transection","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"NumberEntryTransectionClass","array":false,"default":null},{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"game_time","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"GameTimeClass","array":false,"default":null},{"path":"date","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"1772649000000"},{"path":"token","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"payment_completed","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"TenantClass","collection":"tenant","timestamps":true,"fields":[{"path":"name","type":"String","required":true,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"default","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"deleted","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"false"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":2},{"model":"UserClass","collection":"userclasses","timestamps":false,"fields":[{"path":"fname","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"lname","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"email","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"phone","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"password","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"gender","type":"String","required":false,"unique":false,"index":false,"enumValues":["M","F"],"ref":null,"array":false,"default":null},{"path":"dob","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"pob","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"address","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"photo","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"deposit_wallet","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"WalletAllocationClass","collection":"wallet_allocations","timestamps":true,"fields":[{"path":"parentWallet","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"WalletClass","array":false,"default":null},{"path":"childWallet","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"WalletClass","array":false,"default":null},{"path":"amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"active"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"parentWallet":1,"childWallet":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"WalletClass","collection":"wallets","timestamps":true,"fields":[{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"limit","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"used","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"allocated","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"status","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"active"},{"path":"unlimited","type":"Boolean","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"true"},{"path":"version","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"admin":1},"options":{"unique":true,"background":true}}],"count":0},{"model":"WalletPlanClass","collection":"wallet_plans","timestamps":false,"fields":[{"path":"name","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"discount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[],"count":0},{"model":"WalletTransactionClass","collection":"wallet_transactions","timestamps":true,"fields":[{"path":"wallet","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"WalletClass","array":false,"default":null},{"path":"admin","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"type","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"amount","type":"Number","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"0"},{"path":"refType","type":"String","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"refId","type":"Mixed","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"meta","type":"Mixed","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":"[Function anonymous]"},{"path":"createdBy","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":"AdminClass","array":false,"default":null},{"path":"_id","type":"ObjectId","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"createdAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null},{"path":"updatedAt","type":"Date","required":false,"unique":false,"index":false,"enumValues":[],"ref":null,"array":false,"default":null}],"indexes":[{"spec":{"wallet":1,"createdAt":-1},"options":{"background":true}}],"count":0}],"edges":[{"source":"AccessGrantClass","target":"AdminClass","field":"grantee","present":true},{"source":"AccessGrantClass","target":"AdminClass","field":"granted_by","present":true},{"source":"AccessGrantClass","target":"TenantClass","field":"tenant","present":true},{"source":"AddressClass","target":"UserClass","field":"user","present":true},{"source":"AdminClass","target":"RoleClass","field":"role","present":true},{"source":"AdminClass","target":"AdminClass","field":"parent","present":true},{"source":"AdminClass","target":"TenantClass","field":"tenant","present":true},{"source":"AdminClass","target":"GameClass","field":"default_game","present":true},{"source":"AppointmentClass","target":"ClinicClass","field":"clinic","present":true},{"source":"AppointmentClass","target":"TenantClass","field":"tenant","present":true},{"source":"AppointmentClass","target":"PatientClass","field":"patient","present":true},{"source":"AppointmentClass","target":"DoctorClass","field":"doctor","present":true},{"source":"AppointmentClass","target":"DoctorSlotClass","field":"slot","present":true},{"source":"AstrologerClass","target":"CountryClass","field":"country","present":true},{"source":"AstrologerClass","target":"CategoryClass","field":"category","present":true},{"source":"AstrologerClass","target":"CategoryClass","field":"sub_category","present":true},{"source":"AstrologerInsightsClass","target":"AstrologerClass","field":"astrologer","present":true},{"source":"AstroOrder","target":"AstrologerClass","field":"astrologer","present":true},{"source":"AstroOrder","target":"UserClass","field":"user","present":true},{"source":"BankClass","target":"UserClass","field":"user","present":true},{"source":"CartClass","target":"UserClass","field":"user","present":true},{"source":"CategoryClass","target":"CategoryClass","field":"parent","present":true},{"source":"ChatRoom","target":"AstrologerClass","field":"astrologer","present":true},{"source":"ChatRoom","target":"UserClass","field":"user","present":true},{"source":"DoctorClass","target":"ClinicClass","field":"clinic","present":true},{"source":"DoctorClass","target":"TenantClass","field":"tenant","present":true},{"source":"DoctorSlotClass","target":"ClinicClass","field":"clinic","present":true},{"source":"DoctorSlotClass","target":"TenantClass","field":"tenant","present":true},{"source":"DoctorSlotClass","target":"DoctorClass","field":"doctor","present":true},{"source":"GameClass","target":"GameCategoryClass","field":"game_category","present":true},{"source":"GameNumberClass","target":"GameClass","field":"game","present":true},{"source":"GameNumberClass","target":"NumbersClass","field":"number","present":true},{"source":"GameTimeClass","target":"GameClass","field":"game","present":true},{"source":"GroupAdminClass","target":"groupClass","field":"group","present":true},{"source":"GroupAdminClass","target":"AdminClass","field":"admin","present":true},{"source":"groupClass","target":"AdminClass","field":"admin","present":true},{"source":"GroupGameTimeClass","target":"groupClass","field":"group","present":true},{"source":"GroupGameTimeClass","target":"GameTimeClass","field":"game_time","present":true},{"source":"HisabComissonClass","target":"AdminClass","field":"admin","present":true},{"source":"JodiHisabComissonClass","target":"AdminClass","field":"admin","present":true},{"source":"KycClass","target":"UserClass","field":"user","present":true},{"source":"MarketClass","target":"SattaEntryClass","field":"single","present":true},{"source":"MarketClass","target":"SattaEntryClass","field":"jodi","present":true},{"source":"MarketClass","target":"SattaEntryClass","field":"andar","present":true},{"source":"MarketClass","target":"SattaEntryClass","field":"bahar","present":true},{"source":"MarketClass","target":"SattaEntryClass","field":"total","present":true},{"source":"MarketClass","target":"SattaEntryClass","field":"pana","present":true},{"source":"MarketClass","target":"AdminClass","field":"admin","present":true},{"source":"MarketClass","target":"GameClass","field":"game","present":true},{"source":"MessageClass","target":"groupClass","field":"group","present":true},{"source":"MessageClass","target":"AdminClass","field":"user","present":true},{"source":"Notice","target":"GameTimeClass","field":"game_time","present":true},{"source":"NumberEntryClass","target":"NumbersClass","field":"number","present":true},{"source":"NumberEntryClass","target":"AdminClass","field":"admin","present":true},{"source":"NumberEntryClass","target":"GameClass","field":"game","present":true},{"source":"NumberEntryClass","target":"GameTimeClass","field":"game_time","present":true},{"source":"NumberEntryShareClass","target":"AdminClass","field":"admin","present":true},{"source":"NumberEntryShareClass","target":"GameClass","field":"game","present":true},{"source":"NumberEntryShareClass","target":"GameTimeClass","field":"game_time","present":true},{"source":"NumberEntryTransectionClass","target":"NumbersClass","field":"numbers","present":true},{"source":"NumberEntryTransectionClass","target":"AdminClass","field":"admin","present":true},{"source":"NumberEntryTransectionClass","target":"GameClass","field":"game","present":true},{"source":"NumberEntryTransectionClass","target":"GameTimeClass","field":"game_time","present":true},{"source":"OrderClass","target":"UserClass","field":"user","present":true},{"source":"OrderClass","target":"PaymentClass","field":"payment","present":true},{"source":"OrderClass","target":"AddressClass","field":"address","present":true},{"source":"PatientClass","target":"ClinicClass","field":"clinic","present":true},{"source":"PatientClass","target":"TenantClass","field":"tenant","present":true},{"source":"PatientClass","target":"AdminClass","field":"createdBy","present":true},{"source":"PaymentClass","target":"UserClass","field":"user","present":true},{"source":"ProductCategoryClass","target":"ProductCategoryClass","field":"parent","present":true},{"source":"ProductClass","target":"ProductCategoryClass","field":"category","present":true},{"source":"RecordClass","target":"ClinicClass","field":"clinic","present":true},{"source":"RecordClass","target":"TenantClass","field":"tenant","present":true},{"source":"RecordClass","target":"PatientClass","field":"patient","present":true},{"source":"RecordClass","target":"DoctorClass","field":"doctor","present":true},{"source":"RecordClass","target":"AppointmentClass","field":"appointment","present":true},{"source":"ResultClass","target":"GameTimeClass","field":"game_time","present":true},{"source":"ResultClass","target":"NumbersClass","field":"number","present":true},{"source":"SattaEntryClass","target":"AdminClass","field":"admin","present":true},{"source":"SattaEntryClass","target":"GameClass","field":"game","present":true},{"source":"SattaNumberEntryClass","target":"AdminClass","field":"admin","present":true},{"source":"SattaNumberEntryClass","target":"SattaEntryClass","field":"satta_entry","present":true},{"source":"SattaNumberEntryClass","target":"GameClass","field":"game","present":true},{"source":"SattaNumberEntryShareClass","target":"AdminClass","field":"admin","present":true},{"source":"SattaNumberEntryShareClass","target":"GameClass","field":"game","present":true},{"source":"SattaResult","target":"GameClass","field":"game","present":true},{"source":"SpinnerMarketClass","target":"NumberEntryTransectionClass","field":"transection","present":true},{"source":"SpinnerMarketClass","target":"AdminClass","field":"admin","present":true},{"source":"SpinnerMarketClass","target":"GameTimeClass","field":"game_time","present":true},{"source":"WalletAllocationClass","target":"WalletClass","field":"parentWallet","present":true},{"source":"WalletAllocationClass","target":"WalletClass","field":"childWallet","present":true},{"source":"WalletClass","target":"AdminClass","field":"admin","present":true},{"source":"WalletTransactionClass","target":"WalletClass","field":"wallet","present":true},{"source":"WalletTransactionClass","target":"AdminClass","field":"admin","present":true},{"source":"WalletTransactionClass","target":"AdminClass","field":"createdBy","present":true}]};
-
+  <script type="module">
     const subtitle = document.getElementById("subtitle");
     const stats = document.getElementById("stats");
     const searchInput = document.getElementById("search");
     const modelList = document.getElementById("modelList");
     const detail = document.getElementById("detail");
+    const statusEl = document.getElementById("status");
+    const apiUrlInput = document.getElementById("apiUrl");
+    const reloadBtn = document.getElementById("reloadBtn");
 
     const canvas = document.getElementById("graph");
     const ctx = canvas.getContext("2d");
@@ -317,47 +377,38 @@
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#39;");
 
-    const nameToModel = new Map(schemaData.models.map((m) => [m.model, m]));
-
-    const nodes = schemaData.models.map((m, i) => ({
-      id: m.model,
-      label: m.model,
-      x: 200 + (i % 8) * 180,
-      y: 150 + Math.floor(i / 8) * 140,
-      vx: 0,
-      vy: 0,
-      radius: 30,
-    }));
-
-    const nodeById = new Map(nodes.map((n) => [n.id, n]));
-
-    const edges = schemaData.edges.map((e) => ({
-      source: e.source,
-      target: e.target,
-      field: e.field,
-      present: e.present,
-      sourceNode: nodeById.get(e.source),
-      targetNode: nodeById.get(e.target),
-    }));
-
-    const view = {
-      zoom: 0.7,
-      panX: 0,
-      panY: 0,
-      selected: nodes[0] ? nodes[0].id : null,
-      dragNodeId: null,
-      draggingCanvas: false,
-      dragOffsetX: 0,
-      dragOffsetY: 0,
-      lastPointerX: 0,
-      lastPointerY: 0,
+    const defaultApiUrl = () => {
+      if (location.protocol === "http:" || location.protocol === "https:") {
+        return location.origin + "/v1-web/schema-visualizer/schema-data";
+      }
+      return "http://127.0.0.1:8080/v1-web/schema-visualizer/schema-data";
     };
 
     const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
+    const state = {
+      schemaData: null,
+      nameToModel: new Map(),
+      nodes: [],
+      nodeById: new Map(),
+      edges: [],
+      view: {
+        zoom: 0.7,
+        panX: 0,
+        panY: 0,
+        selected: null,
+        dragNodeId: null,
+        draggingCanvas: false,
+        dragOffsetX: 0,
+        dragOffsetY: 0,
+        lastPointerX: 0,
+        lastPointerY: 0,
+      },
+    };
+
     const screenToWorld = (x, y) => ({
-      x: (x - view.panX) / view.zoom,
-      y: (y - view.panY) / view.zoom,
+      x: (x - state.view.panX) / state.view.zoom,
+      y: (y - state.view.panY) / state.view.zoom,
     });
 
     const resizeCanvas = () => {
@@ -367,16 +418,88 @@
       ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     };
 
+    const setStatus = (message, bad = false) => {
+      statusEl.textContent = message;
+      statusEl.className = bad ? "status bad" : "status";
+    };
+
+    const parseApiPayload = (payload) => {
+      if (payload && payload.status === true && payload.data) {
+        return payload.data;
+      }
+
+      if (payload && payload.models && payload.edges) {
+        return payload;
+      }
+
+      throw new Error("Unexpected API response format");
+    };
+
+    const fetchSchemaData = async (apiUrl) => {
+      const res = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status + " from schema API");
+      }
+
+      const payload = await res.json();
+      const schemaData = parseApiPayload(payload);
+
+      if (!Array.isArray(schemaData.models) || !Array.isArray(schemaData.edges)) {
+        throw new Error("schemaData is missing models/edges arrays");
+      }
+
+      return schemaData;
+    };
+
+    const resetGraphState = (schemaData) => {
+      state.schemaData = schemaData;
+      state.nameToModel = new Map(schemaData.models.map((m) => [m.model, m]));
+
+      state.nodes = schemaData.models.map((m, i) => ({
+        id: m.model,
+        label: m.model,
+        x: 200 + (i % 8) * 180,
+        y: 150 + Math.floor(i / 8) * 140,
+        vx: 0,
+        vy: 0,
+        radius: 30,
+      }));
+
+      state.nodeById = new Map(state.nodes.map((n) => [n.id, n]));
+
+      state.edges = schemaData.edges.map((e) => ({
+        source: e.source,
+        target: e.target,
+        field: e.field,
+        present: e.present,
+        sourceNode: state.nodeById.get(e.source),
+        targetNode: state.nodeById.get(e.target),
+      }));
+
+      state.view.selected = state.nodes[0] ? state.nodes[0].id : null;
+      state.view.zoom = 0.7;
+      state.view.panX = 0;
+      state.view.panY = 0;
+      state.view.dragNodeId = null;
+      state.view.draggingCanvas = false;
+    };
+
     const physicsTick = () => {
       const repulsion = 3600;
       const spring = 0.004;
       const springLength = 180;
       const damping = 0.86;
 
-      for (let i = 0; i < nodes.length; i += 1) {
-        const a = nodes[i];
-        for (let j = i + 1; j < nodes.length; j += 1) {
-          const b = nodes[j];
+      for (let i = 0; i < state.nodes.length; i += 1) {
+        const a = state.nodes[i];
+        for (let j = i + 1; j < state.nodes.length; j += 1) {
+          const b = state.nodes[j];
           let dx = a.x - b.x;
           let dy = a.y - b.y;
           let d2 = dx * dx + dy * dy;
@@ -392,7 +515,7 @@
         }
       }
 
-      for (const edge of edges) {
+      for (const edge of state.edges) {
         if (!edge.sourceNode || !edge.targetNode) continue;
         const a = edge.sourceNode;
         const b = edge.targetNode;
@@ -408,8 +531,8 @@
         b.vy -= fy;
       }
 
-      for (const node of nodes) {
-        if (view.dragNodeId === node.id) continue;
+      for (const node of state.nodes) {
+        if (state.view.dragNodeId === node.id) continue;
         node.vx *= damping;
         node.vy *= damping;
         node.x += node.vx;
@@ -420,16 +543,19 @@
     const draw = () => {
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
-
       ctx.clearRect(0, 0, width, height);
 
-      ctx.save();
-      ctx.translate(view.panX, view.panY);
-      ctx.scale(view.zoom, view.zoom);
+      if (!state.schemaData) {
+        return;
+      }
 
-      for (const edge of edges) {
+      ctx.save();
+      ctx.translate(state.view.panX, state.view.panY);
+      ctx.scale(state.view.zoom, state.view.zoom);
+
+      for (const edge of state.edges) {
         if (!edge.sourceNode || !edge.targetNode) continue;
-        const selected = view.selected && (edge.source === view.selected || edge.target === view.selected);
+        const selected = state.view.selected && (edge.source === state.view.selected || edge.target === state.view.selected);
         ctx.lineWidth = selected ? 2 : 1.2;
         ctx.strokeStyle = edge.present ? (selected ? "#9d3a0f" : "rgba(157,58,15,0.38)") : "rgba(162,63,38,0.5)";
         if (!edge.present) {
@@ -444,10 +570,10 @@
       }
       ctx.setLineDash([]);
 
-      for (const node of nodes) {
-        const selected = node.id === view.selected;
-        const model = nameToModel.get(node.id);
-        const links = edges.filter((e) => e.source === node.id || e.target === node.id).length;
+      for (const node of state.nodes) {
+        const selected = node.id === state.view.selected;
+        const model = state.nameToModel.get(node.id);
+        const links = state.edges.filter((e) => e.source === node.id || e.target === node.id).length;
 
         ctx.beginPath();
         ctx.fillStyle = selected ? "#9d3a0f" : "#fefcf8";
@@ -472,15 +598,16 @@
       ctx.restore();
     };
 
-    const tick = () => {
-      physicsTick();
-      draw();
-      window.requestAnimationFrame(tick);
-    };
-
     const renderStats = () => {
+      if (!state.schemaData) {
+        stats.innerHTML = "";
+        return;
+      }
+
+      const schemaData = state.schemaData;
+      const dbName = schemaData.database || "not-connected";
       const chips = [
-        "DB: " + schemaData.database,
+        "DB: " + dbName,
         "Models: " + schemaData.modelCount,
         "Refs: " + schemaData.edgeCount,
         "Generated: " + new Date(schemaData.generatedAt).toLocaleString(),
@@ -491,48 +618,24 @@
     };
 
     const modelItemHTML = (model, isActive) => {
-      const relationCount = edges.filter((e) => e.source === model.model || e.target === model.model).length;
+      const relationCount = state.edges.filter((e) => e.source === model.model || e.target === model.model).length;
       return '<div class="model-item ' + (isActive ? "active" : "") + '" data-model="' + model.model + '">' +
         '<div class="name">' + model.model + '</div>' +
         '<div class="meta">' + model.collection + ' • ' + model.fields.length + ' fields • ' + relationCount + ' refs</div>' +
       '</div>';
     };
 
-    const renderModelList = () => {
-      const q = searchInput.value.trim().toLowerCase();
-      const filtered = schemaData.models.filter((m) =>
-        m.model.toLowerCase().includes(q) || m.collection.toLowerCase().includes(q),
-      );
-
-      modelList.innerHTML = filtered
-        .map((m) => modelItemHTML(m, m.model === view.selected))
-        .join("");
-
-      for (const el of modelList.querySelectorAll(".model-item")) {
-        el.addEventListener("click", () => {
-          const id = el.getAttribute("data-model");
-          if (!id) return;
-          selectModel(id);
-          const node = nodeById.get(id);
-          if (node) {
-            view.panX = canvas.clientWidth / 2 - node.x * view.zoom;
-            view.panY = canvas.clientHeight / 2 - node.y * view.zoom;
-          }
-        });
-      }
-    };
-
     const pill = (text, kind = "") => '<span class="pill ' + kind + '">' + text + '</span>';
 
     const renderDetail = () => {
-      if (!view.selected || !nameToModel.has(view.selected)) {
+      if (!state.schemaData || !state.view.selected || !state.nameToModel.has(state.view.selected)) {
         detail.innerHTML = '<h2>No model selected</h2><div class="empty">Select a model from the left panel or click a node in the graph.</div>';
         return;
       }
 
-      const model = nameToModel.get(view.selected);
-      const outgoing = edges.filter((e) => e.source === model.model);
-      const incoming = edges.filter((e) => e.target === model.model);
+      const model = state.nameToModel.get(state.view.selected);
+      const outgoing = state.edges.filter((e) => e.source === model.model);
+      const incoming = state.edges.filter((e) => e.target === model.model);
 
       const fieldsRows = model.fields
         .map((f) => {
@@ -541,7 +644,7 @@
             f.unique ? pill("unique", "ok") : "",
             f.index ? pill("index") : "",
             f.array ? pill("array") : "",
-            f.ref ? pill("ref:" + f.ref, nameToModel.has(f.ref) ? "ok" : "bad") : "",
+            f.ref ? pill("ref:" + f.ref, state.nameToModel.has(f.ref) ? "ok" : "bad") : "",
           ].join(" ");
 
           const enumCell = f.enumValues && f.enumValues.length ? escapeHtml(JSON.stringify(f.enumValues)) : "";
@@ -558,20 +661,13 @@
 
       const indexRows = model.indexes.length
         ? model.indexes
-            .map((idx) => {
-              return '<tr>' +
-                '<td><code>' + escapeHtml(JSON.stringify(idx.spec)) + '</code></td>' +
-                '<td><code>' + escapeHtml(JSON.stringify(idx.options || {})) + '</code></td>' +
-              '</tr>';
-            })
+            .map((idx) => '<tr><td><code>' + escapeHtml(JSON.stringify(idx.spec)) + '</code></td><td><code>' + escapeHtml(JSON.stringify(idx.options || {})) + '</code></td></tr>')
             .join("")
         : '<tr><td colspan="2" class="empty">No custom indexes</td></tr>';
 
       const relationRows = [...outgoing.map((r) => ({ ...r, direction: "out" })), ...incoming.map((r) => ({ ...r, direction: "in" }))]
         .map((r) => {
-          const txt = r.direction === "out"
-            ? r.field + " -> " + r.target
-            : r.source + " -> " + r.field;
+          const txt = r.direction === "out" ? r.field + " -> " + r.target : r.source + " -> " + r.field;
           return '<div>' + pill(r.direction === "out" ? "out" : "in") + ' ' + escapeHtml(txt) + ' ' + (r.present ? "" : pill("missing", "bad")) + '</div>';
         })
         .join("");
@@ -587,16 +683,43 @@
     };
 
     const selectModel = (id) => {
-      if (!nameToModel.has(id)) return;
-      view.selected = id;
+      if (!state.nameToModel.has(id)) return;
+      state.view.selected = id;
       renderModelList();
       renderDetail();
+    };
+
+    const renderModelList = () => {
+      if (!state.schemaData) {
+        modelList.innerHTML = "";
+        return;
+      }
+
+      const q = searchInput.value.trim().toLowerCase();
+      const filtered = state.schemaData.models.filter((m) =>
+        m.model.toLowerCase().includes(q) || m.collection.toLowerCase().includes(q),
+      );
+
+      modelList.innerHTML = filtered.map((m) => modelItemHTML(m, m.model === state.view.selected)).join("");
+
+      for (const el of modelList.querySelectorAll(".model-item")) {
+        el.addEventListener("click", () => {
+          const id = el.getAttribute("data-model");
+          if (!id) return;
+          selectModel(id);
+          const node = state.nodeById.get(id);
+          if (node) {
+            state.view.panX = canvas.clientWidth / 2 - node.x * state.view.zoom;
+            state.view.panY = canvas.clientHeight / 2 - node.y * state.view.zoom;
+          }
+        });
+      }
     };
 
     const nearestNode = (wx, wy) => {
       let hit = null;
       let min = Infinity;
-      for (const node of nodes) {
+      for (const node of state.nodes) {
         const d = Math.hypot(wx - node.x, wy - node.y);
         const threshold = node.radius + 15;
         if (d < threshold && d < min) {
@@ -608,22 +731,24 @@
     };
 
     canvas.addEventListener("mousedown", (evt) => {
+      if (!state.schemaData) return;
+
       const rect = canvas.getBoundingClientRect();
       const sx = evt.clientX - rect.left;
       const sy = evt.clientY - rect.top;
       const world = screenToWorld(sx, sy);
       const hit = nearestNode(world.x, world.y);
 
-      view.lastPointerX = sx;
-      view.lastPointerY = sy;
+      state.view.lastPointerX = sx;
+      state.view.lastPointerY = sy;
 
       if (hit) {
-        view.dragNodeId = hit.id;
-        view.dragOffsetX = hit.x - world.x;
-        view.dragOffsetY = hit.y - world.y;
+        state.view.dragNodeId = hit.id;
+        state.view.dragOffsetX = hit.x - world.x;
+        state.view.dragOffsetY = hit.y - world.y;
         selectModel(hit.id);
       } else {
-        view.draggingCanvas = true;
+        state.view.draggingCanvas = true;
       }
 
       canvas.style.cursor = "grabbing";
@@ -634,34 +759,36 @@
       const sx = evt.clientX - rect.left;
       const sy = evt.clientY - rect.top;
 
-      if (view.dragNodeId) {
-        const node = nodeById.get(view.dragNodeId);
+      if (state.view.dragNodeId) {
+        const node = state.nodeById.get(state.view.dragNodeId);
         if (!node) return;
         const world = screenToWorld(sx, sy);
-        node.x = world.x + view.dragOffsetX;
-        node.y = world.y + view.dragOffsetY;
+        node.x = world.x + state.view.dragOffsetX;
+        node.y = world.y + state.view.dragOffsetY;
         node.vx = 0;
         node.vy = 0;
         return;
       }
 
-      if (view.draggingCanvas) {
-        const dx = sx - view.lastPointerX;
-        const dy = sy - view.lastPointerY;
-        view.panX += dx;
-        view.panY += dy;
-        view.lastPointerX = sx;
-        view.lastPointerY = sy;
+      if (state.view.draggingCanvas) {
+        const dx = sx - state.view.lastPointerX;
+        const dy = sy - state.view.lastPointerY;
+        state.view.panX += dx;
+        state.view.panY += dy;
+        state.view.lastPointerX = sx;
+        state.view.lastPointerY = sy;
       }
     });
 
     window.addEventListener("mouseup", () => {
-      view.dragNodeId = null;
-      view.draggingCanvas = false;
+      state.view.dragNodeId = null;
+      state.view.draggingCanvas = false;
       canvas.style.cursor = "grab";
     });
 
     canvas.addEventListener("wheel", (evt) => {
+      if (!state.schemaData) return;
+
       evt.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const sx = evt.clientX - rect.left;
@@ -669,21 +796,64 @@
       const before = screenToWorld(sx, sy);
 
       const factor = evt.deltaY < 0 ? 1.08 : 0.92;
-      view.zoom = clamp(view.zoom * factor, 0.25, 2.4);
+      state.view.zoom = clamp(state.view.zoom * factor, 0.25, 2.4);
 
       const after = screenToWorld(sx, sy);
-      view.panX += (after.x - before.x) * view.zoom;
-      view.panY += (after.y - before.y) * view.zoom;
+      state.view.panX += (after.x - before.x) * state.view.zoom;
+      state.view.panY += (after.y - before.y) * state.view.zoom;
     }, { passive: false });
 
+    const tick = () => {
+      if (state.schemaData) {
+        physicsTick();
+      }
+      draw();
+      window.requestAnimationFrame(tick);
+    };
+
+    const reloadSchema = async () => {
+      const apiUrl = apiUrlInput.value.trim();
+      if (!apiUrl) {
+        setStatus("API URL is required", true);
+        return;
+      }
+
+      reloadBtn.disabled = true;
+      setStatus("Loading schema data from API...");
+
+      try {
+        const schemaData = await fetchSchemaData(apiUrl);
+        localStorage.setItem("schema_visualizer_api", apiUrl);
+        resetGraphState(schemaData);
+        renderStats();
+        renderModelList();
+        renderDetail();
+        setStatus("Loaded " + schemaData.modelCount + " models and " + schemaData.edgeCount + " refs");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setStatus("Failed to load schema data: " + message, true);
+      } finally {
+        reloadBtn.disabled = false;
+      }
+    };
+
+    reloadBtn.addEventListener("click", reloadSchema);
+    apiUrlInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        reloadSchema();
+      }
+    });
     searchInput.addEventListener("input", renderModelList);
+
     window.addEventListener("resize", resizeCanvas);
+
+    apiUrlInput.value = localStorage.getItem("schema_visualizer_api") || defaultApiUrl();
 
     resizeCanvas();
     renderStats();
-    renderModelList();
     renderDetail();
     tick();
+    await reloadSchema();
   </script>
 </body>
 </html>
