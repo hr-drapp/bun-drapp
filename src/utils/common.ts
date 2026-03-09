@@ -1,10 +1,6 @@
 import type { DocumentType } from "@typegoose/typegoose";
 import moment from "moment";
 import { Types } from "mongoose";
-import Game from "src/models/Game";
-import GameTime from "src/models/GameTime";
-import NumbersEntry, { NumberEntryClass } from "src/models/NumbersEntry";
-import Result, { ResultClass } from "src/models/Result";
 import { Logger } from "./Logger";
 import AutoIncementalId, {
 	AutoIncIdModel,
@@ -268,110 +264,6 @@ export default function parseEmojiAmounts(
 		text: normalizedInput,
 	};
 }
-
-type NumberEntryDoc = DocumentType<NumberEntryClass>;
-type ResultDoc = ResultClass;
-
-export const runAutoResult = async (
-	gametimeId: string | Types.ObjectId,
-	logger?: Logger,
-): Promise<{ status: boolean; message: string; data?: ResultDoc }> => {
-	const gameTime = await GameTime.findById(gametimeId);
-	if (!gameTime) return { status: false, message: "Invalid Game Time" };
-
-	if (!gameTime.auto_result)
-		return { status: false, message: "Game auto result is turned off" };
-
-	const game = await Game.findById(gameTime.game);
-	if (!game) return { status: false, message: "Invalid Game" };
-
-	logger?.add?.(`GAME: ${game.name} | ${gameTime.start}m - ${gameTime.end}m`);
-
-	const todayStart = moment().startOf("day").toDate();
-	const todayEnd = moment().endOf("day").toDate();
-
-	const result = await Result.findOne({
-		date: { $gte: todayStart, $lte: todayEnd },
-		game_time: gameTime._id,
-	});
-
-	if (result) return { status: false, message: "Result already declared" };
-
-	const entries: NumberEntryDoc[] = await NumbersEntry.find({
-		date: moment().startOf("day"),
-		game_time: gameTime._id,
-	});
-
-	logger?.add?.(`Entries: ${entries.length}`);
-
-	const totalAmount = entries.reduce((a, b) => a + b.total_amount, 0);
-	if (totalAmount === 0)
-		return { status: false, message: "Total amount is zero" };
-
-	const percentage = gameTime.win_margin || 0;
-	let finalAmount = totalAmount;
-
-	if (percentage > 0) {
-		finalAmount = (totalAmount * percentage) / 100;
-	} else if (percentage < 0) {
-		finalAmount = (totalAmount * (100 - percentage)) / 100;
-	}
-
-	const amountToBeGiven = finalAmount / 12;
-
-	const lowerBound = amountToBeGiven * 0.8;
-	const upperBound = amountToBeGiven * 1.2;
-
-	const pickClosest = (list: NumberEntryDoc[]) =>
-		list.reduce<NumberEntryDoc | null>((best, entry) => {
-			if (!best) return entry;
-
-			const diff = Math.abs(entry.total_amount - amountToBeGiven);
-			const bestDiff = Math.abs(best.total_amount - amountToBeGiven);
-
-			if (diff === bestDiff) {
-				return entry.total_amount < best.total_amount ? entry : best;
-			}
-
-			return diff < bestDiff ? entry : best;
-		}, null);
-
-	let winner =
-		pickClosest(
-			entries.filter(
-				(entry) =>
-					entry.total_amount >= lowerBound && entry.total_amount <= upperBound,
-			),
-		) || null;
-
-	if (!winner) {
-		const below = entries.filter(
-			(entry) => entry.total_amount < amountToBeGiven,
-		);
-
-		if (below.length) {
-			winner = below.reduce<NumberEntryDoc | null>(
-				(best, entry) =>
-					!best || entry.total_amount > best.total_amount ? entry : best,
-				null,
-			);
-		} else {
-			winner = entries.reduce<NumberEntryDoc | null>(
-				(best, entry) =>
-					!best || entry.total_amount < best.total_amount ? entry : best,
-				null,
-			);
-		}
-	}
-
-	if (!winner) return { status: false, message: "can't predict" };
-
-	return {
-		status: true,
-		message: "predection",
-		data: winner as any,
-	};
-};
 
 export async function GetAutoIncrId(model: AutoIncIdModel, seq: number = 1) {
 	return (

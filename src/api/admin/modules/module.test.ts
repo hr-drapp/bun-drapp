@@ -1,6 +1,6 @@
 import { connectDB } from "src/db/mongo";
 import Admin from "src/models/drapp/Admin";
-import Role from "src/models/Role";
+import Role from "src/models/drapp/Role";
 
 await connectDB("db");
 

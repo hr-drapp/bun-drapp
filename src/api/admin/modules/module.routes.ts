@@ -1,13 +1,12 @@
 import Elysia, { t } from "elysia";
 import { isAdminAuthenticated } from "src/guard/auth.guard";
-import UserClass from "src/models/User";
 import { customError } from "src/utils/AppErr";
 import { HashPassword, VerifyPassword } from "src/utils/auth";
 import jwt from "src/utils/jwt";
 import { R } from "src/utils/response-helpers";
 import schema from "./module.schema";
 import Admin from "src/models/drapp/Admin";
-import Role from "src/models/Role";
+import Role from "src/models/drapp/Role";
 import { createElysia } from "src/utils/createElysia";
 import {
 	AdditionalModuleList,

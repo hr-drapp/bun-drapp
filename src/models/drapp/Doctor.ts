@@ -10,7 +10,7 @@ import { GetAutoIncrId } from "src/utils/common";
 import { AutoIncIdModel } from "./AutoIncementalId";
 import { ClinicClass } from "./Clinic";
 import { getDefaultClinic } from "src/db/seeder";
-import { TenantClass } from "../Tenant";
+import { TenantClass } from "./Tenant";
 
 @pre<DoctorClass>("save", async function (next) {
 	if (!this.id) {
@@ -40,7 +40,7 @@ export class DoctorClass {
 	public name!: string;
 
 	@prop({})
-	public profilePic!: string;
+	public profile_pic!: string;
 
 	@prop({ default: [] })
 	public pictures!: string[];

@@ -1,4 +1,4 @@
-import _crypto from 'crypto'
+import _crypto from "crypto";
 /**
  * Generate password from allowed word
  */
@@ -23,7 +23,15 @@ export default {
 	 * @param  {boolean} options.upperCase Default: `false` true value includes upperCase in OTP
 	 * @param  {boolean} options.specialChars Default: `false` true value includes specialChars in OTP
 	 */
-	generate: function (length: any, options: any) {
+	generate: function (
+		length: number,
+		options: {
+			digits?: boolean;
+			alphabets?: boolean;
+			upperCase?: boolean;
+			specialChars?: boolean;
+		},
+	) {
 		length = length || 10;
 		const generateOptions = options || {};
 
@@ -53,10 +61,10 @@ export default {
 			: false;
 
 		const allowsChars =
-			((generateOptions.digits) && digits) +
-			((generateOptions.alphabets) && alphabets) +
-			((generateOptions.upperCase) && upperCase) +
-			((generateOptions.specialChars) && specialChars);
+			(generateOptions.digits ? digits : "") +
+			(generateOptions.alphabets ? alphabets : "") +
+			(generateOptions.upperCase && upperCase) +
+			(generateOptions.specialChars && specialChars);
 		let password = "";
 		while (password.length < length) {
 			if (password.length == 1 && password == "0") {
@@ -82,14 +90,14 @@ export default {
 		return `${hashBase}.${expires}`;
 	},
 
-	verify(phone: any, otp: any, hash: any, algorithm = "sha256") {
+	verify(phone: string, otp: string, hash: string, algorithm = "sha256") {
 		otp = otp.toString();
 		if (!hash.match(".")) return false; // Hash should have at least one dot
 		// Separate Hash value and expires from the hash returned from the user(
 		let [hashValue, expires] = hash.split(".");
 		// Check if expiry time has passed
 		let now = Date.now();
-		if (now > expires) return false;
+		if (now > parseInt(expires)) return false;
 		// Calculate new hash with the same key and the same algorithm
 		let data = `${phone}.${otp}.${expires}`;
 		let newCalculatedHash = _crypto
@@ -108,6 +116,4 @@ export default {
 
 		return `${secondName}${firstName}@gmail.com`.toLowerCase();
 	},
-
-
 };

@@ -1,9 +1,9 @@
 import { prop, getModelForClass, modelOptions } from "@typegoose/typegoose";
 import * as mongoose from "mongoose";
 import type { Ref } from "@typegoose/typegoose";
-import Role, { RoleClass } from "../Role";
-import { GameClass } from "../Game";
-import { TenantClass } from "../Tenant";
+import Role, { RoleClass } from "./Role";
+import { TenantClass } from "./Tenant";
+import { ClinicClass } from "./Clinic";
 
 @modelOptions({ schemaOptions: { collection: "admins", timestamps: true } })
 export class AdminClass {
@@ -40,8 +40,8 @@ export class AdminClass {
 	@prop({ ref: () => TenantClass })
 	public tenant!: Ref<TenantClass>;
 
-	@prop({ ref: () => GameClass })
-	public default_game!: Ref<GameClass>;
+	@prop({ ref: () => ClinicClass })
+	public clinic!: Ref<ClinicClass>;
 
 	@prop({ required: false })
 	public expire_at!: Date;

@@ -1,9 +1,7 @@
 import Elysia from "elysia";
 import { routeMap } from "src";
 import Admin from "src/models/drapp/Admin";
-import AstrologerClass from "src/models/Astrologer";
-import { abilityHttpMap } from "src/models/Role";
-import UserClass from "src/models/User";
+import { abilityHttpMap } from "src/models/drapp/Role";
 import { APIResponse } from "src/types/global";
 import { buildScopedQuery } from "src/utils/access-grants";
 import JWT from "src/utils/jwt";
@@ -140,74 +138,4 @@ export const isAdminAuthenticated = async (
 		}
 	}
 	// attachAccessBuilder(Context, user);
-};
-
-export const isUserAuthenticated: any = async (
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	Context: any,
-) => {
-	const { set, headers } = Context;
-	// console.log("/!\\ AUTHENTICATED GUARD /!\\");
-
-	if (!headers!.authorization) {
-		// console.log("@Error: No access token", headers);
-		set.status = 401;
-		return {
-			status: false,
-			message: "Unauthorized",
-			data: "No access token",
-		};
-	}
-
-	let token = headers.authorization.replace("Bearer ", "");
-	// console.log("🚀 ~ token:", token);
-
-	const jwt = JWT.verify(token);
-	// console.log("🚀 ~ jwt:", jwt);
-	if (!jwt) {
-		// console.log("@Error: Invalid access token", jwt);
-
-		set.status = 401;
-		return {
-			status: false,
-			message: "Unauthorized",
-			data: "Invalid access token",
-		};
-	}
-
-	const { _id } = jwt;
-	if (!_id) {
-		// console.log("@Error: Invalid access token", _id);
-		set.status = 401;
-		return {
-			status: false,
-			message: "Unauthorized",
-			data: "Invalid access token",
-		};
-	}
-
-	if (!jwt) {
-		// console.log("@Error: User not found", jwt);
-		set.status = 401;
-		return {
-			status: false,
-			message: "Unauthorized",
-			data: "User not found",
-		};
-	}
-
-	let user = await UserClass.findById(jwt._id);
-	if (!user) {
-		user = await AstrologerClass.findById(jwt._id);
-	}
-
-	// const userContext = new Elysia({ name: "user" }).decorate("user", user);
-	Context.user = user;
-
-	// console.log("user", userContext);
-
-	// return {
-	// 	status: true,
-	// 	data: user,
-	// };
 };

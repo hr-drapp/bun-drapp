@@ -1,13 +1,12 @@
 import Elysia, { t } from "elysia";
 import { isAdminAuthenticated } from "src/guard/auth.guard";
-import UserClass from "src/models/User";
 import { customError } from "src/utils/AppErr";
 import { HashPassword, VerifyPassword } from "src/utils/auth";
 import jwt from "src/utils/jwt";
 import { R } from "src/utils/response-helpers";
 import rolesSchema from "./roles.schema";
 import Admin from "src/models/drapp/Admin";
-import Role, { RoleClass } from "src/models/Role";
+import Role, { RoleClass } from "src/models/drapp/Role";
 import { createElysia } from "src/utils/createElysia";
 import { RootFilterQuery } from "mongoose";
 import { ModuleId, Summary } from "src/config/modules";

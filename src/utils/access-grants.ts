@@ -3,7 +3,7 @@ import AccessGrant, {
 	AccessGrantClass,
 	AccessGrantResource,
 } from "src/models/drapp/AccessGrant";
-import { RoleLevel } from "src/models/Role";
+import { RoleLevel } from "src/models/drapp/Role";
 import redis from "src/db/redis";
 
 const CACHE_PREFIX = "matkactrl:access-grant";

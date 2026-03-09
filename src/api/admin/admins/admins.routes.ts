@@ -1,6 +1,5 @@
 import Elysia, { t } from "elysia";
 import { isAdminAuthenticated } from "src/guard/auth.guard";
-import UserClass from "src/models/User";
 import { customError } from "src/utils/AppErr";
 import { HashPassword, VerifyPassword } from "src/utils/auth";
 import jwt from "src/utils/jwt";
@@ -9,12 +8,10 @@ import rolesSchema from "./admins.schema";
 import Admin, { AdminClass } from "src/models/drapp/Admin";
 import { createElysia } from "src/utils/createElysia";
 import moment from "moment";
-import Role, { RoleLevel } from "src/models/Role";
+import Role, { RoleLevel } from "src/models/drapp/Role";
 import { RootFilterQuery } from "mongoose";
-import Tenant from "src/models/Tenant";
+import Tenant from "src/models/drapp/Tenant";
 import { ModuleId, Summary } from "src/config/modules";
-import GroupAdmin from "src/models/GroupAdmin";
-import Wallet from "src/models/Wallet";
 
 export default createElysia({ prefix: "/admins" }).guard(
 	{
@@ -92,44 +89,14 @@ export default createElysia({ prefix: "/admins" }).guard(
 					const pages = Math.ceil(total / size);
 					console.log("🚀 ~ pages:", pages);
 
-					/**
-					 * Additoinal operations for checking group assigned or not.
-					 */
-					if (group) {
-						const groupAdmins = await GroupAdmin.find({
-							group: group,
-							admin: {
-								$in: list.map((item) => item._id),
-							},
-						}).lean();
+					for (let item of list) {
+						const str = `${item?.phone || ""}|${item?.password_unhashed || ""}`;
 
-						for (let item of list) {
-							(item as any).group_admin = groupAdmins.find(
-								(f) => f.admin!.toString() === item._id.toString(),
-							)?._id;
+						item.password = btoa(
+							String.fromCharCode(...new TextEncoder().encode(str)),
+						);
 
-							const str = `${item?.phone || ""}|${
-								item?.password_unhashed || ""
-							}`;
-
-							item.password = btoa(
-								String.fromCharCode(...new TextEncoder().encode(str)),
-							);
-
-							delete (item as any).password_unhashed;
-						}
-					} else {
-						for (let item of list) {
-							const str = `${item?.phone || ""}|${
-								item?.password_unhashed || ""
-							}`;
-
-							item.password = btoa(
-								String.fromCharCode(...new TextEncoder().encode(str)),
-							);
-
-							delete (item as any).password_unhashed;
-						}
+						delete (item as any).password_unhashed;
 					}
 
 					return R("admin list data", list, true, {
@@ -212,13 +179,6 @@ export default createElysia({ prefix: "/admins" }).guard(
 						entry.tenant = user.tenant._id;
 						await entry.save();
 					}
-
-					const wallet = await Wallet.create({
-						admin: entry._id,
-						limit: 0,
-						used: 0,
-						allocated: 0,
-					});
 
 					if (!user.super_admin) {
 						const children_count = await Admin.countDocuments({

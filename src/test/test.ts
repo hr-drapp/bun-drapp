@@ -5,7 +5,7 @@ import GameTime from "src/models/GameTime";
 import MessageQueue, { MessageQueueStatus } from "src/models/MessageQueue";
 import Numbers from "src/models/Numbers";
 import NumbersEntry from "src/models/NumbersEntry";
-import Role from "src/models/Role";
+import Role from "src/models/drapp/Role";
 import SattaResult from "src/models/SattaResult";
 import { AnkCategory } from "src/utils/anks";
 import { testPersikopQueue } from "src/utils/bullmq";

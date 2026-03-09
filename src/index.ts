@@ -13,14 +13,9 @@ import { connectDB } from "./db/mongo";
 import AppErr from "./utils/AppErr";
 import { R } from "./utils/response-helpers";
 import { adminRoutes } from "./api/admin/admin.index";
-import { webhookRoutes } from "./api/webhook/webhook.index";
 import { staticPlugin } from "@elysiajs/static";
 import { bearer } from "@elysiajs/bearer";
-import { MessageReactQueueWorker } from "./utils/MessageReactQueueWorker";
-import { MessageQueueWorker } from "./utils/MessageQueueWorker";
 import { ModuleId } from "./config/modules";
-import { webRoutes } from "./api/web/web.index";
-import { ResultQueueWorker } from "./utils/ResultQueueWorker";
 
 declare module "elysia" {}
 
@@ -34,7 +29,7 @@ api.use(
 		},
 	}),
 );
-api.onError(({ error, code, set, ...rest }) => {
+api.onError(({ error, code, set, ...rest }: any) => {
 	// console.log("🚀 ~ api.onError ~ rest:", error);
 	// console.log("🚀 ~ api.onError ~ error instanceof AppErr:", error?.appErr)
 
@@ -268,10 +263,6 @@ api
 
 // Routes
 
-api.use(webhookRoutes);
-
-api.use(webRoutes);
-
 api.use(adminRoutes);
 
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjBhZjJmZDY1NDZlMGUxOTFjZmMzNGEiLCJlbWFpbCI6ImhhcnNoLmRxb3RAZ21haWwuY29tIiwicGhvbmUiOiI5OTgzMzk2MTUyIiwiaWF0IjoxNzEyNTk3NDQxfQ.FuZIJkXEN8jvikzJKeiBFS4RAFkI09CibZsVREmVQDQ
@@ -308,9 +299,6 @@ api.get(
 api.onError((err) => {
 	// console.log("🚀 ~ api.onError ~ err:", err);
 });
-const reactWorker = new MessageReactQueueWorker();
-const msgWorker = new MessageQueueWorker();
-const resultWorker = new ResultQueueWorker();
 
 export const routeMap: Map<any, { modules: ModuleId[] }> = new Map();
 

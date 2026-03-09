@@ -1,6 +1,5 @@
 import { t } from "elysia";
 import { RoleSchema } from "../roles/roles.schema";
-import { query } from "firebase/database";
 
 export const adminSchema = t.Object({
 	_id: t.String(),

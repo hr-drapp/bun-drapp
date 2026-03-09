@@ -11,10 +11,10 @@ import { AutoIncIdModel } from "./AutoIncementalId";
 import { ClinicClass } from "./Clinic";
 import { getDefaultClinic } from "src/db/seeder";
 import { AdminClass } from "./Admin";
-import { TenantClass } from "../Tenant";
+import { TenantClass } from "./Tenant";
 import { PatientClass } from "./Patient";
 import { DoctorClass } from "./Doctor";
-import { DoctorSlotClass } from "./DoctorSlot";
+import { DoctorTimeSlotClass } from "./DoctorTimeSlot";
 
 export enum AppointmentType {
 	CONSULTATION = 0,
@@ -65,23 +65,20 @@ export class AppointmentClass {
 	@prop({ ref: () => ClinicClass })
 	public clinic!: Ref<ClinicClass>;
 
-	@prop({ ref: () => TenantClass })
-	public tenant!: Ref<TenantClass>;
-
 	@prop({ ref: () => PatientClass })
 	public patient!: Ref<PatientClass>;
 
 	@prop({ ref: () => DoctorClass })
 	public doctor!: Ref<DoctorClass>;
 
-	@prop({ ref: () => DoctorSlotClass })
-	public slot!: Ref<DoctorSlotClass>;
+	@prop({ ref: () => DoctorTimeSlotClass })
+	public time_slot!: Ref<DoctorTimeSlotClass>;
 
 	@prop({})
 	public date!: Date;
 
 	@prop({})
-	public followUpDate!: Date;
+	public follow_up_date!: Date;
 
 	@prop({})
 	public type!: number;

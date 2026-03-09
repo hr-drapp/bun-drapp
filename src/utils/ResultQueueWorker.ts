@@ -9,7 +9,6 @@ import { Logger } from "./Logger";
 import GameTime, { GameTimeStatus } from "src/models/GameTime";
 import moment from "moment";
 import Result from "src/models/Result";
-import agenda from "src/cron/cron";
 
 export class ResultQueueWorker {
 	private running = false;
@@ -23,7 +22,6 @@ export class ResultQueueWorker {
 	}
 
 	public async start() {
-		await agenda.start();
 		this.running = true;
 
 		while (this.running) {
@@ -67,9 +65,6 @@ export class ResultQueueWorker {
 					end: message.end,
 					game_time: message._id,
 					number: predection.data?.number,
-				});
-				await agenda.now("send-result-message", {
-					result_id: result._id.toString(),
 				});
 			}
 			if (gameTimes.length) {

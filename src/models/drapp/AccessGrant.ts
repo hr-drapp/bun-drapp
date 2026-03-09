@@ -8,7 +8,7 @@ import type { Ref } from "@typegoose/typegoose";
 import mongoose, { Types } from "mongoose";
 import { ModuleId } from "src/config/modules";
 import { AdminClass } from "./Admin";
-import { TenantClass } from "../Tenant";
+import { TenantClass } from "./Tenant";
 
 export type AccessGrantResource = ModuleId | string;
 

@@ -11,7 +11,7 @@ import { AutoIncIdModel } from "./AutoIncementalId";
 import { ClinicClass } from "./Clinic";
 import { getDefaultClinic } from "src/db/seeder";
 import { AdminClass } from "./Admin";
-import { TenantClass } from "../Tenant";
+import { TenantClass } from "./Tenant";
 
 @pre<PatientClass>("save", async function (next) {
 	if (!this.id) {
@@ -49,11 +49,8 @@ export class PatientClass {
 	@prop({}) // 0 female, 1 male
 	public gender!: number;
 
-	@prop({ ref: () => AdminClass })
-	public createdBy!: Ref<AdminClass>;
-
 	@prop({})
-	public profilePic!: string;
+	public profile_pic!: string;
 
 	@prop({ default: false })
 	public deleted!: boolean;

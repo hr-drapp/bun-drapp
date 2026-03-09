@@ -2,9 +2,8 @@ import moment from "moment";
 import { ModuleId } from "src/config/modules";
 import Admin, { AdminClass } from "src/models/drapp/Admin";
 import Clinic from "src/models/drapp/Clinic";
-import Role, { RoleLevel, RoleClass } from "src/models/Role";
-import SattaNumberEntry from "src/models/SattaNumberEntry";
-import Tenant from "src/models/Tenant";
+import Role, { RoleLevel, RoleClass } from "src/models/drapp/Role";
+import Tenant from "src/models/drapp/Tenant";
 import { HashPassword } from "src/utils/auth";
 
 export const seeder = async () => {

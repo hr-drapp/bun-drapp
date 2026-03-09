@@ -1,4 +1,4 @@
-import { AbilitiMap, Ability } from "src/models/Role";
+import { AbilitiMap, Ability } from "src/models/drapp/Role";
 
 /**
  * Canonical list of module identifiers used for plant admin authorization.

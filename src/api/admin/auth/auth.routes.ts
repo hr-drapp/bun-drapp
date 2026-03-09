@@ -1,6 +1,5 @@
 import Elysia, { t } from "elysia";
 import { isAdminAuthenticated } from "src/guard/auth.guard";
-import UserClass from "src/models/User";
 import { customError } from "src/utils/AppErr";
 import { HashPassword, VerifyPassword } from "src/utils/auth";
 import jwt from "src/utils/jwt";
@@ -15,11 +14,9 @@ import {
 	AdminSchema,
 } from "./auth.schema";
 import Admin from "src/models/drapp/Admin";
-import Role from "src/models/Role";
+import Role from "src/models/drapp/Role";
 import { createElysia } from "src/utils/createElysia";
 import moment from "moment";
-import Setting from "src/models/Setting";
-import AdminRequest from "src/models/AdminRequest";
 import { sendMail } from "src/utils/mailer";
 import otp from "src/utils/otp";
 
@@ -102,15 +99,6 @@ export default createElysia({ prefix: "/auth" }).guard(
 					return R("password reset successfully.");
 				},
 				AdminResetPasswordSchema,
-			)
-			.post(
-				"/register",
-				async ({ body, request, user }) => {
-					const entry = await AdminRequest.create(body);
-
-					return R("Registered successfully.", entry);
-				},
-				AdminRegisterSchema,
 			)
 			.post(
 				"/forgot-password",
@@ -208,35 +196,6 @@ export default createElysia({ prefix: "/auth" }).guard(
 					},
 					detail: {
 						operationId: "me",
-					},
-				} as any,
-			)
-			.get(
-				"/contact-number",
-				async (ctx) => {
-					const user = await Setting.findOne({ key: "contact_number" });
-					return R("user data", user);
-				},
-				{
-					response: {
-						200: t.Object(
-							{
-								status: t.Boolean(),
-								message: t.String(),
-								data: t.Object({
-									_id: t.String(),
-									name: t.String(),
-									key: t.String(),
-									value: t.String(),
-								}),
-							},
-							{
-								description: "contact number Response",
-							},
-						),
-					},
-					detail: {
-						operationId: "contactNumber",
 					},
 				} as any,
 			),
