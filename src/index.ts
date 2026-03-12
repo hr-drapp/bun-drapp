@@ -301,7 +301,10 @@ for (let route of api.routes) {
 connectDB("APP").then((d) => {
 	if (process.env?.APP_ENV !== "development") {
 	}
-	api.listen(process.env.APP_PORT || 8080);
+	api.listen({
+		port: process.env.APP_PORT || 8080,
+		hostname: "0.0.0.0",
+	});
 	console.log(
 		`🦊 Elysia is running at ${api.server?.hostname}:${
 			process.env.APP_PORT || 8080
