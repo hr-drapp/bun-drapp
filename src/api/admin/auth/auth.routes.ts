@@ -57,17 +57,17 @@ export default createElysia({ prefix: "/auth" }).guard(
 						}
 					}
 
-					if (!origin.includes("localhost")) {
-						if (user.super_admin) {
-							if (!origin.includes("myroj-dashboard.vercel.app")) {
-								return customError("Not allowed.");
-							}
-						} else {
-							if (origin.includes("myroj-dashboard.vercel.app")) {
-								return customError("Not allowed.");
-							}
-						}
-					}
+					// if (!origin.includes("localhost")) {
+					// 	if (user.super_admin) {
+					// 		if (!origin.includes("myroj-dashboard.vercel.app")) {
+					// 			return customError("Not allowed.");
+					// 		}
+					// 	} else {
+					// 		if (origin.includes("myroj-dashboard.vercel.app")) {
+					// 			return customError("Not allowed.");
+					// 		}
+					// 	}
+					// }
 
 					user.ip = clientIP || "";
 					await user.save();
