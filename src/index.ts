@@ -300,9 +300,6 @@ for (let route of api.routes) {
 
 connectDB("APP").then((d) => {
 	if (process.env?.APP_ENV !== "development") {
-		// reactWorker.start();
-		// msgWorker.start();
-		// resultWorker.start();
 	}
 	api.listen(process.env.APP_PORT || 8080);
 	console.log(
