@@ -6,6 +6,7 @@ import { customError } from "src/utils/AppErr";
 import { RootFilterQuery } from "mongoose";
 import { isAdminAuthenticated } from "src/guard/auth.guard";
 import { ModuleId, Summary } from "src/config/modules";
+import { normalizeQuery } from "src/utils/access-grants";
 
 export default createElysia({ prefix: schema.meta.name }).guard(
 	{
@@ -28,13 +29,17 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 						search = new RegExp(search, "i") as any;
 					}
 
-					const filter: RootFilterQuery<typeof Doctor> = {
-						...(search && {
-							name: {
-								$regex: search,
-							},
-						}),
-					};
+					const filter: RootFilterQuery<typeof Doctor> = normalizeQuery(
+						{
+							...(search && {
+								name: {
+									$regex: search,
+								},
+							}),
+						},
+						user,
+					);
+					console.log("🚀 ~ filter:", filter);
 
 					const [list, total] = await Promise.all([
 						Doctor.find(filter)

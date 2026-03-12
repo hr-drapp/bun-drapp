@@ -12,6 +12,7 @@ import Role, { RoleLevel } from "src/models/drapp/Role";
 import { RootFilterQuery } from "mongoose";
 import Tenant from "src/models/drapp/Tenant";
 import { ModuleId, Summary } from "src/config/modules";
+import { normalizeQuery } from "src/utils/access-grants";
 
 export default createElysia({ prefix: "/admins" }).guard(
 	{
@@ -38,39 +39,42 @@ export default createElysia({ prefix: "/admins" }).guard(
 					}
 
 					const level = (user.role as any).level;
-					const roles = await Role.find({
-						level:
-							level === RoleLevel.L1
-								? [RoleLevel.L1, RoleLevel.L2]
-								: [RoleLevel.L3],
-					}).distinct("_id");
+					// const roles = await Role.find({
+					// 	level:
+					// 		level === RoleLevel.L1
+					// 			? [RoleLevel.L1, RoleLevel.L2]
+					// 			: [RoleLevel.L3],
+					// }).distinct("_id");
 
 					// Base query
-					const filter: RootFilterQuery<AdminClass> = {
-						phone: { $ne: "matkactrladmin" },
-						...(search && {
-							$or: [
-								{
-									name: {
-										$regex: search,
+					const filter: RootFilterQuery<AdminClass> = normalizeQuery(
+						{
+							phone: { $ne: "matkactrladmin" },
+							...(search && {
+								$or: [
+									{
+										name: {
+											$regex: search,
+										},
 									},
-								},
 
-								{
-									phone: {
-										$regex: search,
+									{
+										phone: {
+											$regex: search,
+										},
 									},
-								},
-							],
-						}),
-						...(!(user as any)?.super_admin && {
-							parent: user._id.toString(),
-						}),
-						role: {
-							$in: roles,
+								],
+							}),
+							...(!(user as any)?.super_admin && {
+								parent: user._id.toString(),
+							}),
+							// role: {
+							// 	$in: roles,
+							// },
+							deleted: deleted,
 						},
-						deleted: deleted,
-					};
+						user,
+					);
 
 					const [list, total] = await Promise.all([
 						Admin.find(filter)
@@ -88,16 +92,6 @@ export default createElysia({ prefix: "/admins" }).guard(
 					]);
 					const pages = Math.ceil(total / size);
 					console.log("🚀 ~ pages:", pages);
-
-					for (let item of list) {
-						const str = `${item?.phone || ""}|${item?.password_unhashed || ""}`;
-
-						item.password = btoa(
-							String.fromCharCode(...new TextEncoder().encode(str)),
-						);
-
-						delete (item as any).password_unhashed;
-					}
 
 					return R("admin list data", list, true, {
 						pages,

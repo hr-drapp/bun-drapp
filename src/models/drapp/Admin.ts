@@ -19,9 +19,6 @@ export class AdminClass {
 	@prop()
 	public password!: string;
 
-	@prop()
-	public password_unhashed!: string;
-
 	@prop({ default: false })
 	public password_changed!: boolean;
 

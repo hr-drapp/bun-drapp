@@ -12,7 +12,6 @@ import { ClinicClass } from "./Clinic";
 import { TenantClass } from "./Tenant";
 import { GetAutoIncrId } from "src/utils/common";
 import { AutoIncIdModel } from "./AutoIncementalId";
-import { getDefaultClinic } from "src/db/seeder";
 import { DoctorClass } from "./Doctor";
 
 export enum DoctorSlotStatus {
@@ -24,12 +23,6 @@ export enum DoctorSlotStatus {
 		this.id = await GetAutoIncrId(AutoIncIdModel.CLINIC);
 	}
 
-	if (!this.clinic) {
-		const clinic = await getDefaultClinic();
-		if (clinic) {
-			this.clinic = clinic._id;
-		}
-	}
 	next();
 })
 @modelOptions({

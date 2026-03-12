@@ -87,16 +87,6 @@ api.onTransform(({ body = {}, params = {}, query = {} }) => {
 
 api.use(bearer());
 
-api.use(html());
-
-console.log("🚀 ~ process.cwd():", process.cwd());
-api.use(
-	staticPlugin({
-		assets: "/tmp/public",
-		prefix: "/public",
-	}),
-);
-
 // Setup
 
 api.onAfterHandle((ctx) => {

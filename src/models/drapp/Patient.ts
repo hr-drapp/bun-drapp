@@ -9,7 +9,6 @@ import type { Ref } from "@typegoose/typegoose";
 import { GetAutoIncrId } from "src/utils/common";
 import { AutoIncIdModel } from "./AutoIncementalId";
 import { ClinicClass } from "./Clinic";
-import { getDefaultClinic } from "src/db/seeder";
 import { AdminClass } from "./Admin";
 import { TenantClass } from "./Tenant";
 
@@ -18,12 +17,6 @@ import { TenantClass } from "./Tenant";
 		this.id = await GetAutoIncrId(AutoIncIdModel.CLINIC);
 	}
 
-	if (!this.clinic) {
-		const clinic = await getDefaultClinic();
-		if (clinic) {
-			this.clinic = clinic._id;
-		}
-	}
 	next();
 })
 @modelOptions({ schemaOptions: { collection: "patient", timestamps: true } })

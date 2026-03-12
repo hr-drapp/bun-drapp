@@ -7,7 +7,7 @@ import { AbilitiMap, Ability } from "src/models/drapp/Role";
 export enum ModuleId {
 	DASHBOARD = 1,
 	ROLES_AND_PERMISSIONS = 2,
-	GAME_CATEGORY = 3,
+	DOCTORS = 3,
 	GAME = 4,
 	CHART = 5,
 	GROUP = 6,
@@ -19,6 +19,8 @@ export enum ModuleId {
 	SPINNER_HOME_SITE = 12,
 	SPINNER_MARKET = 13,
 	WALLET = 14,
+	MEDIA = 15,
+	DOCTOR_TIME_SLOTS = 16,
 }
 
 export const FULL_ACCESS_ABILITIES: Ability = [
@@ -40,7 +42,7 @@ export const BasicModuleList = [
 ];
 export const AdditionalModuleList = [
 	gen(ModuleId.GAME, "Game"),
-	gen(ModuleId.GAME_CATEGORY, "Game Category"),
+	gen(ModuleId.DOCTORS, "Game Category"),
 	gen(ModuleId.CHART, "Chart"),
 	gen(ModuleId.GROUP, "Group"),
 	gen(ModuleId.NOTICE, "Notice"),

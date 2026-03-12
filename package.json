@@ -3,7 +3,7 @@
 	"version": "1.0.50",
 	"scripts": {
 		"dev": "bun run --watch src/index.ts",
-		"build": "bun build src/index.ts --outdir ./build --target=node",
+		"build": "bun build src/index.ts --outdir ./build --target=node --external=node-appwrite",
 		"start": "NODE_ENV=production bun build/index.js",
 		"test": "bun --watch src/test/test.ts",
 		"mtgen": "bun run --watch src/utils/mongoose-ts-gen.ts",

@@ -7,6 +7,7 @@ const name = "doctor";
 const detailSchema = t.Object({
 	_id: t.String(),
 	name: t.String(),
+	profile_pic: t.String(),
 	total_count: t.Number(),
 	createdAt: t.String(),
 	updatedAt: t.String(),
@@ -16,7 +17,7 @@ export default {
 	meta: {
 		name: name,
 		detail: detailSchema,
-		module: ModuleId.GAME_CATEGORY,
+		module: ModuleId.DOCTORS,
 	},
 	list: {
 		query: t.Object({
@@ -42,10 +43,9 @@ export default {
 		},
 	},
 	create: {
-		type: "multipart/form-data",
 		body: t.Object({
 			name: t.String(),
-			profile_pic: t.File(),
+			profile_pic: t.String(),
 			// pictures: t.Optional(t.Files()),
 		}),
 		response: {
@@ -65,10 +65,9 @@ export default {
 		},
 	},
 	update: {
-		type: "multipart/form-data",
 		body: t.Object({
 			name: t.String(),
-			profile_pic: t.String(),
+			profile_pic: t.Optional(t.String()),
 		}),
 
 		query: t.Object({
