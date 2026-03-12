@@ -304,10 +304,10 @@ connectDB("APP").then((d) => {
 		// msgWorker.start();
 		// resultWorker.start();
 	}
-	api.listen(process.env.PORT || 8080);
+	api.listen(process.env.APP_PORT || 8080);
 	console.log(
 		`🦊 Elysia is running at ${api.server?.hostname}:${
-			process.env.PORT || 8080
+			process.env.APP_PORT || 8080
 		}`,
 	);
 });
