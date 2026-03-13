@@ -265,7 +265,10 @@ export default function parseEmojiAmounts(
 	};
 }
 
-export async function GetAutoIncrId(model: AutoIncIdModel, seq: number = 1) {
+export async function GetAutoIncrId(
+	model: AutoIncIdModel | string,
+	seq: number = 1,
+) {
 	return (
 		await AutoIncementalId.findOneAndUpdate(
 			{ id: model },

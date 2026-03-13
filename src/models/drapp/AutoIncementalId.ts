@@ -4,6 +4,7 @@ import {
 	modelOptions,
 	index,
 } from "@typegoose/typegoose";
+import { Mixed } from "mongoose";
 
 export enum AutoIncIdModel {
 	CLINIC = 0,
@@ -16,8 +17,8 @@ export enum AutoIncIdModel {
 	schemaOptions: { collection: "autoincrementalid", timestamps: true },
 })
 export class AutoIncementalIdClass {
-	@prop({ enum: AutoIncIdModel, required: true, unique: true })
-	public id!: number;
+	@prop({ required: true, unique: true })
+	public id!: Mixed;
 
 	@prop({ default: 0 })
 	public seq!: number;

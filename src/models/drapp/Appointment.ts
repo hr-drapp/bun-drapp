@@ -14,6 +14,7 @@ import { TenantClass } from "./Tenant";
 import { PatientClass } from "./Patient";
 import { DoctorClass } from "./Doctor";
 import { DoctorTimeSlotClass } from "./DoctorTimeSlot";
+import moment from "moment";
 
 export enum AppointmentType {
 	CONSULTATION = 0,
@@ -41,6 +42,12 @@ export enum AppointmentStatus {
 @pre<AppointmentClass>("save", async function (next) {
 	if (!this.id) {
 		this.id = await GetAutoIncrId(AutoIncIdModel.CLINIC);
+	}
+
+	if (!this.token) {
+		this.token = await GetAutoIncrId(
+			`${moment(this.date).format("DD-MM-YYYY")}-${this.time_slot}`,
+		);
 	}
 
 	next();
@@ -82,7 +89,7 @@ export class AppointmentClass {
 	@prop({})
 	public source!: number;
 
-	@prop({})
+	@prop({ default: AppointmentStatus.BOOKED })
 	public status!: number;
 
 	@prop({})
