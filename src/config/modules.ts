@@ -21,6 +21,7 @@ export enum ModuleId {
 	WALLET = 14,
 	MEDIA = 15,
 	DOCTOR_TIME_SLOTS = 16,
+	PATIENTS = 17,
 }
 
 export const FULL_ACCESS_ABILITIES: Ability = [

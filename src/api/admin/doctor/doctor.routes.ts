@@ -66,6 +66,8 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 				async ({ body, user }) => {
 					const entry = await Doctor.create({
 						...body,
+						clinic: user.clinic,
+						tenant: user.tenant,
 					});
 
 					return R("entry created", entry);
