@@ -58,6 +58,9 @@ export class AppointmentClass {
 	@prop({ ref: () => ClinicClass })
 	public clinic!: Ref<ClinicClass>;
 
+	@prop({ ref: () => TenantClass })
+	public tenant!: Ref<TenantClass>;
+
 	@prop({ ref: () => PatientClass })
 	public patient!: Ref<PatientClass>;
 

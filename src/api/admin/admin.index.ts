@@ -8,6 +8,7 @@ import adminsRoutes from "./admins/admins.routes";
 import doctorRoutes from "./doctor/doctor.routes";
 import doctorTimeSlotRoutes from "./doctor-time-slot/doctor-time-slot.routes";
 import patientRoutes from "./patient/patient.routes";
+import appointmentRoutes from "./appointment/appointment.routes";
 import mediaRoutes from "./media/media.routes";
 import schemaVisualizerRoutes from "./schema-visualizer/schema-visualizer.routes";
 /** Admin Routes */
@@ -23,6 +24,9 @@ adminRoutes.use(doctorTimeSlotRoutes);
 
 // Patient Route
 adminRoutes.use(patientRoutes);
+
+// Appointment Route
+adminRoutes.use(appointmentRoutes);
 
 // Media Route
 adminRoutes.use(mediaRoutes);
