@@ -1,6 +1,6 @@
 import { R } from "src/utils/response-helpers";
 import schema from "./appointment.schema";
-import Appointment from "src/models/drapp/Appointment";
+import Appointment, { AppointmentSource } from "src/models/drapp/Appointment";
 import { createElysia } from "src/utils/createElysia";
 import { customError } from "src/utils/AppErr";
 import { RootFilterQuery } from "mongoose";
@@ -124,6 +124,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 						...body,
 						clinic: user.clinic,
 						tenant: user.tenant,
+						source: AppointmentSource.WALK_IN,
 					});
 
 					return R("entry created", entry);
