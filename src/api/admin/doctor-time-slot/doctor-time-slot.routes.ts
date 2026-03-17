@@ -92,7 +92,9 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.delete(
 				"/",
 				async ({ query }) => {
-					const entry = await DoctorTimeSlot.findByIdAndDelete(query.id);
+					const entry = await DoctorTimeSlot.findByIdAndUpdate(query.id, {
+						deleted: true,
+					});
 
 					return R("entry deleted", entry);
 				},

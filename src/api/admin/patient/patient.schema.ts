@@ -1,16 +1,21 @@
 import { t } from "elysia";
 import { ModuleId } from "src/config/modules";
 import { MetaPaginationSchema } from "src/utils/common";
+import appointmentSchema from "../appointment/appointment.schema";
+import patientHealthRecordSchema from "../patient-health-record/patient-health-record.schema";
 
 const name = "patient";
 
 const detailSchema = t.Object({
 	_id: t.String(),
+	id: t.Number(),
 	name: t.String(),
 	phone: t.String(),
 	age: t.Number(),
 	gender: t.Number(),
 	profile_pic: t.String(),
+	recent_appointment: appointmentSchema.meta.detail,
+	vitals: patientHealthRecordSchema.meta.detail,
 	createdAt: t.String(),
 	updatedAt: t.String(),
 });

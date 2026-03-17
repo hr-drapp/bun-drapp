@@ -7,6 +7,10 @@ import { RootFilterQuery } from "mongoose";
 import { isAdminAuthenticated } from "src/guard/auth.guard";
 import { ModuleId, Summary } from "src/config/modules";
 import { normalizeQuery } from "src/utils/access-grants";
+import Appointment, { AppointmentStatus } from "src/models/drapp/Appointment";
+import PatientHealthRecord, {
+	PatientHealthRecordType,
+} from "src/models/drapp/PatientHealthRecord";
 
 export default createElysia({ prefix: schema.meta.name }).guard(
 	{
@@ -85,9 +89,39 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.get(
 				"/detail",
 				async ({ body, query }) => {
-					const entry = await Patient.findById(query.id);
+					const entry = await Patient.findById(query.id).lean();
 
 					if (!entry) return customError("Invalid Patient");
+
+					const recentLiveAppointment = await Appointment.find({
+						patient: entry._id,
+						status: {
+							$in: [
+								AppointmentStatus.BOOKED,
+								AppointmentStatus.IN_SESSION,
+								AppointmentStatus.PAUSED,
+							],
+						},
+					}).populate([
+						{
+							path: "doctor",
+						},
+						{
+							path: "time_slot",
+						},
+					]);
+
+					(entry as any).recent_appointment =
+						recentLiveAppointment.length > 0 ? recentLiveAppointment[0] : null;
+
+					if ((entry as any).recent_appointment) {
+						const vitals = await PatientHealthRecord.findOne({
+							appointment: (entry as any).recent_appointment._id,
+							type: PatientHealthRecordType.VITALS,
+						});
+
+						(entry as any).vitals = vitals;
+					}
 
 					return R("entry detail", entry);
 				},
@@ -96,7 +130,9 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.delete(
 				"/",
 				async ({ query }) => {
-					const entry = await Patient.findByIdAndDelete(query.id);
+					const entry = await Patient.findByIdAndUpdate(query.id, {
+						deleted: true,
+					});
 
 					return R("entry deleted", entry);
 				},

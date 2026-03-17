@@ -95,6 +95,9 @@ export class AppointmentClass {
 	@prop({})
 	public complaint!: string;
 
+	@prop({})
+	public notes!: string;
+
 	@prop({ default: false })
 	public deleted!: boolean;
 }

@@ -23,6 +23,7 @@ export enum ModuleId {
 	DOCTOR_TIME_SLOTS = 16,
 	PATIENTS = 17,
 	APPOINTMENTS = 18,
+	PATIENT_HEALTH_RECORDS = 19,
 }
 
 export const FULL_ACCESS_ABILITIES: Ability = [

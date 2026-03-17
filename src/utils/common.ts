@@ -284,3 +284,6 @@ export const MetaPaginationSchema = t.Object({
 	page: t.Number(),
 	size: t.Number(),
 });
+
+export const queryStringtoArray = (queryString: string | undefined): string[] =>
+	(queryString || "").split(",").filter((f) => f);

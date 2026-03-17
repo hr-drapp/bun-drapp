@@ -7,6 +7,10 @@ import { RootFilterQuery } from "mongoose";
 import { isAdminAuthenticated } from "src/guard/auth.guard";
 import { ModuleId, Summary } from "src/config/modules";
 import { normalizeQuery } from "src/utils/access-grants";
+import { queryStringtoArray } from "src/utils/common";
+import PatientHealthRecord, {
+	PatientHealthRecordType,
+} from "src/models/drapp/PatientHealthRecord";
 
 export default createElysia({ prefix: schema.meta.name }).guard(
 	{
@@ -24,6 +28,9 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 					const page = parseInt(query.page);
 					const size = parseInt(query.size);
 
+					const statuses = queryStringtoArray(query.statuses);
+					const patients = queryStringtoArray(query.patients);
+
 					let search = query?.search;
 					if (search) {
 						search = new RegExp(search, "i") as any;
@@ -36,19 +43,69 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 									$regex: search,
 								},
 							}),
+							...(statuses.length
+								? {
+										status: {
+											$in: statuses,
+										},
+								  }
+								: {}),
+							...(patients.length
+								? {
+										patient: {
+											$in: patients,
+										},
+								  }
+								: {}),
 						},
 						user,
 					);
 
 					const [list, total] = await Promise.all([
 						Appointment.find(filter)
+							.populate([
+								{
+									path: "doctor",
+								},
+								{
+									path: "patient",
+									select: "_id name",
+								},
+								{
+									path: "time_slot",
+								},
+							])
 							.skip(page * size)
 							.limit(size)
-							.sort({ createdAt: -1 }),
+							.sort({ createdAt: -1 })
+							.lean(),
 						Appointment.countDocuments(filter),
 					]);
 
 					const pages = Math.ceil(total / size);
+
+					const ids = list.map((item) => item._id);
+					const healthRecords = await PatientHealthRecord.find({
+						appointment: { $in: ids },
+					});
+
+					for (let item of list) {
+						(item as any).patient_health_records = [];
+
+						const records = healthRecords.filter(
+							(f) => f.appointment.toString() === item._id.toString(),
+						);
+
+						for (let record of healthRecords) {
+							if (record.appointment.toString() === item._id.toString()) {
+								if (record.type === PatientHealthRecordType.VITALS) {
+									(item as any).vitals = record;
+								} else {
+									(item as any).patient_health_records.push(record);
+								}
+							}
+						}
+					}
 
 					return R(`${schema.meta.name} list data`, list, true, {
 						pages: pages,
@@ -99,7 +156,9 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.delete(
 				"/",
 				async ({ query }) => {
-					const entry = await Appointment.findByIdAndDelete(query.id);
+					const entry = await Appointment.findByIdAndUpdate(query.id, {
+						deleted: true,
+					});
 
 					return R("entry deleted", entry);
 				},
