@@ -13,8 +13,8 @@ import {
 	AdminResetPasswordSchema,
 	AdminSchema,
 } from "./auth.schema";
-import Admin from "src/models/drapp/Admin";
-import Role from "src/models/drapp/Role";
+import Admin from "src/models/clicknic/Admin";
+import Role from "src/models/clicknic/Role";
 import { createElysia } from "src/utils/createElysia";
 import moment from "moment";
 import { sendMail } from "src/utils/mailer";
@@ -37,7 +37,7 @@ export default createElysia({ prefix: "/auth" }).guard(
 					console.log("🚀 ~ origin:", origin);
 					console.log("phoneNumber", body);
 					const user = await Admin.findOne({
-						phone: body.phone,
+						email: body.phone,
 						deleted: false,
 					}).populate("role");
 

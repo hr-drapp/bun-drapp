@@ -2,8 +2,8 @@ import { FilterQuery, Types } from "mongoose";
 import AccessGrant, {
 	AccessGrantClass,
 	AccessGrantResource,
-} from "src/models/drapp/AccessGrant";
-import { RoleLevel } from "src/models/drapp/Role";
+} from "src/models/clicknic/AccessGrant";
+import { RoleLevel } from "src/models/clicknic/Role";
 import redis from "src/db/redis";
 
 const CACHE_PREFIX = "matkactrl:access-grant";

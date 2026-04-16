@@ -1,11 +1,11 @@
 import { connectDB } from "src/db/mongo";
-import Admin from "src/models/drapp/Admin";
+import Admin from "src/models/clicknic/Admin";
 import Game from "src/models/Game";
 import GameTime from "src/models/GameTime";
 import MessageQueue, { MessageQueueStatus } from "src/models/MessageQueue";
 import Numbers from "src/models/Numbers";
 import NumbersEntry from "src/models/NumbersEntry";
-import Role from "src/models/drapp/Role";
+import Role from "src/models/clicknic/Role";
 import SattaResult from "src/models/SattaResult";
 import { AnkCategory } from "src/utils/anks";
 import { testPersikopQueue } from "src/utils/bullmq";

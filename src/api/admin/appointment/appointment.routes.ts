@@ -1,6 +1,8 @@
 import { R } from "src/utils/response-helpers";
 import schema from "./appointment.schema";
-import Appointment, { AppointmentSource } from "src/models/drapp/Appointment";
+import Appointment, {
+	AppointmentSource,
+} from "src/models/clicknic/Appointment";
 import { createElysia } from "src/utils/createElysia";
 import { customError } from "src/utils/AppErr";
 import { RootFilterQuery } from "mongoose";
@@ -10,7 +12,7 @@ import { normalizeQuery } from "src/utils/access-grants";
 import { queryStringtoArray } from "src/utils/common";
 import PatientHealthRecord, {
 	PatientHealthRecordType,
-} from "src/models/drapp/PatientHealthRecord";
+} from "src/models/clicknic/PatientHealthRecord";
 
 export default createElysia({ prefix: schema.meta.name }).guard(
 	{

@@ -5,12 +5,12 @@ import { HashPassword, VerifyPassword } from "src/utils/auth";
 import jwt from "src/utils/jwt";
 import { R } from "src/utils/response-helpers";
 import rolesSchema from "./admins.schema";
-import Admin, { AdminClass } from "src/models/drapp/Admin";
+import Admin, { AdminClass } from "src/models/clicknic/Admin";
 import { createElysia } from "src/utils/createElysia";
 import moment from "moment";
-import Role, { RoleLevel } from "src/models/drapp/Role";
+import Role, { RoleLevel } from "src/models/clicknic/Role";
 import { RootFilterQuery } from "mongoose";
-import Tenant from "src/models/drapp/Tenant";
+import Tenant from "src/models/clicknic/Tenant";
 import { ModuleId, Summary } from "src/config/modules";
 import { normalizeQuery } from "src/utils/access-grants";
 
@@ -75,6 +75,7 @@ export default createElysia({ prefix: "/admins" }).guard(
 						},
 						user,
 					);
+					console.log("🚀 ~ filter:", filter);
 
 					const [list, total] = await Promise.all([
 						Admin.find(filter)

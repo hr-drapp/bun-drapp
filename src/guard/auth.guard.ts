@@ -1,7 +1,7 @@
 import Elysia from "elysia";
 import { routeMap } from "src";
-import Admin from "src/models/drapp/Admin";
-import { abilityHttpMap } from "src/models/drapp/Role";
+import Admin from "src/models/clicknic/Admin";
+import { abilityHttpMap } from "src/models/clicknic/Role";
 import { APIResponse } from "src/types/global";
 import { buildScopedQuery } from "src/utils/access-grants";
 import JWT from "src/utils/jwt";

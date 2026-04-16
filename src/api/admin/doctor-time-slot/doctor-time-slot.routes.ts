@@ -1,6 +1,6 @@
 import { R } from "src/utils/response-helpers";
 import schema from "./doctor-time-slot.schema";
-import DoctorTimeSlot from "src/models/drapp/DoctorTimeSlot";
+import DoctorTimeSlot from "src/models/clicknic/DoctorTimeSlot";
 import { createElysia } from "src/utils/createElysia";
 import { customError } from "src/utils/AppErr";
 import { RootFilterQuery } from "mongoose";

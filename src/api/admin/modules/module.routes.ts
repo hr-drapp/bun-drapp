@@ -5,8 +5,8 @@ import { HashPassword, VerifyPassword } from "src/utils/auth";
 import jwt from "src/utils/jwt";
 import { R } from "src/utils/response-helpers";
 import schema from "./module.schema";
-import Admin from "src/models/drapp/Admin";
-import Role from "src/models/drapp/Role";
+import Admin from "src/models/clicknic/Admin";
+import Role from "src/models/clicknic/Role";
 import { createElysia } from "src/utils/createElysia";
 import {
 	AdditionalModuleList,

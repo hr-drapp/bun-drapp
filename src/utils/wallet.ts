@@ -6,7 +6,7 @@ import WalletTransaction, {
 import WalletAllocation, {
 	WalletAllocationStatus,
 } from "src/models/WalletAllocation";
-import Admin from "src/models/drapp/Admin";
+import Admin from "src/models/clicknic/Admin";
 import { customError } from "src/utils/AppErr";
 import redis from "src/db/redis";
 

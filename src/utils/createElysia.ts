@@ -1,6 +1,6 @@
 import { DocumentType, ReturnModelType } from "@typegoose/typegoose";
 import { Elysia, t } from "elysia";
-import { AdminClass } from "src/models/drapp/Admin";
+import { AdminClass } from "src/models/clicknic/Admin";
 import { AstrologerClass } from "src/models/Astrologer";
 import { UserClass } from "src/models/User";
 

@@ -1,13 +1,13 @@
 import { R } from "src/utils/response-helpers";
 import schema from "./patient-health-record.schema";
-import PatientHealthRecord from "src/models/drapp/PatientHealthRecord";
+import PatientHealthRecord from "src/models/clicknic/PatientHealthRecord";
 import { createElysia } from "src/utils/createElysia";
 import { customError } from "src/utils/AppErr";
 import { RootFilterQuery } from "mongoose";
 import { isAdminAuthenticated } from "src/guard/auth.guard";
 import { ModuleId, Summary } from "src/config/modules";
 import { normalizeQuery } from "src/utils/access-grants";
-import Appointment from "src/models/drapp/Appointment";
+import Appointment from "src/models/clicknic/Appointment";
 
 export default createElysia({ prefix: schema.meta.name }).guard(
 	{

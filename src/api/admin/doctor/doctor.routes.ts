@@ -1,6 +1,6 @@
 import { R } from "src/utils/response-helpers";
 import schema from "./doctor.schema";
-import Doctor, { DoctorClass } from "src/models/drapp/Doctor";
+import Doctor, { DoctorClass } from "src/models/clicknic/Doctor";
 import { createElysia } from "src/utils/createElysia";
 import { customError } from "src/utils/AppErr";
 import { RootFilterQuery } from "mongoose";

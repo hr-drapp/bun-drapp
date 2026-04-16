@@ -4,7 +4,7 @@ import { Types } from "mongoose";
 import { Logger } from "./Logger";
 import AutoIncementalId, {
 	AutoIncIdModel,
-} from "src/models/drapp/AutoIncementalId";
+} from "src/models/clicknic/AutoIncementalId";
 import { t } from "elysia";
 
 export function randomInRange(min: number, max: number) {

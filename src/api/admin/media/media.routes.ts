@@ -1,6 +1,6 @@
 import { R } from "src/utils/response-helpers";
 import schema from "./media.schema";
-import Media, { MediaClass } from "src/models/drapp/media/Media";
+import Media, { MediaClass } from "src/models/clicknic/media/Media";
 import { createElysia } from "src/utils/createElysia";
 import { customError } from "src/utils/AppErr";
 import { RootFilterQuery } from "mongoose";
