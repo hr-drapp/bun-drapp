@@ -4,6 +4,7 @@ import type { Ref } from "@typegoose/typegoose";
 import Role, { RoleClass } from "./Role";
 import { TenantClass } from "./Tenant";
 import { ClinicClass } from "./Clinic";
+import { DoctorClass } from "./Doctor";
 
 @modelOptions({ schemaOptions: { collection: "admins", timestamps: true } })
 export class AdminClass {
@@ -39,6 +40,9 @@ export class AdminClass {
 
 	@prop({ ref: () => ClinicClass })
 	public clinic!: Ref<ClinicClass>;
+
+	@prop({ ref: () => DoctorClass, required: false })
+	public doctor?: Ref<DoctorClass>;
 
 	@prop({ required: false })
 	public expire_at!: Date;

@@ -56,7 +56,7 @@ export const isAdminAuthenticated = async (
 		};
 	}
 
-	const user = await Admin.findById(jwt._id).populate("role");
+	const user = await Admin.findById(jwt._id).populate(["role", "doctor"]);
 
 	if (!user) {
 		set.status = 401;

@@ -171,11 +171,13 @@ export const buildScopedQuery = async <T = any>({
 
 export function normalizeQuery<T extends Record<string, any>>(
 	query: T,
-	user: { tenant: any; clinic: any },
+	user: { tenant: any; clinic: any; doctor?: any },
 ): T & { tenant: any; clinic: any } {
+	const doctorId = user.doctor?._id || user.doctor;
 	return {
 		...query,
 		tenant: user.tenant?._id || user.tenant,
 		clinic: user.clinic?._id || user.clinic,
+		...(doctorId ? { doctor: doctorId } : {}),
 	};
 }
