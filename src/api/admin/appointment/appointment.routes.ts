@@ -13,6 +13,7 @@ import { queryStringtoArray } from "src/utils/common";
 import PatientHealthRecord, {
 	PatientHealthRecordType,
 } from "src/models/clicknic/PatientHealthRecord";
+import moment from "moment";
 
 export default createElysia({ prefix: schema.meta.name }).guard(
 	{
@@ -32,6 +33,8 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 
 					const statuses = queryStringtoArray(query.statuses);
 					const patients = queryStringtoArray(query.patients);
+					const date_from = query.dateFrom;
+					const date_to = query.dateTo;
 
 					let search = query?.search;
 					if (search) {
@@ -59,6 +62,16 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 										},
 								  }
 								: {}),
+							...((date_from || date_to) && {
+								date: {
+									...(date_from && {
+										$gte: moment(date_from).startOf("day").toDate(),
+									}),
+									...(date_to && {
+										$lte: moment(date_to).endOf("day").toDate(),
+									}),
+								},
+							}),
 						},
 						user,
 					);
@@ -71,7 +84,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 								},
 								{
 									path: "patient",
-									select: "_id name",
+									select: "_id name profile_pic phone",
 								},
 								{
 									path: "time_slot",

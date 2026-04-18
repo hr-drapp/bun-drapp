@@ -10,7 +10,12 @@ const name = "appointment";
 const detailSchema = t.Object({
 	_id: t.String(),
 	token: t.Number(),
-	patient: t.Object({ _id: t.String(), name: t.String() }),
+	patient: t.Object({
+		_id: t.String(),
+		name: t.String(),
+		profile_pic: t.String(),
+		phone: t.String(),
+	}),
 	doctor: doctorSchema.meta.detail,
 	time_slot: doctorTimeSlotSchema.meta.detail,
 	date: t.String(),
@@ -39,6 +44,8 @@ export default {
 			search: t.Optional(t.String()),
 			statuses: t.Optional(t.String()),
 			patients: t.Optional(t.String()),
+			dateFrom: t.Optional(t.String()),
+			dateTo: t.Optional(t.String()),
 		}),
 		response: {
 			200: t.Object(

@@ -1,3 +1,4 @@
+import { consola } from "consola";
 import moment from "moment";
 import { ModuleId } from "src/config/modules";
 import Admin, { AdminClass } from "src/models/clicknic/Admin";
@@ -104,12 +105,7 @@ const receptionist: Partial<AdminClass> = {
 	password: "Admin@123",
 };
 
-const DEFAULT_CLINIC_NAMES = [
-	"manjima",
-	"kirthi",
-	"nobin",
-	"krishna",
-] as const;
+const DEFAULT_CLINIC_NAMES = ["manjima", "kirthi", "nobin", "krishna"] as const;
 
 const DEFAULT_SEED_PASSWORD = "Admin@123";
 
@@ -231,7 +227,7 @@ const logSeederCredentials = (clinics: SeededClinicLog[]) => {
 		return;
 	}
 
-	console.log(formatClinicCredentialLog(clinics));
+	consola.box(formatClinicCredentialLog(clinics));
 };
 
 // TENANT->CLINIC->ROLES->ADMINS->DOCTOR
