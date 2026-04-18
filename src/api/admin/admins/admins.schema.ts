@@ -111,10 +111,6 @@ export default {
 			// children: t.Array(t.String()),
 			// games: t.Optional(t.Array(t.String())),
 			parent: t.Optional(t.String()),
-			expire_at: t.Optional(t.Numeric()),
-			admin_create_limit: t.Optional(t.Numeric()),
-			// permissions: t.Optional(t.Any()),
-			is_customer: t.Enum(typeEnum),
 		}),
 		response: {
 			200: t.Object(
@@ -142,10 +138,6 @@ export default {
 			role: t.String(),
 			doctor: t.Optional(t.String()),
 			// children: t.Array(t.String()),
-			expire_at: t.Optional(t.Numeric()),
-			admin_create_limit: t.Optional(t.Numeric()),
-			// permissions: t.Optional(t.Any()),
-			is_customer: t.Enum(typeEnum),
 			// games: t.Optional(t.Array(t.String())),
 		}),
 

@@ -119,34 +119,7 @@ export default createElysia({ prefix: "/admins" }).guard(
 						return customError("Phone Number already used by another admin");
 					}
 
-					if (!user.super_admin) {
-						if (children_count >= user.admin_create_limit) {
-							return customError("Admin create limit exceed.");
-						}
-						if (body.admin_create_limit) {
-							delete body.admin_create_limit;
-						}
-					}
-
 					body.password = HashPassword(body.password_unhashed);
-					if (body.expire_at) {
-						if (!user.super_admin) {
-							let remainingDays = moment(user.expire_at).diff(moment(), "days");
-
-							if (remainingDays <= 0) {
-								return customError("Login Expired, contact the Admin");
-							}
-
-							if (body.expire_at > remainingDays) {
-								return customError(
-									`You can't select more than ${remainingDays} Days expiry.`,
-								);
-							}
-						}
-						body.expire_at = moment()
-							.add(body.expire_at, "days")
-							.endOf("day") as any;
-					}
 
 					if (!user.super_admin) {
 						body.parent = user._id.toString();
@@ -198,36 +171,6 @@ export default createElysia({ prefix: "/admins" }).guard(
 				"/",
 				async ({ body, query, user }) => {
 					body.password = HashPassword(body.password_unhashed);
-
-					if (body.expire_at) {
-						if (!user.super_admin) {
-							let remainingDays = moment(user.expire_at).diff(moment(), "days");
-
-							if (remainingDays <= 0) {
-								return customError("Login Expired, contact the Admin");
-							}
-
-							if (body.expire_at > remainingDays) {
-								return customError(
-									`You can't select more than ${remainingDays} Days expiry.`,
-								);
-							}
-						}
-
-						body.expire_at = moment()
-							.add(body.expire_at, "days")
-							.endOf("day") as any;
-						console.log(
-							"🚀 ~ body.expire_at:",
-							moment(body.expire_at).format("DD MMM YYYY hh:mm A"),
-						);
-					}
-
-					if (!user.super_admin) {
-						if (body.admin_create_limit) {
-							delete body.admin_create_limit;
-						}
-					}
 
 					const entry = await Admin.findOneAndUpdate(
 						{
