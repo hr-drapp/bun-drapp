@@ -30,21 +30,21 @@ export default createElysia({ prefix: "/modules" }).guard(
 			async ({ query }) => {
 				const type = query.type;
 
-				let list: typeof ModuleList = ModuleList;
+				// let list: typeof ModuleList = ModuleList;
 
-				if (type === "all") {
-					list = ModuleList;
-				}
+				// if (type === "all") {
+				// 	list = ModuleList;
+				// }
 
-				if (type === "basic") {
-					list = BasicModuleList;
-				}
+				// if (type === "basic") {
+				// 	list = BasicModuleList;
+				// }
 
-				if (type === "additional") {
-					list = AdditionalModuleList;
-				}
+				// if (type === "additional") {
+				// 	list = AdditionalModuleList;
+				// }
 
-				return R("module list data", list, true);
+				return R("module list data", [], true);
 			},
 			schema.list,
 		),
