@@ -158,7 +158,7 @@ export default createElysia({ prefix: "/admins" }).guard(
 
 					const entry = await Admin.create({
 						...body,
-						is_customer: body?.is_customer === "customer" ? true : false,
+						// is_customer: body?.is_customer === "customer" ? true : false,
 					});
 
 					if (role.level === RoleLevel.L2) {
@@ -240,7 +240,7 @@ export default createElysia({ prefix: "/admins" }).guard(
 						{
 							$set: {
 								...body,
-								is_customer: body?.is_customer === "customer" ? true : false,
+								// is_customer: body?.is_customer === "customer" ? true : false,
 							},
 						},
 						{ new: true },

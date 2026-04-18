@@ -17,12 +17,12 @@ export const adminSchema = t.Object({
 	updatedAt: t.String(),
 
 	// FIX 2 → optional
-	expire_at: t.Optional(t.String()),
+	// expire_at: t.Optional(t.String()),
 
 	// FIX 3 → optional
-	children_count: t.Optional(t.Number()),
+	// children_count: t.Optional(t.Number()),
 
-	is_customer: t.Optional(t.Boolean()),
+	// is_customer: t.Optional(t.Boolean()),
 	children: t.Any(),
 
 	admins: t.Array(
