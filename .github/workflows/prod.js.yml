@@ -16,7 +16,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.PROD_SSH_HOST }}
-          username: root
+          username: ubuntu
           key: ${{ secrets.PROD_SSH_KEY }}
           port: 22
           source: "build/index.js,package.json,deploy.prod.sh"
@@ -30,7 +30,7 @@ jobs:
           key: ${{secrets.PROD_SSH_KEY}}
           # ssh host
           host: ${{secrets.PROD_SSH_HOST}}
-          username: root
+          username: ubuntu
           script: |
             sudo -u root whoami
             sudo -u root su
