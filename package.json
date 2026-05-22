@@ -1,6 +1,6 @@
 {
 	"name": "bun-astrokoolam",
-	"version": "1.0.51",
+	"version": "1.0.52",
 	"scripts": {
 		"dev": "bun run --watch src/index.ts",
 		"build": "bun build src/index.ts --outdir ./build --target=node --external=node-appwrite",
