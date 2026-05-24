@@ -2,6 +2,7 @@ import { R } from "src/utils/response-helpers";
 import schema from "./appointment.schema";
 import Appointment, {
 	AppointmentSource,
+	AppointmentStatus,
 } from "src/models/clicknic/Appointment";
 import { createElysia } from "src/utils/createElysia";
 import { customError } from "src/utils/AppErr";
@@ -140,6 +141,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 						clinic: user.clinic,
 						tenant: user.tenant,
 						source: AppointmentSource.WALK_IN,
+						status: AppointmentStatus.IN_QUEUE,
 					});
 
 					return R("entry created", entry);
