@@ -186522,7 +186522,8 @@ var appointment_routes_default = createElysia({ prefix: appointment_schema_defau
     ...body,
     clinic: user.clinic,
     tenant: user.tenant,
-    source: 1 /* WALK_IN */
+    source: 1 /* WALK_IN */,
+    status: 1 /* IN_QUEUE */
   });
   return R3("entry created", entry);
 }, appointment_schema_default.create).put("/", async ({ body, query }) => {
@@ -187103,6 +187104,164 @@ adminRoutes.use(patient_health_record_routes_default);
 adminRoutes.use(media_routes_default);
 adminRoutes.use(schema_visualizer_routes_default);
 
+// src/api/manglam-city/contribution/contribution.schema.ts
+var name9 = "contribution";
+var publicDetailSchema = t2.Object({
+  _id: t2.String(),
+  name: t2.String(),
+  phone: t2.String(),
+  amount: t2.Number(),
+  createdAt: t2.String()
+});
+var contribution_schema_default = {
+  meta: { name: name9 },
+  submit: {
+    body: t2.Object({
+      name: t2.String({ minLength: 1 }),
+      phone: t2.String({ minLength: 10, maxLength: 15 }),
+      amount: t2.Number({ minimum: 1 })
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Object({
+          _id: t2.String(),
+          name: t2.String(),
+          amount: t2.Number(),
+          createdAt: t2.String()
+        })
+      })
+    },
+    detail: { operationId: "submit" }
+  },
+  list: {
+    query: t2.Object({
+      page: t2.String(),
+      size: t2.String()
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Array(publicDetailSchema),
+        meta: MetaPaginationSchema
+      })
+    },
+    detail: { operationId: "list" }
+  },
+  analytics: {
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Object({
+          total_amount: t2.Number(),
+          total_contributors: t2.Number()
+        })
+      })
+    },
+    detail: { operationId: "analytics" }
+  }
+};
+
+// src/models/ManglamCityContribution.ts
+var import_typegoose13 = __toESM(require_typegoose(), 1);
+class ManglamCityContributionClass {
+}
+__legacyDecorateClassTS([
+  import_typegoose13.prop({}),
+  __legacyMetadataTS("design:type", String)
+], ManglamCityContributionClass.prototype, "name", undefined);
+__legacyDecorateClassTS([
+  import_typegoose13.prop({}),
+  __legacyMetadataTS("design:type", String)
+], ManglamCityContributionClass.prototype, "phone", undefined);
+__legacyDecorateClassTS([
+  import_typegoose13.prop({}),
+  __legacyMetadataTS("design:type", Number)
+], ManglamCityContributionClass.prototype, "amount", undefined);
+__legacyDecorateClassTS([
+  import_typegoose13.prop({}),
+  __legacyMetadataTS("design:type", String)
+], ManglamCityContributionClass.prototype, "ip", undefined);
+ManglamCityContributionClass = __legacyDecorateClassTS([
+  import_typegoose13.modelOptions({
+    schemaOptions: { collection: "manglam_city_contribution", timestamps: true }
+  })
+], ManglamCityContributionClass);
+var ManglamCityContribution_default = import_typegoose13.getModelForClass(ManglamCityContributionClass);
+
+// src/api/manglam-city/contribution/contribution.routes.ts
+function maskPhone(phone) {
+  if (phone.length <= 4)
+    return "****";
+  return "*".repeat(phone.length - 4) + phone.slice(-4);
+}
+function maskName(name10) {
+  const visible = Math.min(4, Math.ceil(name10.length / 2));
+  return name10.slice(0, visible) + "*".repeat(Math.max(0, name10.length - visible));
+}
+var contribution_routes_default = createElysia({ prefix: contribution_schema_default.meta.name }).guard({
+  detail: {
+    tags: ["manglam-city"]
+  }
+}, (app) => app.post("/", async ({ body, request }) => {
+  const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "";
+  const entry = await ManglamCityContribution_default.create({
+    name: body.name.trim(),
+    phone: body.phone.trim(),
+    amount: body.amount,
+    ip
+  });
+  return R3("Entry submitted successfully", {
+    _id: entry._id,
+    name: entry.name,
+    amount: entry.amount,
+    createdAt: entry.createdAt
+  });
+}, contribution_schema_default.submit).get("/", async ({ query }) => {
+  const page = parseInt(query.page);
+  const size = parseInt(query.size);
+  const [list, total] = await Promise.all([
+    ManglamCityContribution_default.find().skip(page * size).limit(size).sort({ createdAt: -1 }).lean(),
+    ManglamCityContribution_default.countDocuments()
+  ]);
+  console.log("\uD83D\uDE80 ~ list:", list);
+  const pages = Math.ceil(total / size);
+  const masked = list.map((entry) => ({
+    _id: entry._id,
+    name: maskName(entry.name),
+    phone: maskPhone(entry.phone),
+    amount: entry.amount,
+    createdAt: entry.createdAt
+  }));
+  return R3("contribution list data", masked, true, {
+    pages,
+    total,
+    page,
+    size
+  });
+}, contribution_schema_default.list).get("/analytics", async () => {
+  const [result] = await ManglamCityContribution_default.aggregate([
+    {
+      $group: {
+        _id: null,
+        total_amount: { $sum: "$amount" },
+        total_contributors: { $sum: 1 }
+      }
+    }
+  ]);
+  return R3("analytics data", {
+    total_amount: result?.total_amount ?? 0,
+    total_contributors: result?.total_contributors ?? 0
+  });
+}, contribution_schema_default.analytics));
+
+// src/api/manglam-city/manglam-city.index.ts
+var manglamCityRoutes = createElysia({ prefix: "/manglam-city" });
+manglamCityRoutes.use(contribution_routes_default);
+
 // src/index.ts
 var import_bearer = __toESM(require_cjs5(), 1);
 process.env.TZ = "Asia/Kolkata";
@@ -187177,10 +187336,10 @@ api.onAfterHandle((ctx) => {
   };
   const toOpenApiPath = (path) => path.split("/").map((segment) => {
     if (segment.startsWith(":")) {
-      let name9 = segment.slice(1);
-      if (name9.endsWith("?"))
-        name9 = name9.slice(0, -1);
-      return `{${name9}}`;
+      let name10 = segment.slice(1);
+      if (name10.endsWith("?"))
+        name10 = name10.slice(0, -1);
+      return `{${name10}}`;
     }
     return segment;
   }).join("/");
@@ -187282,8 +187441,24 @@ api.use(swagger({
   swaggerOptions: {
     persistAuthorization: true
   }
+})).use(swagger({
+  path: "/swagger-manglam-city",
+  provider: "scalar",
+  autoDarkMode: true,
+  documentation: {
+    info: {
+      title: "Manglam City — Crowdfunding Portal",
+      version: "1.0.0",
+      description: "Public API for the Manglam City colony crowdfunding portal."
+    }
+  },
+  exclude: new RegExp(/^(?!\/manglam-city).*/),
+  swaggerOptions: {
+    persistAuthorization: true
+  }
 }));
 api.use(adminRoutes);
+api.use(manglamCityRoutes);
 api.get("/admin-doc", () => `<!doctype html>
 <html lang="en">
   <head>
