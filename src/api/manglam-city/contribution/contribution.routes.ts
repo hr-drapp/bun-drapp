@@ -73,6 +73,8 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 						createdAt: entry.createdAt,
 					}));
 
+					//
+
 					return R("contribution list data", masked, true, {
 						pages,
 						total,
