@@ -8,6 +8,7 @@ const publicDetailSchema = t.Object({
 	name: t.String(),
 	phone: t.String(),
 	amount: t.Number(),
+	area: t.Optional(t.String()),
 	createdAt: t.String(),
 });
 
@@ -18,6 +19,7 @@ export default {
 			name: t.String({ minLength: 1 }),
 			phone: t.String({ minLength: 10, maxLength: 15 }),
 			amount: t.Number({ minimum: 1 }),
+			area: t.Optional(t.String()),
 		}),
 		response: {
 			200: t.Object({

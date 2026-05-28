@@ -14,6 +14,9 @@ export class ManglamCityContributionClass {
 	public amount!: number;
 
 	@prop({})
+	public area!: string;
+
+	@prop({})
 	public ip!: string;
 }
 

@@ -35,6 +35,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 						name: body.name.trim(),
 						phone: body.phone.trim(),
 						amount: body.amount,
+						...(body.area && { area: body.area.trim() }),
 						ip,
 					});
 
@@ -70,6 +71,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 						name: maskName(entry.name),
 						phone: maskPhone(entry.phone),
 						amount: entry.amount,
+						area: entry.area,
 						createdAt: entry.createdAt,
 					}));
 

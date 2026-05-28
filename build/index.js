@@ -187111,6 +187111,7 @@ var publicDetailSchema = t2.Object({
   name: t2.String(),
   phone: t2.String(),
   amount: t2.Number(),
+  area: t2.Optional(t2.String()),
   createdAt: t2.String()
 });
 var contribution_schema_default = {
@@ -187119,7 +187120,8 @@ var contribution_schema_default = {
     body: t2.Object({
       name: t2.String({ minLength: 1 }),
       phone: t2.String({ minLength: 10, maxLength: 15 }),
-      amount: t2.Number({ minimum: 1 })
+      amount: t2.Number({ minimum: 1 }),
+      area: t2.Optional(t2.String())
     }),
     response: {
       200: t2.Object({
@@ -187184,6 +187186,10 @@ __legacyDecorateClassTS([
 __legacyDecorateClassTS([
   import_typegoose13.prop({}),
   __legacyMetadataTS("design:type", String)
+], ManglamCityContributionClass.prototype, "area", undefined);
+__legacyDecorateClassTS([
+  import_typegoose13.prop({}),
+  __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "ip", undefined);
 ManglamCityContributionClass = __legacyDecorateClassTS([
   import_typegoose13.modelOptions({
@@ -187212,6 +187218,7 @@ var contribution_routes_default = createElysia({ prefix: contribution_schema_def
     name: body.name.trim(),
     phone: body.phone.trim(),
     amount: body.amount,
+    ...body.area && { area: body.area.trim() },
     ip
   });
   return R3("Entry submitted successfully", {
@@ -187234,6 +187241,7 @@ var contribution_routes_default = createElysia({ prefix: contribution_schema_def
     name: maskName(entry.name),
     phone: maskPhone(entry.phone),
     amount: entry.amount,
+    area: entry.area,
     createdAt: entry.createdAt
   }));
   return R3("contribution list data", masked, true, {
