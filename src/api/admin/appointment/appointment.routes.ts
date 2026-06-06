@@ -31,6 +31,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 				async ({ query, user }) => {
 					const page = parseInt(query.page);
 					const size = parseInt(query.size);
+					const deleted = query?.deleted === "true";
 
 					const statuses = queryStringtoArray(query.statuses);
 					const patients = queryStringtoArray(query.patients);
@@ -73,6 +74,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 									}),
 								},
 							}),
+							deleted: deleted,
 						},
 						user,
 					);
@@ -174,9 +176,12 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.delete(
 				"/",
 				async ({ query }) => {
-					const entry = await Appointment.findByIdAndUpdate(query.id, {
-						deleted: true,
-					});
+					const entry = await Appointment.findById(query.id);
+
+					if (entry) {
+						entry.deleted = !entry.deleted;
+						await entry.save();
+					}
 
 					return R("entry deleted", entry);
 				},

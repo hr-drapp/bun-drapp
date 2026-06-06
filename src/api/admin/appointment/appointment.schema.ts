@@ -10,6 +10,7 @@ const name = "appointment";
 const detailSchema = t.Object({
 	_id: t.String(),
 	token: t.Number(),
+	deleted: t.Boolean(),
 	patient: t.Object({
 		_id: t.String(),
 		name: t.String(),
@@ -46,6 +47,7 @@ export default {
 			patients: t.Optional(t.String()),
 			dateFrom: t.Optional(t.String()),
 			dateTo: t.Optional(t.String()),
+			deleted: t.Optional(t.String()),
 		}),
 		response: {
 			200: t.Object(

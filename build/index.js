@@ -185912,6 +185912,7 @@ var name5 = "appointment";
 var detailSchema4 = t2.Object({
   _id: t2.String(),
   token: t2.Number(),
+  deleted: t2.Boolean(),
   patient: t2.Object({
     _id: t2.String(),
     name: t2.String(),
@@ -185946,7 +185947,8 @@ var appointment_schema_default = {
       statuses: t2.Optional(t2.String()),
       patients: t2.Optional(t2.String()),
       dateFrom: t2.Optional(t2.String()),
-      dateTo: t2.Optional(t2.String())
+      dateTo: t2.Optional(t2.String()),
+      deleted: t2.Optional(t2.String())
     }),
     response: {
       200: t2.Object({
@@ -186460,6 +186462,7 @@ var appointment_routes_default = createElysia({ prefix: appointment_schema_defau
 }, (app) => app.get("/", async ({ query, user }) => {
   const page = parseInt(query.page);
   const size = parseInt(query.size);
+  const deleted = query?.deleted === "true";
   const statuses = queryStringtoArray(query.statuses);
   const patients = queryStringtoArray(query.patients);
   const date_from = query.dateFrom;
@@ -186493,7 +186496,8 @@ var appointment_routes_default = createElysia({ prefix: appointment_schema_defau
           $lte: import_moment3.default(date_to).endOf("day").toDate()
         }
       }
-    }
+    },
+    deleted
   }, user);
   const [list, total] = await Promise.all([
     Appointment_default.find(filter).populate([
@@ -186552,9 +186556,11 @@ var appointment_routes_default = createElysia({ prefix: appointment_schema_defau
     return customError("Invalid Appointment");
   return R3("entry detail", entry);
 }, appointment_schema_default.detail).delete("/", async ({ query }) => {
-  const entry = await Appointment_default.findByIdAndUpdate(query.id, {
-    deleted: true
-  });
+  const entry = await Appointment_default.findById(query.id);
+  if (entry) {
+    entry.deleted = !entry.deleted;
+    await entry.save();
+  }
   return R3("entry deleted", entry);
 }, appointment_schema_default.delete));
 
