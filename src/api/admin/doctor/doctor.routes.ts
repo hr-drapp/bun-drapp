@@ -23,6 +23,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 				async ({ query, user }) => {
 					const page = parseInt(query.page);
 					const size = parseInt(query.size);
+					const deleted = query?.deleted === "true";
 
 					let search = query?.search;
 					if (search) {
@@ -36,10 +37,10 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 									$regex: search,
 								},
 							}),
+							deleted: deleted,
 						},
 						user,
 					);
-					console.log("🚀 ~ filter:", filter);
 
 					const [list, total] = await Promise.all([
 						Doctor.find(filter)
@@ -97,9 +98,12 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.delete(
 				"/",
 				async ({ query }) => {
-					const entry = await Doctor.findByIdAndUpdate(query.id, {
-						deleted: true,
-					});
+					const entry = await Doctor.findById(query.id);
+
+					if (entry) {
+						entry.deleted = !entry.deleted;
+						await entry.save();
+					}
 
 					return R("entry deleted", entry);
 				},

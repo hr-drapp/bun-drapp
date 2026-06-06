@@ -131,6 +131,8 @@ export default createElysia({ prefix: "/admins" }).guard(
 
 					const entry = await Admin.create({
 						...body,
+						tenant: user.tenant,
+						clinic: user.clinic,
 						// is_customer: body?.is_customer === "customer" ? true : false,
 					});
 

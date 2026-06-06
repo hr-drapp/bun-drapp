@@ -183842,6 +183842,10 @@ __legacyDecorateClassTS([
   import_typegoose5.prop({ default: [] }),
   __legacyMetadataTS("design:type", Array)
 ], DoctorClass.prototype, "pictures", undefined);
+__legacyDecorateClassTS([
+  import_typegoose5.prop({ default: false }),
+  __legacyMetadataTS("design:type", Boolean)
+], DoctorClass.prototype, "deleted", undefined);
 DoctorClass = __legacyDecorateClassTS([
   import_typegoose5.pre("save", async function(next) {
     if (!this.id) {
@@ -185302,7 +185306,9 @@ var admins_routes_default = createElysia({ prefix: "/admins" }).guard({
   if (!role)
     return customError("Invalid role");
   const entry = await Admin_default.create({
-    ...body
+    ...body,
+    tenant: user.tenant,
+    clinic: user.clinic
   });
   if (role.level === 2 /* L2 */) {
     const tenantEntry = await Tenant_default.create({
@@ -185378,6 +185384,7 @@ var detailSchema = t2.Object({
   name: t2.String(),
   profile_pic: t2.String(),
   total_count: t2.Number(),
+  deleted: t2.Boolean(),
   createdAt: t2.String(),
   updatedAt: t2.String()
 });
@@ -185391,7 +185398,8 @@ var doctor_schema_default = {
     query: t2.Object({
       page: t2.String(),
       size: t2.String(),
-      search: t2.Optional(t2.String())
+      search: t2.Optional(t2.String()),
+      deleted: t2.Optional(t2.String())
     }),
     response: {
       200: t2.Object({
@@ -185492,6 +185500,7 @@ var doctor_routes_default = createElysia({ prefix: doctor_schema_default.meta.na
 }, (app) => app.get("/", async ({ query, user }) => {
   const page = parseInt(query.page);
   const size = parseInt(query.size);
+  const deleted = query?.deleted === "true";
   let search = query?.search;
   if (search) {
     search = new RegExp(search, "i");
@@ -185501,9 +185510,9 @@ var doctor_routes_default = createElysia({ prefix: doctor_schema_default.meta.na
       name: {
         $regex: search
       }
-    }
+    },
+    deleted
   }, user);
-  console.log("\uD83D\uDE80 ~ filter:", filter);
   const [list, total] = await Promise.all([
     Doctor_default.find(filter).skip(page * size).limit(size).sort({ createdAt: -1 }),
     Doctor_default.countDocuments(filter)
@@ -185531,9 +185540,11 @@ var doctor_routes_default = createElysia({ prefix: doctor_schema_default.meta.na
     return customError("Invalid Game Category");
   return R3("entry updated", entry);
 }, doctor_schema_default.detail).delete("/", async ({ query }) => {
-  const entry = await Doctor_default.findByIdAndUpdate(query.id, {
-    deleted: true
-  });
+  const entry = await Doctor_default.findById(query.id);
+  if (entry) {
+    entry.deleted = !entry.deleted;
+    await entry.save();
+  }
   return R3("entry deleted", entry);
 }, doctor_schema_default.delete));
 
@@ -186048,6 +186059,7 @@ var detailSchema5 = t2.Object({
   age: t2.Number(),
   gender: t2.Number(),
   profile_pic: t2.String(),
+  deleted: t2.Boolean(),
   recent_appointment: appointment_schema_default.meta.detail,
   vitals: patient_health_record_schema_default.meta.detail,
   createdAt: t2.String(),
@@ -186063,7 +186075,8 @@ var patient_schema_default = {
     query: t2.Object({
       page: t2.String(),
       size: t2.String(),
-      search: t2.Optional(t2.String())
+      search: t2.Optional(t2.String()),
+      deleted: t2.Optional(t2.String())
     }),
     response: {
       200: t2.Object({
@@ -186363,6 +186376,7 @@ var patient_routes_default = createElysia({ prefix: patient_schema_default.meta.
 }, (app) => app.get("/", async ({ query, user }) => {
   const page = parseInt(query.page);
   const size = parseInt(query.size);
+  const deleted = query?.deleted === "true";
   let search = query?.search;
   if (search) {
     search = new RegExp(search, "i");
@@ -186372,7 +186386,8 @@ var patient_routes_default = createElysia({ prefix: patient_schema_default.meta.
       name: {
         $regex: search
       }
-    }
+    },
+    deleted
   }, user);
   const [list, total] = await Promise.all([
     Patient_default.find(filter).skip(page * size).limit(size).sort({ createdAt: -1 }),
@@ -186426,9 +186441,11 @@ var patient_routes_default = createElysia({ prefix: patient_schema_default.meta.
   }
   return R3("entry detail", entry);
 }, patient_schema_default.detail).delete("/", async ({ query }) => {
-  const entry = await Patient_default.findByIdAndUpdate(query.id, {
-    deleted: true
-  });
+  const entry = await Patient_default.findById(query.id);
+  if (entry) {
+    entry.deleted = !entry.deleted;
+    await entry.save();
+  }
   return R3("entry deleted", entry);
 }, patient_schema_default.delete));
 

@@ -9,6 +9,7 @@ const detailSchema = t.Object({
 	name: t.String(),
 	profile_pic: t.String(),
 	total_count: t.Number(),
+	deleted: t.Boolean(),
 	createdAt: t.String(),
 	updatedAt: t.String(),
 });
@@ -24,6 +25,7 @@ export default {
 			page: t.String(),
 			size: t.String(),
 			search: t.Optional(t.String()),
+			deleted: t.Optional(t.String()),
 		}),
 		response: {
 			200: t.Object(

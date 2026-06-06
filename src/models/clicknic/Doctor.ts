@@ -37,6 +37,9 @@ export class DoctorClass {
 
 	@prop({ default: [] })
 	public pictures!: string[];
+
+	@prop({ default: false })
+	public deleted!: boolean;
 }
 
 export default getModelForClass(DoctorClass);

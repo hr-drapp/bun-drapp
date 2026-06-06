@@ -14,6 +14,7 @@ const detailSchema = t.Object({
 	age: t.Number(),
 	gender: t.Number(),
 	profile_pic: t.String(),
+	deleted: t.Boolean(),
 	recent_appointment: appointmentSchema.meta.detail,
 	vitals: patientHealthRecordSchema.meta.detail,
 	createdAt: t.String(),
@@ -31,6 +32,7 @@ export default {
 			page: t.String(),
 			size: t.String(),
 			search: t.Optional(t.String()),
+			deleted: t.Optional(t.String()),
 		}),
 		response: {
 			200: t.Object(
