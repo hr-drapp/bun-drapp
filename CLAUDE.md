@@ -185,3 +185,161 @@ something one clinic genuinely loves. That's the entire focus until further noti
   well is more valuable than one that uses 15 features poorly.
 - **We are early.** Don't over-engineer for scale we don't have yet. Build for
   the one clinic in front of us, then generalize.
+
+---
+
+## Backend Route & Schema Boilerplate
+
+Every feature lives under `src/api/admin/<feature>/` with two files.
+
+### `<feature>.schema.ts`
+
+```ts
+import { t } from "elysia";
+import { ModuleId } from "src/config/modules";
+import { MetaPaginationSchema } from "src/utils/common"; // only for paginated lists
+
+const name = "<feature>";
+
+const detailSchema = t.Object({
+  _id: t.String(),
+  // ...fields
+  createdAt: t.String(),
+  updatedAt: t.String(),
+});
+
+export default {
+  meta: {
+    name: name,
+    detail: detailSchema,      // omit if no shared detail shape
+    module: ModuleId.<MODULE>, // pick from src/config/modules.ts
+  },
+  // ── list (paginated) ──────────────────────────────────────────────
+  list: {
+    query: t.Object({
+      page: t.String(),
+      size: t.String(),
+      search: t.Optional(t.String()),
+      deleted: t.Optional(t.String()),
+    }),
+    response: {
+      200: t.Object({ status: t.Boolean(), message: t.String(), data: t.Array(detailSchema), meta: MetaPaginationSchema },
+        { description: `${name} list response` }),
+    },
+    detail: { operationId: "list" },
+  },
+  // ── create ────────────────────────────────────────────────────────
+  create: {
+    body: t.Object({ /* required fields */ }),
+    response: {
+      200: t.Object({ status: t.Boolean(), message: t.String(), data: detailSchema },
+        { description: `${name} create response` }),
+    },
+    detail: { operationId: "create" },
+  },
+  // ── update ────────────────────────────────────────────────────────
+  update: {
+    body: t.Object({ /* all Optional */ }),
+    query: t.Object({ id: t.String() }),
+    response: {
+      200: t.Object({ status: t.Boolean(), message: t.String(), data: detailSchema },
+        { description: `${name} update response` }),
+    },
+    detail: { operationId: "update" },
+  },
+  // ── detail ────────────────────────────────────────────────────────
+  detail: {
+    query: t.Object({ id: t.String() }),
+    response: {
+      200: t.Object({ status: t.Boolean(), message: t.String(), data: detailSchema },
+        { description: `${name} detail response` }),
+    },
+    detail: { operationId: "detail" },
+  },
+  // ── delete (soft toggle) ──────────────────────────────────────────
+  delete: {
+    query: t.Object({ id: t.String() }),
+    response: {
+      200: t.Object({ status: t.Boolean(), message: t.String(), data: detailSchema },
+        { description: `${name} delete response` }),
+    },
+    detail: { operationId: "delete" },
+  },
+  // ── insight/aggregate (no pagination) ────────────────────────────
+  insight: {
+    response: {
+      200: t.Object({ status: t.Boolean(), message: t.String(), data: /* aggregateSchema */ t.Any() },
+        { description: `${name} insight response` }),
+    },
+    detail: { operationId: "insight" },
+  },
+};
+```
+
+### `<feature>.routes.ts`
+
+```ts
+import { R } from "src/utils/response-helpers";
+import schema from "./<feature>.schema";
+import FeatureModel from "src/models/clicknic/<Feature>";
+import { createElysia } from "src/utils/createElysia";
+import { customError } from "src/utils/AppErr";
+import { isAdminAuthenticated } from "src/guard/auth.guard";
+import { ModuleId, Summary } from "src/config/modules";
+import { normalizeQuery } from "src/utils/access-grants";
+
+export default createElysia({ prefix: schema.meta.name }).guard(
+  {
+    detail: { tags: [schema.meta.name], summary: Summary([schema.meta.module]) },
+    beforeHandle: isAdminAuthenticated,
+  },
+  (app) =>
+    app
+      .get("/", async ({ query, user }) => {
+        const page = parseInt(query.page);
+        const size = parseInt(query.size);
+        const deleted = query?.deleted === "true";
+        const filter = normalizeQuery({ deleted }, user);
+        const [list, total] = await Promise.all([
+          FeatureModel.find(filter).skip(page * size).limit(size).sort({ createdAt: -1 }).lean(),
+          FeatureModel.countDocuments(filter),
+        ]);
+        return R(`${schema.meta.name} list data`, list, true, {
+          pages: Math.ceil(total / size), total, page, size,
+        });
+      }, schema.list)
+      .post("/", async ({ body, user }) => {
+        const entry = await FeatureModel.create({ ...body, clinic: user.clinic, tenant: user.tenant });
+        return R("entry created", entry);
+      }, schema.create)
+      .put("/", async ({ body, query }) => {
+        const entry = await FeatureModel.findByIdAndUpdate(query.id, body as any);
+        return R("entry updated", entry);
+      }, schema.update)
+      .get("/detail", async ({ query }) => {
+        const entry = await FeatureModel.findById(query.id);
+        if (!entry) return customError("Invalid entry");
+        return R("entry detail", entry);
+      }, schema.detail)
+      .delete("/", async ({ query }) => {
+        const entry = await FeatureModel.findById(query.id);
+        if (entry) { entry.deleted = !entry.deleted; await entry.save(); }
+        return R("entry deleted", entry);
+      }, schema.delete),
+);
+```
+
+### Register in `src/api/admin/admin.index.ts`
+
+```ts
+import featureRoutes from "./<feature>/<feature>.routes";
+// ...
+adminRoutes.use(featureRoutes);
+```
+
+### Rules
+- `normalizeQuery` always wraps the filter — it injects `clinic`/`tenant` scoping from the user.
+- `R(message, data, status?, meta?)` is the only response helper — always use it.
+- `createElysia({ prefix: schema.meta.name })` sets the URL prefix to the feature name.
+- Soft-delete: toggle `entry.deleted` and save rather than calling `deleteOne`.
+- For insight/aggregate endpoints (no CRUD), just add a named GET route and a matching schema key.

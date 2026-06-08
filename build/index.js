@@ -187113,6 +187113,92 @@ var schema_visualizer_routes_default = createElysia({ prefix: schema_visualizer_
   }
 }, schema_visualizer_schema_default.schema_data));
 
+// src/api/admin/dashboard/dashboard.schema.ts
+var name9 = "dashboard";
+var doctorInsightSchema = t2.Object({
+  _id: t2.String(),
+  name: t2.String(),
+  profile_pic: t2.String(),
+  appointment_count: t2.Number()
+});
+var insightSchema = t2.Object({
+  total_appointments: t2.Number(),
+  doctors_available: t2.Number(),
+  active_sessions: t2.Number(),
+  walk_in_patients: t2.Number(),
+  doctors: t2.Array(doctorInsightSchema)
+});
+var dashboard_schema_default = {
+  meta: {
+    name: name9,
+    module: 1 /* DASHBOARD */
+  },
+  insight: {
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: insightSchema
+      }, {
+        description: `${name9} insight response`
+      })
+    },
+    detail: {
+      operationId: "insight"
+    }
+  }
+};
+
+// src/api/admin/dashboard/dashboard.routes.ts
+var import_moment4 = __toESM(require_moment(), 1);
+var dashboard_routes_default = createElysia({ prefix: dashboard_schema_default.meta.name }).guard({
+  detail: {
+    tags: [dashboard_schema_default.meta.name],
+    summary: Summary([dashboard_schema_default.meta.module])
+  },
+  beforeHandle: isAdminAuthenticated
+}, (app) => app.get("/insight", async ({ user }) => {
+  const today = import_moment4.default().startOf("day").toDate();
+  const todayEnd = import_moment4.default().endOf("day").toDate();
+  const currentMinutes = import_moment4.default().hours() * 60 + import_moment4.default().minutes();
+  const todayFilter = normalizeQuery({ date: { $gte: today, $lte: todayEnd }, deleted: false }, user);
+  const activeFilter = normalizeQuery({
+    status: { $in: [2 /* IN_SESSION */, 3 /* PAUSED */] },
+    deleted: false
+  }, user);
+  const activeSlotFilter = normalizeQuery({
+    start: { $lte: currentMinutes },
+    end: { $gte: currentMinutes },
+    deleted: false
+  }, user);
+  const [todayAppointments, activeSessions, activeSlots] = await Promise.all([
+    Appointment_default.find(todayFilter).lean(),
+    Appointment_default.countDocuments(activeFilter),
+    DoctorTimeSlot_default.find(activeSlotFilter).populate({ path: "doctor", select: "_id name profile_pic" }).lean()
+  ]);
+  let walk_in_patients = 0;
+  for (const appt of todayAppointments) {
+    if (appt.source === 1 /* WALK_IN */)
+      walk_in_patients++;
+  }
+  const doctors = Array.from(new Map(activeSlots.map((slot) => slot.doctor).filter((doc) => doc?._id).map((doc) => [
+    doc._id.toString(),
+    {
+      _id: doc._id.toString(),
+      name: doc.name ?? "",
+      profile_pic: doc.profile_pic ?? "",
+      appointment_count: 0
+    }
+  ])).values());
+  return R3("dashboard insight", {
+    total_appointments: todayAppointments.length,
+    doctors_available: doctors.length,
+    active_sessions: activeSessions,
+    walk_in_patients,
+    doctors
+  });
+}, dashboard_schema_default.insight));
+
 // src/api/admin/admin.index.ts
 var adminRoutes = createElysia({ prefix: "/admin" });
 adminRoutes.use(auth_routes_default);
@@ -187125,10 +187211,11 @@ adminRoutes.use(patient_routes_default);
 adminRoutes.use(appointment_routes_default);
 adminRoutes.use(patient_health_record_routes_default);
 adminRoutes.use(media_routes_default);
+adminRoutes.use(dashboard_routes_default);
 adminRoutes.use(schema_visualizer_routes_default);
 
 // src/api/manglam-city/contribution/contribution.schema.ts
-var name9 = "contribution";
+var name10 = "contribution";
 var publicDetailSchema = t2.Object({
   _id: t2.String(),
   name: t2.String(),
@@ -187138,7 +187225,7 @@ var publicDetailSchema = t2.Object({
   createdAt: t2.String()
 });
 var contribution_schema_default = {
-  meta: { name: name9 },
+  meta: { name: name10 },
   submit: {
     body: t2.Object({
       name: t2.String({ minLength: 1 }),
@@ -187227,9 +187314,9 @@ function maskPhone(phone) {
     return "****";
   return "*".repeat(phone.length - 4) + phone.slice(-4);
 }
-function maskName(name10) {
-  const visible = Math.min(4, Math.ceil(name10.length / 2));
-  return name10.slice(0, visible) + "*".repeat(Math.max(0, name10.length - visible));
+function maskName(name11) {
+  const visible = Math.min(4, Math.ceil(name11.length / 2));
+  return name11.slice(0, visible) + "*".repeat(Math.max(0, name11.length - visible));
 }
 var contribution_routes_default = createElysia({ prefix: contribution_schema_default.meta.name }).guard({
   detail: {
@@ -187367,10 +187454,10 @@ api.onAfterHandle((ctx) => {
   };
   const toOpenApiPath = (path) => path.split("/").map((segment) => {
     if (segment.startsWith(":")) {
-      let name10 = segment.slice(1);
-      if (name10.endsWith("?"))
-        name10 = name10.slice(0, -1);
-      return `{${name10}}`;
+      let name11 = segment.slice(1);
+      if (name11.endsWith("?"))
+        name11 = name11.slice(0, -1);
+      return `{${name11}}`;
     }
     return segment;
   }).join("/");

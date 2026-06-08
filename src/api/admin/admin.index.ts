@@ -12,6 +12,7 @@ import appointmentRoutes from "./appointment/appointment.routes";
 import patientHealthRecordRoutes from "./patient-health-record/patient-health-record.routes";
 import mediaRoutes from "./media/media.routes";
 import schemaVisualizerRoutes from "./schema-visualizer/schema-visualizer.routes";
+import dashboardRoutes from "./dashboard/dashboard.routes";
 /** Admin Routes */
 export const adminRoutes = createElysia({ prefix: "/admin" });
 adminRoutes.use(authRoutes);
@@ -34,6 +35,9 @@ adminRoutes.use(patientHealthRecordRoutes);
 
 // Media Route
 adminRoutes.use(mediaRoutes);
+
+// Dashboard Route
+adminRoutes.use(dashboardRoutes);
 
 /** Schema Visualizer */
 adminRoutes.use(schemaVisualizerRoutes);
