@@ -37,6 +37,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 					const patients = queryStringtoArray(query.patients);
 					const date_from = query.dateFrom;
 					const date_to = query.dateTo;
+					const excludeId = query.excludeId;
 
 					let search = query?.search;
 					if (search) {
@@ -45,6 +46,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 
 					const filter: RootFilterQuery<typeof Appointment> = normalizeQuery(
 						{
+							...(excludeId && { _id: { $ne: excludeId } }),
 							...(search && {
 								complaint: {
 									$regex: search,

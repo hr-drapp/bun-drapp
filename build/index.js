@@ -185948,7 +185948,8 @@ var appointment_schema_default = {
       patients: t2.Optional(t2.String()),
       dateFrom: t2.Optional(t2.String()),
       dateTo: t2.Optional(t2.String()),
-      deleted: t2.Optional(t2.String())
+      deleted: t2.Optional(t2.String()),
+      excludeId: t2.Optional(t2.String())
     }),
     response: {
       200: t2.Object({
@@ -186467,11 +186468,13 @@ var appointment_routes_default = createElysia({ prefix: appointment_schema_defau
   const patients = queryStringtoArray(query.patients);
   const date_from = query.dateFrom;
   const date_to = query.dateTo;
+  const excludeId = query.excludeId;
   let search = query?.search;
   if (search) {
     search = new RegExp(search, "i");
   }
   const filter = normalizeQuery({
+    ...excludeId && { _id: { $ne: excludeId } },
     ...search && {
       complaint: {
         $regex: search

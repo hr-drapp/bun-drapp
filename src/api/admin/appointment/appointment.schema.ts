@@ -48,6 +48,7 @@ export default {
 			dateFrom: t.Optional(t.String()),
 			dateTo: t.Optional(t.String()),
 			deleted: t.Optional(t.String()),
+			excludeId: t.Optional(t.String()),
 		}),
 		response: {
 			200: t.Object(
