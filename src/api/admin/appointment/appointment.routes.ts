@@ -165,7 +165,14 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.get(
 				"/detail",
 				async ({ body, query }) => {
-					const entry = await Appointment.findById(query.id);
+					const entry = await Appointment.findById(query.id).populate([
+						{
+							path: "doctor",
+						},
+						{
+							path: "time_slot",
+						},
+					]);
 
 					if (!entry) return customError("Invalid Appointment");
 

@@ -186551,7 +186551,14 @@ var appointment_routes_default = createElysia({ prefix: appointment_schema_defau
   const entry = await Appointment_default.findByIdAndUpdate(query.id, body);
   return R3("entry updated", entry);
 }, appointment_schema_default.update).get("/detail", async ({ body, query }) => {
-  const entry = await Appointment_default.findById(query.id);
+  const entry = await Appointment_default.findById(query.id).populate([
+    {
+      path: "doctor"
+    },
+    {
+      path: "time_slot"
+    }
+  ]);
   if (!entry)
     return customError("Invalid Appointment");
   return R3("entry detail", entry);
