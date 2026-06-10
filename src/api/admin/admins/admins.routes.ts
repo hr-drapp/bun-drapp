@@ -114,7 +114,7 @@ export default createElysia({ prefix: "/admins" }).guard(
 					});
 
 					const exitingAdmin = await Admin.findOne({ phone: body.phone });
-
+					//
 					if (exitingAdmin) {
 						return customError("Phone Number already used by another admin");
 					}
