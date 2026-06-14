@@ -185907,9 +185907,58 @@ var patient_health_record_schema_default = {
   }
 };
 
-// src/api/admin/appointment/appointment.schema.ts
-var name5 = "appointment";
+// src/api/admin/prescription/prescription.schema.ts
+var name5 = "prescription";
+var drugSchema = t2.Object({
+  name: t2.String(),
+  dose: t2.String(),
+  frequency: t2.String(),
+  duration: t2.String(),
+  instructions: t2.String()
+});
+var investigationSchema = t2.Object({
+  name: t2.String(),
+  notes: t2.Optional(t2.String())
+});
 var detailSchema4 = t2.Object({
+  _id: t2.String(),
+  clinic: t2.String(),
+  tenant: t2.String(),
+  patient: t2.String(),
+  doctor: t2.String(),
+  appointment: t2.String(),
+  drugs: t2.Array(drugSchema),
+  investigations: t2.Array(investigationSchema),
+  createdAt: t2.String(),
+  updatedAt: t2.String()
+});
+var prescription_schema_default = {
+  meta: { name: name5, detail: detailSchema4, module: 18 /* APPOINTMENTS */ },
+  upsert: {
+    body: t2.Object({
+      appointment: t2.String(),
+      patient: t2.String(),
+      doctor: t2.String(),
+      drugs: t2.Array(drugSchema),
+      investigations: t2.Array(investigationSchema)
+    }),
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: detailSchema4 }, { description: "prescription upsert response" })
+    },
+    detail: { operationId: "upsert" }
+  },
+  byAppointment: {
+    query: t2.Object({ appointment: t2.String() }),
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: t2.Union([detailSchema4, t2.Null()]) }, { description: "prescription by appointment response" })
+    },
+    detail: { operationId: "byAppointment" }
+  }
+};
+
+// src/api/admin/appointment/appointment.schema.ts
+var name6 = "appointment";
+var detailSchema5 = t2.Object({
   _id: t2.String(),
   token: t2.Number(),
   deleted: t2.Boolean(),
@@ -185928,15 +185977,17 @@ var detailSchema4 = t2.Object({
   status: t2.Number(),
   complaint: t2.String(),
   notes: t2.String(),
+  diagnosis: t2.Optional(t2.String()),
   createdAt: t2.String(),
   updatedAt: t2.String(),
   patient_health_records: t2.Array(patient_health_record_schema_default.meta.detail),
-  vitals: patient_health_record_schema_default.meta.detail
+  vitals: patient_health_record_schema_default.meta.detail,
+  prescription: t2.Union([prescription_schema_default.meta.detail, t2.Null()])
 });
 var appointment_schema_default = {
   meta: {
-    name: name5,
-    detail: detailSchema4,
+    name: name6,
+    detail: detailSchema5,
     module: 18 /* APPOINTMENTS */
   },
   list: {
@@ -185955,10 +186006,10 @@ var appointment_schema_default = {
       200: t2.Object({
         status: t2.Boolean(),
         message: t2.String(),
-        data: t2.Array(detailSchema4),
+        data: t2.Array(detailSchema5),
         meta: MetaPaginationSchema
       }, {
-        description: `${name5} list response`
+        description: `${name6} list response`
       })
     },
     detail: {
@@ -185979,9 +186030,9 @@ var appointment_schema_default = {
       200: t2.Object({
         status: t2.Boolean(),
         message: t2.String(),
-        data: detailSchema4
+        data: detailSchema5
       }, {
-        description: `${name5} create response`
+        description: `${name6} create response`
       })
     },
     detail: {
@@ -185998,131 +186049,8 @@ var appointment_schema_default = {
       type: t2.Optional(t2.Number()),
       status: t2.Optional(t2.Number()),
       complaint: t2.Optional(t2.String()),
-      notes: t2.Optional(t2.String())
-    }),
-    query: t2.Object({
-      id: t2.String()
-    }),
-    response: {
-      200: t2.Object({
-        status: t2.Boolean(),
-        message: t2.String(),
-        data: detailSchema4
-      }, {
-        description: `${name5} update response`
-      })
-    },
-    detail: {
-      operationId: "update"
-    }
-  },
-  detail: {
-    query: t2.Object({
-      id: t2.String()
-    }),
-    response: {
-      200: t2.Object({
-        status: t2.Boolean(),
-        message: t2.String(),
-        data: detailSchema4
-      }, {
-        description: `${name5} detail response`
-      })
-    },
-    detail: {
-      operationId: "detail"
-    }
-  },
-  delete: {
-    query: t2.Object({
-      id: t2.String()
-    }),
-    response: {
-      200: t2.Object({
-        status: t2.Boolean(),
-        message: t2.String(),
-        data: detailSchema4
-      }, {
-        description: `${name5} delete response`
-      })
-    },
-    detail: {
-      operationId: "delete"
-    }
-  }
-};
-
-// src/api/admin/patient/patient.schema.ts
-var name6 = "patient";
-var detailSchema5 = t2.Object({
-  _id: t2.String(),
-  id: t2.Number(),
-  name: t2.String(),
-  phone: t2.String(),
-  age: t2.Number(),
-  gender: t2.Number(),
-  profile_pic: t2.String(),
-  deleted: t2.Boolean(),
-  recent_appointment: appointment_schema_default.meta.detail,
-  vitals: patient_health_record_schema_default.meta.detail,
-  createdAt: t2.String(),
-  updatedAt: t2.String()
-});
-var patient_schema_default = {
-  meta: {
-    name: name6,
-    detail: detailSchema5,
-    module: 17 /* PATIENTS */
-  },
-  list: {
-    query: t2.Object({
-      page: t2.String(),
-      size: t2.String(),
-      search: t2.Optional(t2.String()),
-      deleted: t2.Optional(t2.String())
-    }),
-    response: {
-      200: t2.Object({
-        status: t2.Boolean(),
-        message: t2.String(),
-        data: t2.Array(detailSchema5),
-        meta: MetaPaginationSchema
-      }, {
-        description: `${name6} list response`
-      })
-    },
-    detail: {
-      operationId: "list"
-    }
-  },
-  create: {
-    body: t2.Object({
-      name: t2.String(),
-      phone: t2.String(),
-      age: t2.Number(),
-      gender: t2.Number(),
-      profile_pic: t2.Optional(t2.String())
-    }),
-    response: {
-      200: t2.Object({
-        status: t2.Boolean(),
-        message: t2.String(),
-        data: detailSchema5
-      }, {
-        description: `${name6} create response`
-      })
-    },
-    detail: {
-      operationId: "create"
-    }
-  },
-  update: {
-    body: t2.Object({
-      name: t2.Optional(t2.String()),
-      phone: t2.Optional(t2.String()),
-      age: t2.Optional(t2.Number()),
-      gender: t2.Optional(t2.Number()),
-      profile_pic: t2.Optional(t2.String())
+      notes: t2.Optional(t2.String()),
+      diagnosis: t2.Optional(t2.String())
     }),
     query: t2.Object({
       id: t2.String()
@@ -186168,6 +186096,130 @@ var patient_schema_default = {
         data: detailSchema5
       }, {
         description: `${name6} delete response`
+      })
+    },
+    detail: {
+      operationId: "delete"
+    }
+  }
+};
+
+// src/api/admin/patient/patient.schema.ts
+var name7 = "patient";
+var detailSchema6 = t2.Object({
+  _id: t2.String(),
+  id: t2.Number(),
+  name: t2.String(),
+  phone: t2.String(),
+  age: t2.Number(),
+  gender: t2.Number(),
+  profile_pic: t2.String(),
+  deleted: t2.Boolean(),
+  recent_appointment: appointment_schema_default.meta.detail,
+  vitals: patient_health_record_schema_default.meta.detail,
+  createdAt: t2.String(),
+  updatedAt: t2.String()
+});
+var patient_schema_default = {
+  meta: {
+    name: name7,
+    detail: detailSchema6,
+    module: 17 /* PATIENTS */
+  },
+  list: {
+    query: t2.Object({
+      page: t2.String(),
+      size: t2.String(),
+      search: t2.Optional(t2.String()),
+      deleted: t2.Optional(t2.String())
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Array(detailSchema6),
+        meta: MetaPaginationSchema
+      }, {
+        description: `${name7} list response`
+      })
+    },
+    detail: {
+      operationId: "list"
+    }
+  },
+  create: {
+    body: t2.Object({
+      name: t2.String(),
+      phone: t2.String(),
+      age: t2.Number(),
+      gender: t2.Number(),
+      profile_pic: t2.Optional(t2.String())
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: detailSchema6
+      }, {
+        description: `${name7} create response`
+      })
+    },
+    detail: {
+      operationId: "create"
+    }
+  },
+  update: {
+    body: t2.Object({
+      name: t2.Optional(t2.String()),
+      phone: t2.Optional(t2.String()),
+      age: t2.Optional(t2.Number()),
+      gender: t2.Optional(t2.Number()),
+      profile_pic: t2.Optional(t2.String())
+    }),
+    query: t2.Object({
+      id: t2.String()
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: detailSchema6
+      }, {
+        description: `${name7} update response`
+      })
+    },
+    detail: {
+      operationId: "update"
+    }
+  },
+  detail: {
+    query: t2.Object({
+      id: t2.String()
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: detailSchema6
+      }, {
+        description: `${name7} detail response`
+      })
+    },
+    detail: {
+      operationId: "detail"
+    }
+  },
+  delete: {
+    query: t2.Object({
+      id: t2.String()
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: detailSchema6
+      }, {
+        description: `${name7} delete response`
       })
     },
     detail: {
@@ -186288,6 +186340,10 @@ __legacyDecorateClassTS([
   import_typegoose10.prop({}),
   __legacyMetadataTS("design:type", String)
 ], AppointmentClass.prototype, "notes", undefined);
+__legacyDecorateClassTS([
+  import_typegoose10.prop({}),
+  __legacyMetadataTS("design:type", String)
+], AppointmentClass.prototype, "diagnosis", undefined);
 __legacyDecorateClassTS([
   import_typegoose10.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
@@ -186452,6 +186508,49 @@ var patient_routes_default = createElysia({ prefix: patient_schema_default.meta.
   return R3("entry deleted", entry);
 }, patient_schema_default.delete));
 
+// src/models/clicknic/Prescription.ts
+var import_typegoose12 = __toESM(require_typegoose(), 1);
+class PrescriptionClass {
+}
+__legacyDecorateClassTS([
+  import_typegoose12.prop({ ref: () => ClinicClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], PrescriptionClass.prototype, "clinic", undefined);
+__legacyDecorateClassTS([
+  import_typegoose12.prop({ ref: () => TenantClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], PrescriptionClass.prototype, "tenant", undefined);
+__legacyDecorateClassTS([
+  import_typegoose12.prop({ ref: () => PatientClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], PrescriptionClass.prototype, "patient", undefined);
+__legacyDecorateClassTS([
+  import_typegoose12.prop({ ref: () => DoctorClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], PrescriptionClass.prototype, "doctor", undefined);
+__legacyDecorateClassTS([
+  import_typegoose12.prop({ ref: () => AppointmentClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], PrescriptionClass.prototype, "appointment", undefined);
+__legacyDecorateClassTS([
+  import_typegoose12.prop({ type: () => [Object], default: [] }),
+  __legacyMetadataTS("design:type", Array)
+], PrescriptionClass.prototype, "drugs", undefined);
+__legacyDecorateClassTS([
+  import_typegoose12.prop({ type: () => [Object], default: [] }),
+  __legacyMetadataTS("design:type", Array)
+], PrescriptionClass.prototype, "investigations", undefined);
+__legacyDecorateClassTS([
+  import_typegoose12.prop({ default: false }),
+  __legacyMetadataTS("design:type", Boolean)
+], PrescriptionClass.prototype, "deleted", undefined);
+PrescriptionClass = __legacyDecorateClassTS([
+  import_typegoose12.modelOptions({
+    schemaOptions: { collection: "prescription", timestamps: true }
+  })
+], PrescriptionClass);
+var Prescription_default = import_typegoose12.getModelForClass(PrescriptionClass);
+
 // src/api/admin/appointment/appointment.routes.ts
 var import_moment3 = __toESM(require_moment(), 1);
 var appointment_routes_default = createElysia({ prefix: appointment_schema_default.meta.name }).guard({
@@ -186522,9 +186621,10 @@ var appointment_routes_default = createElysia({ prefix: appointment_schema_defau
   const healthRecords = await PatientHealthRecord_default.find({
     appointment: { $in: ids }
   });
+  const prescriptions = await Prescription_default.find({ appointment: { $in: ids } }).lean();
   for (let item of list) {
     item.patient_health_records = [];
-    const records = healthRecords.filter((f3) => f3.appointment.toString() === item._id.toString());
+    item.prescription = prescriptions.find((p) => p.appointment.toString() === item._id.toString()) ?? null;
     for (let record of healthRecords) {
       if (record.appointment.toString() === item._id.toString()) {
         if (record.type === 0 /* VITALS */) {
@@ -186554,17 +186654,25 @@ var appointment_routes_default = createElysia({ prefix: appointment_schema_defau
   const entry = await Appointment_default.findByIdAndUpdate(query.id, body);
   return R3("entry updated", entry);
 }, appointment_schema_default.update).get("/detail", async ({ body, query }) => {
-  const entry = await Appointment_default.findById(query.id).populate([
-    {
-      path: "doctor"
-    },
-    {
-      path: "time_slot"
-    }
+  const [entry, prescription, healthRecords] = await Promise.all([
+    Appointment_default.findById(query.id).populate([
+      { path: "doctor" },
+      { path: "time_slot" },
+      { path: "patient", select: "_id name profile_pic phone" }
+    ]),
+    Prescription_default.findOne({ appointment: query.id }).lean(),
+    PatientHealthRecord_default.find({ appointment: query.id }).lean()
   ]);
   if (!entry)
     return customError("Invalid Appointment");
-  return R3("entry detail", entry);
+  const vitals = healthRecords.find((r4) => r4.type === 0 /* VITALS */) ?? null;
+  const patient_health_records = healthRecords.filter((r4) => r4.type !== 0 /* VITALS */);
+  return R3("entry detail", {
+    ...entry.toObject(),
+    prescription: prescription ?? null,
+    vitals,
+    patient_health_records
+  });
 }, appointment_schema_default.detail).delete("/", async ({ query }) => {
   const entry = await Appointment_default.findById(query.id);
   if (entry) {
@@ -186573,6 +186681,20 @@ var appointment_routes_default = createElysia({ prefix: appointment_schema_defau
   }
   return R3("entry deleted", entry);
 }, appointment_schema_default.delete));
+
+// src/api/admin/prescription/prescription.routes.ts
+var prescription_routes_default = createElysia({ prefix: prescription_schema_default.meta.name }).guard({
+  detail: { tags: [prescription_schema_default.meta.name], summary: Summary([prescription_schema_default.meta.module]) },
+  beforeHandle: isAdminAuthenticated
+}, (app) => app.put("/", async ({ body, user }) => {
+  const filter = normalizeQuery({ appointment: body.appointment }, user);
+  const entry = await Prescription_default.findOneAndUpdate(filter, { ...body, clinic: user.clinic, tenant: user.tenant }, { upsert: true, new: true });
+  return R3("prescription saved", entry);
+}, prescription_schema_default.upsert).get("/by-appointment", async ({ query, user }) => {
+  const filter = normalizeQuery({ appointment: query.appointment }, user);
+  const entry = await Prescription_default.findOne(filter).lean();
+  return R3("prescription data", entry);
+}, prescription_schema_default.byAppointment));
 
 // src/api/admin/patient-health-record/patient-health-record.routes.ts
 var patient_health_record_routes_default = createElysia({ prefix: patient_health_record_schema_default.meta.name }).guard({
@@ -186654,8 +186776,8 @@ var patient_health_record_routes_default = createElysia({ prefix: patient_health
 }, patient_health_record_schema_default.delete));
 
 // src/api/admin/media/media.schema.ts
-var name7 = "media";
-var detailSchema6 = t2.Object({
+var name8 = "media";
+var detailSchema7 = t2.Object({
   _id: t2.String(),
   name: t2.String(),
   media_type: t2.String(),
@@ -186670,8 +186792,8 @@ var detailSchema6 = t2.Object({
 });
 var media_schema_default = {
   meta: {
-    name: name7,
-    detail: detailSchema6,
+    name: name8,
+    detail: detailSchema7,
     module: 15 /* MEDIA */
   },
   list: {
@@ -186684,10 +186806,10 @@ var media_schema_default = {
       200: t2.Object({
         status: t2.Boolean(),
         message: t2.String(),
-        data: t2.Array(detailSchema6),
+        data: t2.Array(detailSchema7),
         meta: MetaPaginationSchema
       }, {
-        description: `${name7} list response`
+        description: `${name8} list response`
       })
     },
     detail: {
@@ -186707,9 +186829,9 @@ var media_schema_default = {
       200: t2.Object({
         status: t2.Boolean(),
         message: t2.String(),
-        data: detailSchema6
+        data: detailSchema7
       }, {
-        description: `${name7} create response`
+        description: `${name8} create response`
       })
     },
     detail: {
@@ -186732,9 +186854,9 @@ var media_schema_default = {
       200: t2.Object({
         status: t2.Boolean(),
         message: t2.String(),
-        data: detailSchema6
+        data: detailSchema7
       }, {
-        description: `${name7} update response`
+        description: `${name8} update response`
       })
     },
     detail: {
@@ -186749,9 +186871,9 @@ var media_schema_default = {
       200: t2.Object({
         status: t2.Boolean(),
         message: t2.String(),
-        data: detailSchema6
+        data: detailSchema7
       }, {
-        description: `${name7} detail response`
+        description: `${name8} detail response`
       })
     },
     detail: {
@@ -186766,9 +186888,9 @@ var media_schema_default = {
       200: t2.Object({
         status: t2.Boolean(),
         message: t2.String(),
-        data: detailSchema6
+        data: detailSchema7
       }, {
-        description: `${name7} delete response`
+        description: `${name8} delete response`
       })
     },
     detail: {
@@ -186778,45 +186900,45 @@ var media_schema_default = {
 };
 
 // src/models/clicknic/media/Media.ts
-var import_typegoose12 = __toESM(require_typegoose(), 1);
+var import_typegoose13 = __toESM(require_typegoose(), 1);
 class MediaClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose12.prop({}),
+  import_typegoose13.prop({}),
   __legacyMetadataTS("design:type", String)
 ], MediaClass.prototype, "name", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({}),
+  import_typegoose13.prop({}),
   __legacyMetadataTS("design:type", String)
 ], MediaClass.prototype, "media_type", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({}),
+  import_typegoose13.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], MediaClass.prototype, "resource", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({}),
+  import_typegoose13.prop({}),
   __legacyMetadataTS("design:type", String)
 ], MediaClass.prototype, "url", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({}),
+  import_typegoose13.prop({}),
   __legacyMetadataTS("design:type", String)
 ], MediaClass.prototype, "size", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ ref: () => TenantClass }),
+  import_typegoose13.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], MediaClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ ref: () => ClinicClass }),
+  import_typegoose13.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], MediaClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ default: false }),
+  import_typegoose13.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], MediaClass.prototype, "deleted", undefined);
 MediaClass = __legacyDecorateClassTS([
-  import_typegoose12.modelOptions({ schemaOptions: { collection: "media", timestamps: true } })
+  import_typegoose13.modelOptions({ schemaOptions: { collection: "media", timestamps: true } })
 ], MediaClass);
-var Media_default = import_typegoose12.getModelForClass(MediaClass);
+var Media_default = import_typegoose13.getModelForClass(MediaClass);
 
 // src/utils/AppWrite.ts
 var import_dotenv4 = __toESM(require_main(), 1);
@@ -186930,7 +187052,7 @@ var media_routes_default = createElysia({ prefix: media_schema_default.meta.name
 }, media_schema_default.delete));
 
 // src/api/admin/schema-visualizer/schema-visualizer.schema.ts
-var name8 = "schema-visualizer";
+var name9 = "schema-visualizer";
 var schemaDataShape = t2.Object({
   generatedAt: t2.String(),
   database: t2.String(),
@@ -186942,7 +187064,7 @@ var schemaDataShape = t2.Object({
 });
 var schema_visualizer_schema_default = {
   meta: {
-    name: `/${name8}`,
+    name: `/${name9}`,
     tag: "Schema Visualizer"
   },
   schema_data: {
@@ -186952,7 +187074,7 @@ var schema_visualizer_schema_default = {
         message: t2.String(),
         data: schemaDataShape
       }, {
-        description: `${name8} schema data response`
+        description: `${name9} schema data response`
       })
     },
     detail: {
@@ -187124,7 +187246,7 @@ var schema_visualizer_routes_default = createElysia({ prefix: schema_visualizer_
 }, schema_visualizer_schema_default.schema_data));
 
 // src/api/admin/dashboard/dashboard.schema.ts
-var name9 = "dashboard";
+var name10 = "dashboard";
 var doctorInsightSchema = t2.Object({
   _id: t2.String(),
   name: t2.String(),
@@ -187140,7 +187262,7 @@ var insightSchema = t2.Object({
 });
 var dashboard_schema_default = {
   meta: {
-    name: name9,
+    name: name10,
     module: 1 /* DASHBOARD */
   },
   insight: {
@@ -187150,7 +187272,7 @@ var dashboard_schema_default = {
         message: t2.String(),
         data: insightSchema
       }, {
-        description: `${name9} insight response`
+        description: `${name10} insight response`
       })
     },
     detail: {
@@ -187219,13 +187341,14 @@ adminRoutes.use(doctor_routes_default);
 adminRoutes.use(doctor_time_slot_routes_default);
 adminRoutes.use(patient_routes_default);
 adminRoutes.use(appointment_routes_default);
+adminRoutes.use(prescription_routes_default);
 adminRoutes.use(patient_health_record_routes_default);
 adminRoutes.use(media_routes_default);
 adminRoutes.use(dashboard_routes_default);
 adminRoutes.use(schema_visualizer_routes_default);
 
 // src/api/manglam-city/contribution/contribution.schema.ts
-var name10 = "contribution";
+var name11 = "contribution";
 var publicDetailSchema = t2.Object({
   _id: t2.String(),
   name: t2.String(),
@@ -187235,7 +187358,7 @@ var publicDetailSchema = t2.Object({
   createdAt: t2.String()
 });
 var contribution_schema_default = {
-  meta: { name: name10 },
+  meta: { name: name11 },
   submit: {
     body: t2.Object({
       name: t2.String({ minLength: 1 }),
@@ -187288,35 +187411,35 @@ var contribution_schema_default = {
 };
 
 // src/models/ManglamCityContribution.ts
-var import_typegoose13 = __toESM(require_typegoose(), 1);
+var import_typegoose14 = __toESM(require_typegoose(), 1);
 class ManglamCityContributionClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose13.prop({}),
+  import_typegoose14.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "name", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({}),
+  import_typegoose14.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "phone", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({}),
+  import_typegoose14.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], ManglamCityContributionClass.prototype, "amount", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({}),
+  import_typegoose14.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "area", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({}),
+  import_typegoose14.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "ip", undefined);
 ManglamCityContributionClass = __legacyDecorateClassTS([
-  import_typegoose13.modelOptions({
+  import_typegoose14.modelOptions({
     schemaOptions: { collection: "manglam_city_contribution", timestamps: true }
   })
 ], ManglamCityContributionClass);
-var ManglamCityContribution_default = import_typegoose13.getModelForClass(ManglamCityContributionClass);
+var ManglamCityContribution_default = import_typegoose14.getModelForClass(ManglamCityContributionClass);
 
 // src/api/manglam-city/contribution/contribution.routes.ts
 function maskPhone(phone) {
@@ -187324,9 +187447,9 @@ function maskPhone(phone) {
     return "****";
   return "*".repeat(phone.length - 4) + phone.slice(-4);
 }
-function maskName(name11) {
-  const visible = Math.min(4, Math.ceil(name11.length / 2));
-  return name11.slice(0, visible) + "*".repeat(Math.max(0, name11.length - visible));
+function maskName(name12) {
+  const visible = Math.min(4, Math.ceil(name12.length / 2));
+  return name12.slice(0, visible) + "*".repeat(Math.max(0, name12.length - visible));
 }
 var contribution_routes_default = createElysia({ prefix: contribution_schema_default.meta.name }).guard({
   detail: {
@@ -187464,10 +187587,10 @@ api.onAfterHandle((ctx) => {
   };
   const toOpenApiPath = (path) => path.split("/").map((segment) => {
     if (segment.startsWith(":")) {
-      let name11 = segment.slice(1);
-      if (name11.endsWith("?"))
-        name11 = name11.slice(0, -1);
-      return `{${name11}}`;
+      let name12 = segment.slice(1);
+      if (name12.endsWith("?"))
+        name12 = name12.slice(0, -1);
+      return `{${name12}}`;
     }
     return segment;
   }).join("/");

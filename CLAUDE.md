@@ -188,6 +188,108 @@ something one clinic genuinely loves. That's the entire focus until further noti
 
 ---
 
+## Doctor's consultation workflow — what the appointment detail page must do
+
+This is the single most important screen for doctor adoption. If the doctor
+has no reason to open this software during a consultation, they use paper and
+we've lost them as an active user.
+
+### What a doctor actually does in sequence when a patient sits down
+
+```
+1. Glance at patient identity  →  name, age, gender (2 seconds)
+2. Check vitals                →  BP, pulse, temp — first clinical data point
+3. Read chief complaint        →  what did the receptionist log at booking?
+4. Review patient history      →  chronic conditions, allergies, last 2–3 visits,
+                                   what was prescribed before, did it work?
+5. Examine patient, form diagnosis
+6. Record diagnosis            →  what the doctor concluded (≠ complaint)
+7. Write prescription          →  the core job. 5–10 drugs, each with dose,
+                                   frequency, duration, instructions
+8. Order investigations        →  CBC, blood sugar, X-ray, etc. (common)
+9. Set follow-up date          →  "come back in 2 weeks"
+10. Add any clinical notes     →  free-form observations
+11. Mark consultation complete
+```
+
+### What is currently missing from the appointment detail page
+
+**Priority 1 — blocks doctor adoption entirely:**
+- **Prescription writing** — No drug entry, no dose, no frequency, no duration.
+  This is what a doctor does. Without it, the software is irrelevant to them.
+- **Diagnosis field** — `complaint` is what the patient says. `diagnosis` is
+  what the doctor concludes. They are separate fields. Currently there is none.
+
+**Priority 2 — causes clinical risk or significant friction:**
+- **Vitals placement** — Vitals are buried inside the notes card and only
+  visible if already recorded. They should be the most prominent element at
+  the top of the page, always visible, and editable inline (nurse may not have
+  entered them yet when the doctor opens the page).
+- **Patient medical context** — Allergies, chronic conditions, current
+  medications must be visible before the doctor prescribes. The patient model
+  only has demographics right now. This is a future patient model expansion
+  but must be planned for.
+- **Complaint editability** — The receptionist's booking complaint is a rough
+  note. The doctor refines it after talking to the patient. It should be
+  editable on the consultation page.
+
+**Priority 3 — friction, but survivable short-term:**
+- **Follow-up date inline editing** — Doctor decides follow-up at end of
+  consultation. Should be a date picker on this page, not inside an edit form.
+- **Lab investigation ordering** — Ordering tests is common. Should be
+  recordable here and flow into billing.
+- **History timeline shows prescriptions** — Once prescriptions exist, past
+  visit history must show what was prescribed, not just complaint and notes.
+  "What did I prescribe last time?" is the most valuable history question.
+
+### Prescription data model (Indian outpatient format)
+
+Indian doctors write prescriptions in this structure — the software must match
+their mental model, not force a different format:
+
+```
+Drug name  |  Dose   |  Frequency  |  Duration  |  Instructions
+-----------+---------+-------------+------------+------------------
+Paracetamol  500mg     TDS (1-1-1)   5 days       After food
+Cetirizine   10mg      OD (1-0-0)    5 days       At night
+Omeprazole   20mg      BD (1-0-1)    7 days       Before food
+```
+
+- **Frequency notation**: Indian doctors use OD/BD/TDS/QID or the `1-0-1`
+  format (morning-afternoon-night). Both must be supported.
+- **Duration**: days, weeks, months.
+- **Instructions**: before food / after food / empty stomach / at night / SOS
+  (as needed — means "only if required").
+- **Multiple drugs**: 5–10 per prescription is normal. UI must handle a list,
+  not one drug at a time.
+- **Print + WhatsApp share**: After writing, the doctor needs to print the
+  prescription (many clinics have a small printer) or send via WhatsApp.
+  The prescription must render in a printable format with clinic letterhead.
+
+### What the appointment detail page layout should be
+
+```
+┌─────────────────────────────────────────────┬──────────────────────┐
+│ Patient: Name · Age · Gender · Phone        │  Appointment meta    │
+│                                             │  Token · Doctor      │
+│ VITALS (always visible, editable)           │  Date · Time slot    │
+│  BP · Pulse · Temp · Weight · Height · Resp │  Status              │
+│                                             │                      │
+│ Complaint (editable)                        │  Follow-up date      │
+│ Diagnosis (editable)                        │  (inline date picker)│
+├─────────────────────────────────────────────┴──────────────────────┤
+│ PRESCRIPTION (largest area, center of page)                        │
+│  + Add drug row → [Drug name] [Dose] [Freq] [Duration] [Instr] [x]│
+│  + Add investigation                                               │
+├────────────────────────────────────────────┬───────────────────────┤
+│ Clinical Notes (free text)                 │  Visit History        │
+│                                            │  (with prescriptions) │
+│ [Complete Appointment]                     │                       │
+└────────────────────────────────────────────┴───────────────────────┘
+```
+
+---
+
 ## Backend Route & Schema Boilerplate
 
 Every feature lives under `src/api/admin/<feature>/` with two files.

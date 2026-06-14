@@ -4,6 +4,7 @@ import { MetaPaginationSchema } from "src/utils/common";
 import doctorSchema from "../doctor/doctor.schema";
 import doctorTimeSlotSchema from "../doctor-time-slot/doctor-time-slot.schema";
 import patientHealthRecordSchema from "../patient-health-record/patient-health-record.schema";
+import prescriptionSchema from "../prescription/prescription.schema";
 
 const name = "appointment";
 
@@ -26,10 +27,12 @@ const detailSchema = t.Object({
 	status: t.Number(),
 	complaint: t.String(),
 	notes: t.String(),
+	diagnosis: t.Optional(t.String()),
 	createdAt: t.String(),
 	updatedAt: t.String(),
 	patient_health_records: t.Array(patientHealthRecordSchema.meta.detail),
 	vitals: patientHealthRecordSchema.meta.detail,
+	prescription: t.Union([prescriptionSchema.meta.detail, t.Null()]),
 });
 
 export default {
@@ -104,6 +107,7 @@ export default {
 			status: t.Optional(t.Number()),
 			complaint: t.Optional(t.String()),
 			notes: t.Optional(t.String()),
+			diagnosis: t.Optional(t.String()),
 		}),
 		query: t.Object({
 			id: t.String(),

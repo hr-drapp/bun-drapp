@@ -14,6 +14,7 @@ import { queryStringtoArray } from "src/utils/common";
 import PatientHealthRecord, {
 	PatientHealthRecordType,
 } from "src/models/clicknic/PatientHealthRecord";
+import Prescription from "src/models/clicknic/Prescription";
 import moment from "moment";
 
 export default createElysia({ prefix: schema.meta.name }).guard(
@@ -109,12 +110,13 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 						appointment: { $in: ids },
 					});
 
+					const prescriptions = await Prescription.find({ appointment: { $in: ids } }).lean();
+
 					for (let item of list) {
 						(item as any).patient_health_records = [];
-
-						const records = healthRecords.filter(
-							(f) => f.appointment.toString() === item._id.toString(),
-						);
+						(item as any).prescription = prescriptions.find(
+							(p) => p.appointment.toString() === item._id.toString(),
+						) ?? null;
 
 						for (let record of healthRecords) {
 							if (record.appointment.toString() === item._id.toString()) {
@@ -167,18 +169,30 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.get(
 				"/detail",
 				async ({ body, query }) => {
-					const entry = await Appointment.findById(query.id).populate([
-						{
-							path: "doctor",
-						},
-						{
-							path: "time_slot",
-						},
+					const [entry, prescription, healthRecords] = await Promise.all([
+						Appointment.findById(query.id).populate([
+							{ path: "doctor" },
+							{ path: "time_slot" },
+							{ path: "patient", select: "_id name profile_pic phone" },
+						]),
+						Prescription.findOne({ appointment: query.id }).lean(),
+						PatientHealthRecord.find({ appointment: query.id }).lean(),
 					]);
 
 					if (!entry) return customError("Invalid Appointment");
 
-					return R("entry detail", entry);
+					const vitals =
+						healthRecords.find((r) => r.type === PatientHealthRecordType.VITALS) ?? null;
+					const patient_health_records = healthRecords.filter(
+						(r) => r.type !== PatientHealthRecordType.VITALS,
+					);
+
+					return R("entry detail", {
+						...entry.toObject(),
+						prescription: prescription ?? null,
+						vitals,
+						patient_health_records,
+					});
 				},
 				schema.detail,
 			)

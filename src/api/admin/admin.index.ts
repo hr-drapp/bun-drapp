@@ -9,6 +9,7 @@ import doctorRoutes from "./doctor/doctor.routes";
 import doctorTimeSlotRoutes from "./doctor-time-slot/doctor-time-slot.routes";
 import patientRoutes from "./patient/patient.routes";
 import appointmentRoutes from "./appointment/appointment.routes";
+import prescriptionRoutes from "./prescription/prescription.routes";
 import patientHealthRecordRoutes from "./patient-health-record/patient-health-record.routes";
 import mediaRoutes from "./media/media.routes";
 import schemaVisualizerRoutes from "./schema-visualizer/schema-visualizer.routes";
@@ -29,6 +30,7 @@ adminRoutes.use(patientRoutes);
 
 // Appointment Route
 adminRoutes.use(appointmentRoutes);
+adminRoutes.use(prescriptionRoutes);
 
 // Patient Health Record Route
 adminRoutes.use(patientHealthRecordRoutes);
