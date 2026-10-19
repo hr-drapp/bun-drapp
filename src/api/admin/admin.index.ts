@@ -15,6 +15,7 @@ import mediaRoutes from "./media/media.routes";
 import schemaVisualizerRoutes from "./schema-visualizer/schema-visualizer.routes";
 import dashboardRoutes from "./dashboard/dashboard.routes";
 import ivrCallRequestRoutes from "./ivr-call-request/ivr-call-request.routes";
+import webhookLogRoutes from "./webhook-log/webhook-log.routes";
 /** Admin Routes */
 export const adminRoutes = createElysia({ prefix: "/admin" });
 adminRoutes.use(authRoutes);
@@ -44,6 +45,9 @@ adminRoutes.use(dashboardRoutes);
 
 // IVR Call Request Route
 adminRoutes.use(ivrCallRequestRoutes);
+
+// Webhook Log Route
+adminRoutes.use(webhookLogRoutes);
 
 /** Schema Visualizer */
 adminRoutes.use(schemaVisualizerRoutes);

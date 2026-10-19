@@ -187623,6 +187623,208 @@ var ivr_call_request_routes_default = createElysia({ prefix: ivr_call_request_sc
   return R3("entry deleted", entry);
 }, ivr_call_request_schema_default.delete));
 
+// src/api/admin/webhook-log/webhook-log.schema.ts
+var name12 = "webhook-log";
+var detailSchema9 = t2.Object({
+  _id: t2.String(),
+  clinic: t2.Optional(t2.String()),
+  tenant: t2.Optional(t2.String()),
+  patient: t2.Optional(t2.Object({
+    _id: t2.String(),
+    name: t2.String(),
+    phone: t2.String()
+  })),
+  ivr_call_request: t2.Optional(t2.String()),
+  provider: t2.String(),
+  event: t2.String(),
+  method: t2.String(),
+  path: t2.String(),
+  status: t2.String(),
+  http_status: t2.Optional(t2.Number()),
+  execution_id: t2.Optional(t2.String()),
+  contact_number: t2.Optional(t2.String()),
+  logs: t2.String(),
+  error: t2.Optional(t2.String()),
+  duration_ms: t2.Optional(t2.Number()),
+  ip: t2.Optional(t2.String()),
+  query: t2.Optional(t2.Any()),
+  body: t2.Optional(t2.Any()),
+  response: t2.Optional(t2.Any()),
+  createdAt: t2.String(),
+  updatedAt: t2.String()
+});
+var webhook_log_schema_default = {
+  meta: {
+    name: name12,
+    detail: detailSchema9,
+    module: 21 /* WEBHOOK_LOGS */
+  },
+  list: {
+    query: t2.Object({
+      page: t2.String(),
+      size: t2.String(),
+      search: t2.Optional(t2.String()),
+      status: t2.Optional(t2.String()),
+      event: t2.Optional(t2.String())
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Array(detailSchema9),
+        meta: MetaPaginationSchema
+      }, { description: `${name12} list response` })
+    },
+    detail: { operationId: "list" }
+  },
+  detail: {
+    query: t2.Object({ id: t2.String() }),
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: detailSchema9 }, { description: `${name12} detail response` })
+    },
+    detail: { operationId: "detail" }
+  }
+};
+
+// src/models/clicknic/WebhookLog.ts
+var import_typegoose15 = __toESM(require_typegoose(), 1);
+var WEBHOOK_LOG_TTL_SECONDS = 60 * 60 * 24 * 30;
+
+class WebhookLogClass {
+}
+__legacyDecorateClassTS([
+  import_typegoose15.prop({ ref: () => ClinicClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], WebhookLogClass.prototype, "clinic", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({ ref: () => TenantClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], WebhookLogClass.prototype, "tenant", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({ ref: () => PatientClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], WebhookLogClass.prototype, "patient", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({ ref: () => IvrCallRequestClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], WebhookLogClass.prototype, "ivr_call_request", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({ required: true }),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "provider", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({ required: true }),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "event", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "method", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "path", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({ default: "received" /* RECEIVED */ }),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "status", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", Number)
+], WebhookLogClass.prototype, "http_status", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "execution_id", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "contact_number", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({ default: "" }),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "logs", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "error", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", Number)
+], WebhookLogClass.prototype, "duration_ms", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", String)
+], WebhookLogClass.prototype, "ip", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", Object)
+], WebhookLogClass.prototype, "query", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", Object)
+], WebhookLogClass.prototype, "body", undefined);
+__legacyDecorateClassTS([
+  import_typegoose15.prop({}),
+  __legacyMetadataTS("design:type", Object)
+], WebhookLogClass.prototype, "response", undefined);
+WebhookLogClass = __legacyDecorateClassTS([
+  import_typegoose15.index({ createdAt: 1 }, { expireAfterSeconds: WEBHOOK_LOG_TTL_SECONDS }),
+  import_typegoose15.index({ execution_id: 1 }),
+  import_typegoose15.index({ clinic: 1, createdAt: -1 }),
+  import_typegoose15.modelOptions({
+    schemaOptions: { collection: "webhook_log", timestamps: true },
+    options: { allowMixed: import_typegoose15.Severity.ALLOW }
+  })
+], WebhookLogClass);
+var WebhookLog_default = import_typegoose15.getModelForClass(WebhookLogClass);
+
+// src/api/admin/webhook-log/webhook-log.routes.ts
+var scopeFilter2 = (user) => {
+  const { tenant, clinic } = normalizeQuery({}, user);
+  return {
+    $or: [{ clinic, tenant }, { clinic: { $exists: false } }, { clinic: null }]
+  };
+};
+var webhook_log_routes_default = createElysia({ prefix: webhook_log_schema_default.meta.name }).guard({
+  detail: {
+    tags: [webhook_log_schema_default.meta.name],
+    summary: Summary([webhook_log_schema_default.meta.module])
+  },
+  beforeHandle: isAdminAuthenticated
+}, (app) => app.get("/", async ({ query, user }) => {
+  const page = parseInt(query.page);
+  const size = parseInt(query.size);
+  const search = query?.search?.trim();
+  const regex3 = search ? new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") : null;
+  const filter = {
+    $and: [
+      scopeFilter2(user),
+      ...regex3 ? [{ $or: [{ execution_id: regex3 }, { contact_number: regex3 }] }] : []
+    ],
+    ...query.status && { status: query.status },
+    ...query.event && { event: query.event }
+  };
+  const [list, total] = await Promise.all([
+    WebhookLog_default.find(filter).populate({ path: "patient", select: "_id name phone" }).skip(page * size).limit(size).sort({ createdAt: -1 }).lean(),
+    WebhookLog_default.countDocuments(filter)
+  ]);
+  return R3(`${webhook_log_schema_default.meta.name} list data`, list, true, {
+    pages: Math.ceil(total / size),
+    total,
+    page,
+    size
+  });
+}, webhook_log_schema_default.list).get("/detail", async ({ query, user }) => {
+  const entry = await WebhookLog_default.findOne({
+    _id: query.id,
+    ...scopeFilter2(user)
+  }).populate({ path: "patient", select: "_id name phone" }).lean();
+  if (!entry)
+    return customError("Invalid entry");
+  return R3("entry detail", entry);
+}, webhook_log_schema_default.detail));
+
 // src/api/admin/admin.index.ts
 var adminRoutes = createElysia({ prefix: "/admin" });
 adminRoutes.use(auth_routes_default);
@@ -187638,10 +187840,11 @@ adminRoutes.use(patient_health_record_routes_default);
 adminRoutes.use(media_routes_default);
 adminRoutes.use(dashboard_routes_default);
 adminRoutes.use(ivr_call_request_routes_default);
+adminRoutes.use(webhook_log_routes_default);
 adminRoutes.use(schema_visualizer_routes_default);
 
 // src/api/manglam-city/contribution/contribution.schema.ts
-var name12 = "contribution";
+var name13 = "contribution";
 var publicDetailSchema = t2.Object({
   _id: t2.String(),
   name: t2.String(),
@@ -187651,7 +187854,7 @@ var publicDetailSchema = t2.Object({
   createdAt: t2.String()
 });
 var contribution_schema_default = {
-  meta: { name: name12 },
+  meta: { name: name13 },
   submit: {
     body: t2.Object({
       name: t2.String({ minLength: 1 }),
@@ -187704,35 +187907,35 @@ var contribution_schema_default = {
 };
 
 // src/models/ManglamCityContribution.ts
-var import_typegoose15 = __toESM(require_typegoose(), 1);
+var import_typegoose16 = __toESM(require_typegoose(), 1);
 class ManglamCityContributionClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "name", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "phone", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], ManglamCityContributionClass.prototype, "amount", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "area", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "ip", undefined);
 ManglamCityContributionClass = __legacyDecorateClassTS([
-  import_typegoose15.modelOptions({
+  import_typegoose16.modelOptions({
     schemaOptions: { collection: "manglam_city_contribution", timestamps: true }
   })
 ], ManglamCityContributionClass);
-var ManglamCityContribution_default = import_typegoose15.getModelForClass(ManglamCityContributionClass);
+var ManglamCityContribution_default = import_typegoose16.getModelForClass(ManglamCityContributionClass);
 
 // src/api/manglam-city/contribution/contribution.routes.ts
 function maskPhone(phone) {
@@ -187740,9 +187943,9 @@ function maskPhone(phone) {
     return "****";
   return "*".repeat(phone.length - 4) + phone.slice(-4);
 }
-function maskName(name13) {
-  const visible = Math.min(4, Math.ceil(name13.length / 2));
-  return name13.slice(0, visible) + "*".repeat(Math.max(0, name13.length - visible));
+function maskName(name14) {
+  const visible = Math.min(4, Math.ceil(name14.length / 2));
+  return name14.slice(0, visible) + "*".repeat(Math.max(0, name14.length - visible));
 }
 var contribution_routes_default = createElysia({ prefix: contribution_schema_default.meta.name }).guard({
   detail: {
@@ -187807,14 +188010,14 @@ var manglamCityRoutes = createElysia({ prefix: "/manglam-city" });
 manglamCityRoutes.use(contribution_routes_default);
 
 // src/api/webhook/bolna/bolna.schema.ts
-var name13 = "bolna";
+var name14 = "bolna";
 var bolna_schema_default = {
   meta: {
-    name: name13
+    name: name14
   },
   caller: {
     query: t2.Object({
-      contact_number: t2.String(),
+      contact_number: t2.Optional(t2.String()),
       agent_id: t2.Optional(t2.String()),
       execution_id: t2.Optional(t2.String()),
       token: t2.Optional(t2.String())
@@ -187829,7 +188032,7 @@ var bolna_schema_default = {
         patient_gender: t2.String(),
         clinic_name: t2.String()
       }, {
-        description: `${name13} caller lookup response, merged into the agent prompt`
+        description: `${name14} caller lookup response, merged into the agent prompt`
       })
     },
     detail: { operationId: "caller" }
@@ -187840,7 +188043,7 @@ var bolna_schema_default = {
     }),
     body: t2.Any(),
     response: {
-      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: t2.Any() }, { description: `${name13} execution webhook response` })
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: t2.Any() }, { description: `${name14} execution webhook response` })
     },
     detail: { operationId: "execution" }
   }
@@ -187857,37 +188060,54 @@ var normalizePhone = (raw) => {
     variants: Array.from(new Set([local, `0${local}`, `91${local}`, `+91${local}`, digits2]))
   };
 };
-var resolveClinicForAgent = async (agentId) => {
+var resolveClinicForAgent = async (agentId, trace) => {
   if (agentId) {
-    const clinic = await Clinic_default.findOne({ ivr_agent_ids: agentId }).sort({ default: -1, createdAt: 1 }).lean();
-    if (clinic)
-      return clinic;
+    const clinic2 = await Clinic_default.findOne({ ivr_agent_ids: agentId }).sort({ default: -1, createdAt: 1 }).lean();
+    if (clinic2) {
+      trace?.step(`Clinic resolved by agent mapping: "${clinic2.name}" (${clinic2._id})`);
+      return clinic2;
+    }
+    trace?.step(`No clinic has agent ${agentId} in ivr_agent_ids, trying default clinic`);
+  } else {
+    trace?.step("No agent_id sent, trying default clinic");
   }
-  return Clinic_default.findOne({ default: true }).lean();
+  const clinic = await Clinic_default.findOne({ default: true }).lean();
+  if (clinic) {
+    trace?.step(`Clinic resolved by default fallback: "${clinic.name}" (${clinic._id})`);
+  }
+  return clinic;
 };
 var isActiveStatus = (status3) => IVR_ACTIVE_STATUSES.includes(`${status3 ?? ""}`.toLowerCase());
 var registerIncomingCall = async ({
   contactNumber,
   agentId,
   executionId,
-  status: status3 = "in-progress"
+  status: status3 = "in-progress",
+  trace
 }) => {
   const phone = normalizePhone(contactNumber);
-  if (phone.local.length < 10)
+  trace?.set({ contact_number: phone.display, execution_id: executionId });
+  if (phone.local.length < 10) {
+    trace?.step(`Invalid caller number "${contactNumber}" (fewer than 10 digits), stopping`);
     return null;
-  const clinic = await resolveClinicForAgent(agentId);
+  }
+  trace?.step(`Caller number "${contactNumber}" normalized to ${phone.local}`);
+  const clinic = await resolveClinicForAgent(agentId, trace);
   if (!clinic) {
-    console.error("\uD83D\uDE80 ~ IVR ~ no clinic found for agent:", agentId);
+    trace?.step("No clinic found (no agent mapping and no default clinic), stopping");
     return null;
   }
   const scope = { clinic: clinic._id, tenant: clinic.tenant };
+  trace?.set(scope);
   let isNewPatient = false;
   let patient = await Patient_default.findOne({
     ...scope,
     phone: { $in: phone.variants },
     deleted: false
   }).sort({ createdAt: 1 }).lean();
-  if (!patient) {
+  if (patient) {
+    trace?.step(`Existing patient found: "${patient.name}" (#${patient.id}, ${patient._id})`);
+  } else {
     const created = await Patient_default.create({
       ...scope,
       name: IVR_UNKNOWN_PATIENT_NAME,
@@ -187898,8 +188118,14 @@ var registerIncomingCall = async ({
     });
     patient = created.toObject();
     isNewPatient = true;
+    trace?.step(`No patient with this number, registered new patient #${patient.id} (${patient._id})`);
   }
-  const callRequest = executionId ? await IvrCallRequest_default.findOneAndUpdate({ execution_id: executionId }, {
+  trace?.set({ patient: patient._id });
+  if (!executionId) {
+    trace?.step("No execution_id sent, IVR call request not recorded");
+    return { clinic, patient, isNewPatient, callRequest: null };
+  }
+  const result = await IvrCallRequest_default.findOneAndUpdate({ execution_id: executionId }, {
     $setOnInsert: {
       ...scope,
       patient: patient._id,
@@ -187910,34 +188136,56 @@ var registerIncomingCall = async ({
       is_active: isActiveStatus(status3),
       is_new_patient: isNewPatient
     }
-  }, { upsert: true, new: true }).lean() : null;
+  }, { upsert: true, new: true, includeResultMetadata: true }).lean();
+  const callRequest = result.value;
+  trace?.set({ ivr_call_request: callRequest?._id });
+  trace?.step(result.lastErrorObject?.updatedExisting ? `IVR call request already existed for execution ${executionId} (retry), left unchanged` : `IVR call request created (${callRequest?._id}) with status "${status3}"`);
   return { clinic, patient, isNewPatient, callRequest };
 };
-var applyExecutionUpdate = async (payload) => {
+var applyExecutionUpdate = async (payload, trace) => {
   const executionId = payload?.id || payload?.execution_id;
-  if (!executionId)
+  if (!executionId) {
+    trace?.step("Payload has no execution id (id / execution_id), ignored");
     return null;
+  }
   const status3 = `${payload?.status ?? ""}`.toLowerCase();
   const telephony = payload?.telephony_data ?? {};
+  trace?.set({ execution_id: executionId });
+  trace?.step(`Status update for execution ${executionId}: status="${status3 || "-"}", call_type="${telephony.call_type || "-"}"`);
   let existing = await IvrCallRequest_default.findOne({
     execution_id: executionId
   }).lean();
-  if (!existing) {
+  if (existing) {
+    trace?.step(`Found IVR call request ${existing._id} (status "${existing.status}", active=${existing.is_active})`);
+  } else {
     const from = telephony.from_number || payload?.user_number;
-    if (telephony.call_type && telephony.call_type !== "inbound")
+    if (telephony.call_type && telephony.call_type !== "inbound") {
+      trace?.step(`No IVR call request and call is ${telephony.call_type}, ignored`);
       return null;
-    if (!from)
+    }
+    if (!from) {
+      trace?.step("No IVR call request and payload has no caller number, ignored");
       return null;
+    }
+    trace?.step(`No IVR call request yet, registering caller ${from} from this payload`);
     const registered = await registerIncomingCall({
       contactNumber: from,
       agentId: payload?.agent_id,
       executionId,
-      status: status3 || undefined
+      status: status3 || undefined,
+      trace
     });
     existing = registered?.callRequest ?? null;
     if (!existing)
       return null;
   }
+  trace?.set({
+    clinic: existing.clinic,
+    tenant: existing.tenant,
+    patient: existing.patient,
+    ivr_call_request: existing._id,
+    contact_number: existing.contact_number
+  });
   const update = {};
   const duration = Number(telephony.duration ?? payload?.conversation_duration);
   if (Number.isFinite(duration) && duration > 0)
@@ -187948,39 +188196,141 @@ var applyExecutionUpdate = async (payload) => {
     update.summary = payload.summary;
   if (payload?.transcript)
     update.transcript = payload.transcript;
-  if (status3 && !(isActiveStatus(status3) && !existing.is_active)) {
+  if (!status3) {
+    trace?.step("Payload has no status, status left unchanged");
+  } else if (isActiveStatus(status3) && !existing.is_active) {
+    trace?.step(`Out-of-order status "${status3}" ignored, call already ended as "${existing.status}"`);
+  } else {
     update.status = status3;
     update.is_active = isActiveStatus(status3);
     if (!update.is_active && existing.is_active)
       update.ended_at = new Date;
+    trace?.step(`Status "${existing.status}" → "${status3}" (${update.is_active ? "call live" : "call ended"})`);
   }
+  const saved = Object.keys(update).filter((key2) => !["status", "is_active"].includes(key2));
+  if (saved.length)
+    trace?.step(`Saved: ${saved.join(", ")}`);
   return IvrCallRequest_default.findByIdAndUpdate(existing._id, update, {
     new: true
   }).lean();
 };
 
+// src/utils/webhook-trace.ts
+var import_mongoose6 = __toESM(require_mongoose2(), 1);
+class WebhookTrace {
+  id = new import_mongoose6.Types.ObjectId;
+  startedAt = Date.now();
+  lines = [];
+  fields = {};
+  static async start(entry) {
+    const trace = new WebhookTrace;
+    trace.step(`${entry.method} ${entry.path} received`);
+    try {
+      await WebhookLog_default.create({
+        _id: trace.id,
+        ...entry,
+        status: "received" /* RECEIVED */,
+        logs: trace.text()
+      });
+    } catch (error) {
+      console.error("\uD83D\uDE80 ~ WebhookTrace.start ~ error:", error?.message);
+    }
+    return trace;
+  }
+  step(message) {
+    this.lines.push(`[${new Date().toISOString()}] (+${Date.now() - this.startedAt}ms) ${message}`);
+  }
+  set(fields) {
+    Object.assign(this.fields, fields);
+  }
+  text() {
+    return this.lines.join(`
+`);
+  }
+  async finish(status3, { response, error } = {}) {
+    const duration = Date.now() - this.startedAt;
+    this.step(`Finished as "${status3}" in ${duration}ms`);
+    try {
+      await WebhookLog_default.updateOne({ _id: this.id }, {
+        $set: {
+          ...this.fields,
+          status: status3,
+          response,
+          error,
+          duration_ms: duration,
+          logs: this.text()
+        }
+      });
+    } catch (err) {
+      console.error("\uD83D\uDE80 ~ WebhookTrace.finish ~ error:", err?.message);
+    }
+  }
+}
+
 // src/api/webhook/bolna/bolna.routes.ts
 var BOLNA_WEBHOOK_TOKEN = "86659ec7a4d8ef78cb3d1332ebdf08e394a8388e4786e0f0";
 var genderLabel = (gender) => gender === 1 ? "Male" : gender === 2 ? "Female" : "";
-var isBolnaAuthorized = ({ headers, query, set }) => {
-  const received = `${headers?.authorization ?? ""}`.replace(/^Bearer\s+/i, "") || query?.token;
+var emptyCallerResponse = {
+  is_registered: false,
+  patient_id: "",
+  patient_name: "",
+  patient_phone: "",
+  patient_age: "",
+  patient_gender: "",
+  clinic_name: ""
+};
+var UNAUTHORIZED = { status: false, message: "Unauthorized", data: null };
+var traced = async (event, ctx, handler) => {
+  const { headers, query, body, request, set, path } = ctx;
+  const { token, ...safeQuery } = query ?? {};
+  const trace = await WebhookTrace.start({
+    provider: "bolna",
+    event,
+    method: request.method,
+    path,
+    ip: headers?.["x-forwarded-for"] || headers?.["x-real-ip"],
+    query: safeQuery,
+    body
+  });
+  const received = `${headers?.authorization ?? ""}`.replace(/^Bearer\s+/i, "") || token;
   if (received !== BOLNA_WEBHOOK_TOKEN) {
+    trace.step(received ? "Token mismatch, rejected with 401" : "No token sent (header or ?token=), rejected with 401");
+    trace.set({ http_status: 401 });
     set.status = 401;
-    return { status: false, message: "Unauthorized", data: null };
+    trace.finish("unauthorized" /* UNAUTHORIZED */, { response: UNAUTHORIZED });
+    return UNAUTHORIZED;
+  }
+  trace.step("Token verified");
+  try {
+    const { response, ignored } = await handler(trace);
+    trace.set({ http_status: 200 });
+    trace.finish(ignored ? "ignored" /* IGNORED */ : "success" /* SUCCESS */, { response });
+    return response;
+  } catch (error) {
+    trace.step(`Error: ${error?.message}`);
+    trace.set({ http_status: 500 });
+    trace.finish("failed" /* FAILED */, { error: error?.stack || error?.message });
+    throw error;
   }
 };
 var bolna_routes_default = createElysia({ prefix: bolna_schema_default.meta.name }).guard({
-  detail: { tags: ["webhook"] },
-  beforeHandle: isBolnaAuthorized
-}, (app) => app.get("/caller", async ({ query }) => {
+  detail: { tags: ["webhook"] }
+}, (app) => app.get("/caller", (ctx) => traced("caller-lookup", ctx, async (trace) => {
+  const { query } = ctx;
+  trace.step(`Caller lookup: contact_number="${query.contact_number ?? ""}", agent_id="${query.agent_id ?? "-"}", execution_id="${query.execution_id ?? "-"}"`);
+  if (!query.contact_number) {
+    trace.step("contact_number missing, returning empty caller data");
+    return { response: emptyCallerResponse, ignored: true };
+  }
   const result = await registerIncomingCall({
     contactNumber: query.contact_number,
     agentId: query.agent_id,
-    executionId: query.execution_id
+    executionId: query.execution_id,
+    trace
   });
   const patient = result?.patient;
   const isRegistered = !!patient && !result?.isNewPatient;
-  return {
+  const response = {
     is_registered: isRegistered,
     patient_id: patient ? `${patient.id ?? ""}` : "",
     patient_name: isRegistered ? patient?.name ?? "" : "",
@@ -187989,10 +188339,15 @@ var bolna_routes_default = createElysia({ prefix: bolna_schema_default.meta.name
     patient_gender: isRegistered ? genderLabel(patient?.gender) : "",
     clinic_name: result?.clinic?.name ?? ""
   };
-}, bolna_schema_default.caller).post("/execution", async ({ body }) => {
-  const entry = await applyExecutionUpdate(body);
-  return R3("execution processed", entry);
-}, bolna_schema_default.execution));
+  trace.step(`Responded to Bolna: is_registered=${response.is_registered}, patient_name="${response.patient_name}"`);
+  return { response, ignored: !result };
+}), bolna_schema_default.caller).post("/execution", (ctx) => traced("execution-status", ctx, async (trace) => {
+  const entry = await applyExecutionUpdate(ctx.body, trace);
+  return {
+    response: R3("execution processed", entry),
+    ignored: !entry
+  };
+}), bolna_schema_default.execution));
 
 // src/api/webhook/webhook.index.ts
 var webhookRoutes = createElysia({ prefix: "/webhook" });
@@ -188072,10 +188427,10 @@ api.onAfterHandle((ctx) => {
   };
   const toOpenApiPath = (path) => path.split("/").map((segment) => {
     if (segment.startsWith(":")) {
-      let name14 = segment.slice(1);
-      if (name14.endsWith("?"))
-        name14 = name14.slice(0, -1);
-      return `{${name14}}`;
+      let name15 = segment.slice(1);
+      if (name15.endsWith("?"))
+        name15 = name15.slice(0, -1);
+      return `{${name15}}`;
     }
     return segment;
   }).join("/");

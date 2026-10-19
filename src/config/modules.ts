@@ -25,6 +25,7 @@ export enum ModuleId {
 	APPOINTMENTS = 18,
 	PATIENT_HEALTH_RECORDS = 19,
 	IVR_CALL_REQUESTS = 20,
+	WEBHOOK_LOGS = 21,
 }
 
 export const FULL_ACCESS_ABILITIES: Ability = [

@@ -9,7 +9,8 @@ export default {
 	// ── caller lookup (Bolna "Use your internal APIs") ───────────────
 	caller: {
 		query: t.Object({
-			contact_number: t.String(),
+			// Optional so a malformed call still reaches the handler and gets logged.
+			contact_number: t.Optional(t.String()),
 			agent_id: t.Optional(t.String()),
 			execution_id: t.Optional(t.String()),
 			token: t.Optional(t.String()),
