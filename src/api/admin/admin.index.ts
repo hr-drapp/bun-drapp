@@ -14,6 +14,7 @@ import patientHealthRecordRoutes from "./patient-health-record/patient-health-re
 import mediaRoutes from "./media/media.routes";
 import schemaVisualizerRoutes from "./schema-visualizer/schema-visualizer.routes";
 import dashboardRoutes from "./dashboard/dashboard.routes";
+import ivrCallRequestRoutes from "./ivr-call-request/ivr-call-request.routes";
 /** Admin Routes */
 export const adminRoutes = createElysia({ prefix: "/admin" });
 adminRoutes.use(authRoutes);
@@ -40,6 +41,9 @@ adminRoutes.use(mediaRoutes);
 
 // Dashboard Route
 adminRoutes.use(dashboardRoutes);
+
+// IVR Call Request Route
+adminRoutes.use(ivrCallRequestRoutes);
 
 /** Schema Visualizer */
 adminRoutes.use(schemaVisualizerRoutes);

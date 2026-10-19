@@ -14,6 +14,7 @@ import AppErr from "./utils/AppErr";
 import { R } from "./utils/response-helpers";
 import { adminRoutes } from "./api/admin/admin.index";
 import { manglamCityRoutes } from "./api/manglam-city/manglam-city.index";
+import { webhookRoutes } from "./api/webhook/webhook.index";
 import { staticPlugin } from "@elysiajs/static";
 import { bearer } from "@elysiajs/bearer";
 import { ModuleId } from "./config/modules";
@@ -274,6 +275,7 @@ api
 
 api.use(adminRoutes);
 api.use(manglamCityRoutes);
+api.use(webhookRoutes);
 
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjBhZjJmZDY1NDZlMGUxOTFjZmMzNGEiLCJlbWFpbCI6ImhhcnNoLmRxb3RAZ21haWwuY29tIiwicGhvbmUiOiI5OTgzMzk2MTUyIiwiaWF0IjoxNzEyNTk3NDQxfQ.FuZIJkXEN8jvikzJKeiBFS4RAFkI09CibZsVREmVQDQ
 api.get(

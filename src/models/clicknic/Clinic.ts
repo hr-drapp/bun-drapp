@@ -36,6 +36,10 @@ export class ClinicClass {
 
 	@prop({ default: false })
 	public default!: boolean;
+
+	/** Bolna agent ids whose incoming calls belong to this clinic. */
+	@prop({ type: () => [String], default: [] })
+	public ivr_agent_ids!: string[];
 }
 
 export default getModelForClass(ClinicClass);

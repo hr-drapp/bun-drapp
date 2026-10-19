@@ -183821,6 +183821,10 @@ __legacyDecorateClassTS([
   import_typegoose4.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], ClinicClass.prototype, "default", undefined);
+__legacyDecorateClassTS([
+  import_typegoose4.prop({ type: () => [String], default: [] }),
+  __legacyMetadataTS("design:type", Array)
+], ClinicClass.prototype, "ivr_agent_ids", undefined);
 ClinicClass = __legacyDecorateClassTS([
   import_typegoose4.pre("save", async function(next) {
     if (!this.id) {
@@ -187349,6 +187353,271 @@ var dashboard_routes_default = createElysia({ prefix: dashboard_schema_default.m
   });
 }, dashboard_schema_default.insight));
 
+// src/api/admin/ivr-call-request/ivr-call-request.schema.ts
+var name11 = "ivr-call-request";
+var detailSchema8 = t2.Object({
+  _id: t2.String(),
+  patient: t2.Object({
+    _id: t2.String(),
+    id: t2.Optional(t2.Number()),
+    name: t2.String(),
+    phone: t2.String(),
+    age: t2.Optional(t2.Number()),
+    gender: t2.Optional(t2.Number()),
+    profile_pic: t2.Optional(t2.String())
+  }),
+  contact_number: t2.String(),
+  agent_id: t2.Optional(t2.String()),
+  execution_id: t2.String(),
+  status: t2.String(),
+  is_active: t2.Boolean(),
+  is_new_patient: t2.Boolean(),
+  note: t2.String(),
+  duration: t2.Optional(t2.Number()),
+  recording_url: t2.Optional(t2.String()),
+  summary: t2.Optional(t2.String()),
+  transcript: t2.Optional(t2.String()),
+  ended_at: t2.Optional(t2.String()),
+  deleted: t2.Boolean(),
+  createdAt: t2.String(),
+  updatedAt: t2.String()
+});
+var insightSchema2 = t2.Object({
+  active: t2.Number(),
+  today: t2.Number(),
+  today_new_patients: t2.Number()
+});
+var ivr_call_request_schema_default = {
+  meta: {
+    name: name11,
+    detail: detailSchema8,
+    module: 20 /* IVR_CALL_REQUESTS */
+  },
+  list: {
+    query: t2.Object({
+      page: t2.String(),
+      size: t2.String(),
+      search: t2.Optional(t2.String()),
+      deleted: t2.Optional(t2.String()),
+      active: t2.Optional(t2.String())
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Array(detailSchema8),
+        meta: MetaPaginationSchema
+      }, { description: `${name11} list response` })
+    },
+    detail: { operationId: "list" }
+  },
+  update: {
+    body: t2.Object({
+      note: t2.Optional(t2.String())
+    }),
+    query: t2.Object({ id: t2.String() }),
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: detailSchema8 }, { description: `${name11} update response` })
+    },
+    detail: { operationId: "update" }
+  },
+  detail: {
+    query: t2.Object({ id: t2.String() }),
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: detailSchema8 }, { description: `${name11} detail response` })
+    },
+    detail: { operationId: "detail" }
+  },
+  delete: {
+    query: t2.Object({ id: t2.String() }),
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: detailSchema8 }, { description: `${name11} delete response` })
+    },
+    detail: { operationId: "delete" }
+  },
+  insight: {
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: insightSchema2 }, { description: `${name11} insight response` })
+    },
+    detail: { operationId: "insight" }
+  }
+};
+
+// src/models/clicknic/IvrCallRequest.ts
+var import_typegoose14 = __toESM(require_typegoose(), 1);
+var IVR_ACTIVE_STATUSES = [
+  "queued",
+  "initiated",
+  "ringing",
+  "in-progress"
+];
+var IVR_ACTIVE_TIMEOUT_MINUTES = 30;
+
+class IvrCallRequestClass {
+}
+__legacyDecorateClassTS([
+  import_typegoose14.prop({ ref: () => ClinicClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], IvrCallRequestClass.prototype, "clinic", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({ ref: () => TenantClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], IvrCallRequestClass.prototype, "tenant", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({ ref: () => PatientClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], IvrCallRequestClass.prototype, "patient", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({}),
+  __legacyMetadataTS("design:type", String)
+], IvrCallRequestClass.prototype, "contact_number", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({}),
+  __legacyMetadataTS("design:type", String)
+], IvrCallRequestClass.prototype, "agent_id", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({ required: true }),
+  __legacyMetadataTS("design:type", String)
+], IvrCallRequestClass.prototype, "execution_id", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({ default: "in-progress" }),
+  __legacyMetadataTS("design:type", String)
+], IvrCallRequestClass.prototype, "status", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({ default: true }),
+  __legacyMetadataTS("design:type", Boolean)
+], IvrCallRequestClass.prototype, "is_active", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({ default: false }),
+  __legacyMetadataTS("design:type", Boolean)
+], IvrCallRequestClass.prototype, "is_new_patient", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({ default: "" }),
+  __legacyMetadataTS("design:type", String)
+], IvrCallRequestClass.prototype, "note", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({}),
+  __legacyMetadataTS("design:type", Number)
+], IvrCallRequestClass.prototype, "duration", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({}),
+  __legacyMetadataTS("design:type", String)
+], IvrCallRequestClass.prototype, "recording_url", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({}),
+  __legacyMetadataTS("design:type", String)
+], IvrCallRequestClass.prototype, "summary", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({}),
+  __legacyMetadataTS("design:type", String)
+], IvrCallRequestClass.prototype, "transcript", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({}),
+  __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
+], IvrCallRequestClass.prototype, "ended_at", undefined);
+__legacyDecorateClassTS([
+  import_typegoose14.prop({ default: false }),
+  __legacyMetadataTS("design:type", Boolean)
+], IvrCallRequestClass.prototype, "deleted", undefined);
+IvrCallRequestClass = __legacyDecorateClassTS([
+  import_typegoose14.index({ execution_id: 1 }, { unique: true }),
+  import_typegoose14.index({ clinic: 1, tenant: 1, createdAt: -1 }),
+  import_typegoose14.modelOptions({
+    schemaOptions: { collection: "ivr_call_request", timestamps: true }
+  })
+], IvrCallRequestClass);
+var IvrCallRequest_default = import_typegoose14.getModelForClass(IvrCallRequestClass);
+
+// src/api/admin/ivr-call-request/ivr-call-request.routes.ts
+var import_moment5 = __toESM(require_moment(), 1);
+var patientPopulate = {
+  path: "patient",
+  select: "_id id name phone age gender profile_pic"
+};
+var scopeFilter = (query, user) => {
+  const { doctor: doctor2, ...filter } = normalizeQuery(query, user);
+  return filter;
+};
+var expireStaleCalls = (scope) => IvrCallRequest_default.updateMany({
+  ...scope,
+  is_active: true,
+  updatedAt: {
+    $lt: import_moment5.default().subtract(IVR_ACTIVE_TIMEOUT_MINUTES, "minutes").toDate()
+  }
+}, { $set: { is_active: false, status: "timed-out", ended_at: new Date } });
+var ivr_call_request_routes_default = createElysia({ prefix: ivr_call_request_schema_default.meta.name }).guard({
+  detail: {
+    tags: [ivr_call_request_schema_default.meta.name],
+    summary: Summary([ivr_call_request_schema_default.meta.module])
+  },
+  beforeHandle: isAdminAuthenticated
+}, (app) => app.get("/", async ({ query, user }) => {
+  const page = parseInt(query.page);
+  const size = parseInt(query.size);
+  const deleted = query?.deleted === "true";
+  const scope = scopeFilter({}, user);
+  await expireStaleCalls(scope);
+  const search = query?.search?.trim();
+  let patientIds;
+  if (search) {
+    const regex3 = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    const patients = await Patient_default.find({ ...scope, $or: [{ name: regex3 }, { phone: regex3 }] }, { _id: 1 }).lean();
+    patientIds = patients.map((p) => p._id);
+  }
+  const filter = scopeFilter({
+    deleted,
+    ...query.active && { is_active: query.active === "true" },
+    ...patientIds && { patient: { $in: patientIds } }
+  }, user);
+  const [list, total] = await Promise.all([
+    IvrCallRequest_default.find(filter).populate(patientPopulate).skip(page * size).limit(size).sort({ is_active: -1, createdAt: -1 }).lean(),
+    IvrCallRequest_default.countDocuments(filter)
+  ]);
+  return R3(`${ivr_call_request_schema_default.meta.name} list data`, list, true, {
+    pages: Math.ceil(total / size),
+    total,
+    page,
+    size
+  });
+}, ivr_call_request_schema_default.list).get("/insight", async ({ user }) => {
+  const scope = scopeFilter({ deleted: false }, user);
+  const startOfDay = import_moment5.default().startOf("day").toDate();
+  const [active, today, todayNewPatients] = await Promise.all([
+    IvrCallRequest_default.countDocuments({ ...scope, is_active: true }),
+    IvrCallRequest_default.countDocuments({
+      ...scope,
+      createdAt: { $gte: startOfDay }
+    }),
+    IvrCallRequest_default.countDocuments({
+      ...scope,
+      is_new_patient: true,
+      createdAt: { $gte: startOfDay }
+    })
+  ]);
+  return R3(`${ivr_call_request_schema_default.meta.name} insight`, {
+    active,
+    today,
+    today_new_patients: todayNewPatients
+  });
+}, ivr_call_request_schema_default.insight).put("/", async ({ body, query, user }) => {
+  const entry = await IvrCallRequest_default.findOneAndUpdate(scopeFilter({ _id: query.id }, user), { note: body.note ?? "" }, { new: true }).populate(patientPopulate).lean();
+  if (!entry)
+    return customError("Invalid entry");
+  return R3("entry updated", entry);
+}, ivr_call_request_schema_default.update).get("/detail", async ({ query, user }) => {
+  const entry = await IvrCallRequest_default.findOne(scopeFilter({ _id: query.id }, user)).populate(patientPopulate).lean();
+  if (!entry)
+    return customError("Invalid entry");
+  return R3("entry detail", entry);
+}, ivr_call_request_schema_default.detail).delete("/", async ({ query, user }) => {
+  const entry = await IvrCallRequest_default.findOne(scopeFilter({ _id: query.id }, user));
+  if (entry) {
+    entry.deleted = !entry.deleted;
+    await entry.save();
+  }
+  return R3("entry deleted", entry);
+}, ivr_call_request_schema_default.delete));
+
 // src/api/admin/admin.index.ts
 var adminRoutes = createElysia({ prefix: "/admin" });
 adminRoutes.use(auth_routes_default);
@@ -187363,10 +187632,11 @@ adminRoutes.use(prescription_routes_default);
 adminRoutes.use(patient_health_record_routes_default);
 adminRoutes.use(media_routes_default);
 adminRoutes.use(dashboard_routes_default);
+adminRoutes.use(ivr_call_request_routes_default);
 adminRoutes.use(schema_visualizer_routes_default);
 
 // src/api/manglam-city/contribution/contribution.schema.ts
-var name11 = "contribution";
+var name12 = "contribution";
 var publicDetailSchema = t2.Object({
   _id: t2.String(),
   name: t2.String(),
@@ -187376,7 +187646,7 @@ var publicDetailSchema = t2.Object({
   createdAt: t2.String()
 });
 var contribution_schema_default = {
-  meta: { name: name11 },
+  meta: { name: name12 },
   submit: {
     body: t2.Object({
       name: t2.String({ minLength: 1 }),
@@ -187429,35 +187699,35 @@ var contribution_schema_default = {
 };
 
 // src/models/ManglamCityContribution.ts
-var import_typegoose14 = __toESM(require_typegoose(), 1);
+var import_typegoose15 = __toESM(require_typegoose(), 1);
 class ManglamCityContributionClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "name", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "phone", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], ManglamCityContributionClass.prototype, "amount", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "area", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "ip", undefined);
 ManglamCityContributionClass = __legacyDecorateClassTS([
-  import_typegoose14.modelOptions({
+  import_typegoose15.modelOptions({
     schemaOptions: { collection: "manglam_city_contribution", timestamps: true }
   })
 ], ManglamCityContributionClass);
-var ManglamCityContribution_default = import_typegoose14.getModelForClass(ManglamCityContributionClass);
+var ManglamCityContribution_default = import_typegoose15.getModelForClass(ManglamCityContributionClass);
 
 // src/api/manglam-city/contribution/contribution.routes.ts
 function maskPhone(phone) {
@@ -187465,9 +187735,9 @@ function maskPhone(phone) {
     return "****";
   return "*".repeat(phone.length - 4) + phone.slice(-4);
 }
-function maskName(name12) {
-  const visible = Math.min(4, Math.ceil(name12.length / 2));
-  return name12.slice(0, visible) + "*".repeat(Math.max(0, name12.length - visible));
+function maskName(name13) {
+  const visible = Math.min(4, Math.ceil(name13.length / 2));
+  return name13.slice(0, visible) + "*".repeat(Math.max(0, name13.length - visible));
 }
 var contribution_routes_default = createElysia({ prefix: contribution_schema_default.meta.name }).guard({
   detail: {
@@ -187530,6 +187800,198 @@ var contribution_routes_default = createElysia({ prefix: contribution_schema_def
 // src/api/manglam-city/manglam-city.index.ts
 var manglamCityRoutes = createElysia({ prefix: "/manglam-city" });
 manglamCityRoutes.use(contribution_routes_default);
+
+// src/api/webhook/bolna/bolna.schema.ts
+var name13 = "bolna";
+var bolna_schema_default = {
+  meta: {
+    name: name13
+  },
+  caller: {
+    query: t2.Object({
+      contact_number: t2.String(),
+      agent_id: t2.Optional(t2.String()),
+      execution_id: t2.Optional(t2.String()),
+      token: t2.Optional(t2.String())
+    }),
+    response: {
+      200: t2.Object({
+        is_registered: t2.Boolean(),
+        patient_id: t2.String(),
+        patient_name: t2.String(),
+        patient_phone: t2.String(),
+        patient_age: t2.String(),
+        patient_gender: t2.String(),
+        clinic_name: t2.String()
+      }, {
+        description: `${name13} caller lookup response, merged into the agent prompt`
+      })
+    },
+    detail: { operationId: "caller" }
+  },
+  execution: {
+    query: t2.Object({
+      token: t2.Optional(t2.String())
+    }),
+    body: t2.Any(),
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: t2.Any() }, { description: `${name13} execution webhook response` })
+    },
+    detail: { operationId: "execution" }
+  }
+};
+
+// src/api/webhook/bolna/bolna.service.ts
+var IVR_UNKNOWN_PATIENT_NAME = "Unknown Caller";
+var normalizePhone = (raw) => {
+  const digits2 = `${raw ?? ""}`.replace(/\D/g, "");
+  const local = digits2.slice(-10);
+  return {
+    local,
+    display: digits2.length > 10 ? `+${digits2}` : digits2,
+    variants: Array.from(new Set([local, `0${local}`, `91${local}`, `+91${local}`, digits2]))
+  };
+};
+var resolveClinicForAgent = async (agentId) => {
+  if (agentId) {
+    const clinic = await Clinic_default.findOne({ ivr_agent_ids: agentId }).lean();
+    if (clinic)
+      return clinic;
+  }
+  return Clinic_default.findOne({ default: true }).lean();
+};
+var isActiveStatus = (status3) => IVR_ACTIVE_STATUSES.includes(`${status3 ?? ""}`.toLowerCase());
+var registerIncomingCall = async ({
+  contactNumber,
+  agentId,
+  executionId,
+  status: status3 = "in-progress"
+}) => {
+  const phone = normalizePhone(contactNumber);
+  if (phone.local.length < 10)
+    return null;
+  const clinic = await resolveClinicForAgent(agentId);
+  if (!clinic) {
+    console.error("\uD83D\uDE80 ~ IVR ~ no clinic found for agent:", agentId);
+    return null;
+  }
+  const scope = { clinic: clinic._id, tenant: clinic.tenant };
+  let isNewPatient = false;
+  let patient = await Patient_default.findOne({
+    ...scope,
+    phone: { $in: phone.variants },
+    deleted: false
+  }).sort({ createdAt: 1 }).lean();
+  if (!patient) {
+    const created = await Patient_default.create({
+      ...scope,
+      name: IVR_UNKNOWN_PATIENT_NAME,
+      phone: phone.local,
+      age: 0,
+      gender: 3,
+      profile_pic: ""
+    });
+    patient = created.toObject();
+    isNewPatient = true;
+  }
+  const callRequest = executionId ? await IvrCallRequest_default.findOneAndUpdate({ execution_id: executionId }, {
+    $setOnInsert: {
+      ...scope,
+      patient: patient._id,
+      contact_number: phone.display,
+      agent_id: agentId,
+      execution_id: executionId,
+      status: status3,
+      is_active: isActiveStatus(status3),
+      is_new_patient: isNewPatient
+    }
+  }, { upsert: true, new: true }).lean() : null;
+  return { clinic, patient, isNewPatient, callRequest };
+};
+var applyExecutionUpdate = async (payload) => {
+  const executionId = payload?.id || payload?.execution_id;
+  if (!executionId)
+    return null;
+  const status3 = `${payload?.status ?? ""}`.toLowerCase();
+  const telephony = payload?.telephony_data ?? {};
+  let existing = await IvrCallRequest_default.findOne({
+    execution_id: executionId
+  }).lean();
+  if (!existing) {
+    const from = telephony.from_number || payload?.user_number;
+    if (telephony.call_type && telephony.call_type !== "inbound")
+      return null;
+    if (!from)
+      return null;
+    const registered = await registerIncomingCall({
+      contactNumber: from,
+      agentId: payload?.agent_id,
+      executionId,
+      status: status3 || undefined
+    });
+    existing = registered?.callRequest ?? null;
+    if (!existing)
+      return null;
+  }
+  const update = {};
+  const duration = Number(telephony.duration ?? payload?.conversation_duration);
+  if (Number.isFinite(duration) && duration > 0)
+    update.duration = duration;
+  if (telephony.recording_url)
+    update.recording_url = telephony.recording_url;
+  if (payload?.summary)
+    update.summary = payload.summary;
+  if (payload?.transcript)
+    update.transcript = payload.transcript;
+  if (status3 && !(isActiveStatus(status3) && !existing.is_active)) {
+    update.status = status3;
+    update.is_active = isActiveStatus(status3);
+    if (!update.is_active && existing.is_active)
+      update.ended_at = new Date;
+  }
+  return IvrCallRequest_default.findByIdAndUpdate(existing._id, update, {
+    new: true
+  }).lean();
+};
+
+// src/api/webhook/bolna/bolna.routes.ts
+var BOLNA_WEBHOOK_TOKEN = "86659ec7a4d8ef78cb3d1332ebdf08e394a8388e4786e0f0";
+var genderLabel = (gender) => gender === 1 ? "Male" : gender === 2 ? "Female" : "";
+var isBolnaAuthorized = ({ headers, query, set }) => {
+  const received = `${headers?.authorization ?? ""}`.replace(/^Bearer\s+/i, "") || query?.token;
+  if (received !== BOLNA_WEBHOOK_TOKEN) {
+    set.status = 401;
+    return { status: false, message: "Unauthorized", data: null };
+  }
+};
+var bolna_routes_default = createElysia({ prefix: bolna_schema_default.meta.name }).guard({
+  detail: { tags: ["webhook"] },
+  beforeHandle: isBolnaAuthorized
+}, (app) => app.get("/caller", async ({ query }) => {
+  const result = await registerIncomingCall({
+    contactNumber: query.contact_number,
+    agentId: query.agent_id,
+    executionId: query.execution_id
+  });
+  const patient = result?.patient;
+  const isRegistered = !!patient && !result?.isNewPatient;
+  return {
+    is_registered: isRegistered,
+    patient_id: patient ? `${patient.id ?? ""}` : "",
+    patient_name: isRegistered ? patient?.name ?? "" : "",
+    patient_phone: patient?.phone ?? "",
+    patient_age: isRegistered && patient?.age ? `${patient.age}` : "",
+    patient_gender: isRegistered ? genderLabel(patient?.gender) : "",
+    clinic_name: result?.clinic?.name ?? ""
+  };
+}, bolna_schema_default.caller).post("/execution", async ({ body }) => {
+  const entry = await applyExecutionUpdate(body);
+  return R3("execution processed", entry);
+}, bolna_schema_default.execution));
+
+// src/api/webhook/webhook.index.ts
+var webhookRoutes = createElysia({ prefix: "/webhook" });
+webhookRoutes.use(bolna_routes_default);
 
 // src/index.ts
 var import_bearer = __toESM(require_cjs5(), 1);
@@ -187605,10 +188067,10 @@ api.onAfterHandle((ctx) => {
   };
   const toOpenApiPath = (path) => path.split("/").map((segment) => {
     if (segment.startsWith(":")) {
-      let name12 = segment.slice(1);
-      if (name12.endsWith("?"))
-        name12 = name12.slice(0, -1);
-      return `{${name12}}`;
+      let name14 = segment.slice(1);
+      if (name14.endsWith("?"))
+        name14 = name14.slice(0, -1);
+      return `{${name14}}`;
     }
     return segment;
   }).join("/");
@@ -187728,6 +188190,7 @@ api.use(swagger({
 }));
 api.use(adminRoutes);
 api.use(manglamCityRoutes);
+api.use(webhookRoutes);
 api.get("/admin-doc", () => `<!doctype html>
 <html lang="en">
   <head>

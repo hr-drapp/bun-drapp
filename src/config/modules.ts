@@ -24,6 +24,7 @@ export enum ModuleId {
 	PATIENTS = 17,
 	APPOINTMENTS = 18,
 	PATIENT_HEALTH_RECORDS = 19,
+	IVR_CALL_REQUESTS = 20,
 }
 
 export const FULL_ACCESS_ABILITIES: Ability = [
