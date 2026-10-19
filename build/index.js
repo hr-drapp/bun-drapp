@@ -183999,6 +183999,7 @@ var clinicPayload = {
   tenant: undefined,
   id: undefined
 };
+var DEFAULT_IVR_AGENT_ID = "724f62ec-3dc4-41c9-b2ad-a58756231b09";
 var doctorPayload = {
   name: "Dr Arjun",
   profile_pic: "https://clicknic.me/assets/images/logo.svg",
@@ -184146,7 +184147,10 @@ var logSeederCredentials = (clinics) => {
 var seeder = async () => {
   const tenant = await Tenant_default.findOneAndUpdate({ default: true }, { $set: tenantPayload }, { upsert: true, new: true });
   clinicPayload.tenant = tenant._id;
-  const clinic = await Clinic_default.findOneAndUpdate({ domain: clinicPayload.domain, tenant: tenant._id }, { $set: clinicPayload }, { upsert: true, new: true });
+  const clinic = await Clinic_default.findOneAndUpdate({ domain: clinicPayload.domain, tenant: tenant._id }, {
+    $set: clinicPayload,
+    $addToSet: { ivr_agent_ids: DEFAULT_IVR_AGENT_ID }
+  }, { upsert: true, new: true });
   const superAdminRoleDoc = await Role_default.findOneAndUpdate({ name: superAdminRole.name }, { $set: superAdminRole }, { upsert: true, new: true });
   const doctorRoleDoc = await Role_default.findOneAndUpdate({ name: doctorRole.name }, { $set: doctorRole }, { upsert: true, new: true });
   const receptionistRoleDoc = await Role_default.findOneAndUpdate({ name: receptionistRole.name }, { $set: receptionistRole }, { upsert: true, new: true });
@@ -184252,7 +184256,8 @@ var seedClinicDefaults = async (clinicName) => {
       default: false,
       domain: `${clinicSlug}.clicknic.site`,
       tenant: tenant._id
-    }
+    },
+    $addToSet: { ivr_agent_ids: DEFAULT_IVR_AGENT_ID }
   }, { upsert: true, new: true });
   const { superAdminRoleDoc, doctorRoleDoc, receptionistRoleDoc } = await getOrCreateDefaultRoles();
   const superAdminDoc = await Admin_default.findOneAndUpdate({ phone: credentials.superAdmin.phone }, {
@@ -187854,7 +187859,7 @@ var normalizePhone = (raw) => {
 };
 var resolveClinicForAgent = async (agentId) => {
   if (agentId) {
-    const clinic = await Clinic_default.findOne({ ivr_agent_ids: agentId }).lean();
+    const clinic = await Clinic_default.findOne({ ivr_agent_ids: agentId }).sort({ default: -1, createdAt: 1 }).lean();
     if (clinic)
       return clinic;
   }

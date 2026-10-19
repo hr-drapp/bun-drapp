@@ -23,10 +23,15 @@ export const normalizePhone = (raw: string) => {
 	};
 };
 
-/** Agent → clinic via Clinic.ivr_agent_ids, falling back to the default clinic. */
+/**
+ * Agent → clinic via Clinic.ivr_agent_ids, falling back to the default clinic.
+ * If several clinics share an agent, the default (then oldest) clinic wins.
+ */
 export const resolveClinicForAgent = async (agentId?: string) => {
 	if (agentId) {
-		const clinic = await Clinic.findOne({ ivr_agent_ids: agentId }).lean();
+		const clinic = await Clinic.findOne({ ivr_agent_ids: agentId })
+			.sort({ default: -1, createdAt: 1 })
+			.lean();
 		if (clinic) return clinic;
 	}
 	return Clinic.findOne({ default: true }).lean();

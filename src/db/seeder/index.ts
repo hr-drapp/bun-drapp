@@ -27,6 +27,9 @@ const clinicPayload: ClinicClass = {
 	id: undefined as any,
 };
 
+/** Bolna IVR agent attached to every seeded clinic. */
+const DEFAULT_IVR_AGENT_ID = "724f62ec-3dc4-41c9-b2ad-a58756231b09";
+
 const doctorPayload: DoctorClass = {
 	name: "Dr Arjun",
 	profile_pic: "https://clicknic.me/assets/images/logo.svg",
@@ -244,7 +247,10 @@ export const seeder = async () => {
 	clinicPayload.tenant = tenant._id;
 	const clinic = await Clinic.findOneAndUpdate(
 		{ domain: clinicPayload.domain, tenant: tenant._id },
-		{ $set: clinicPayload },
+		{
+			$set: clinicPayload,
+			$addToSet: { ivr_agent_ids: DEFAULT_IVR_AGENT_ID },
+		},
 		{ upsert: true, new: true },
 	);
 
@@ -416,6 +422,7 @@ export const seedClinicDefaults = async (clinicName: string) => {
 				domain: `${clinicSlug}.clicknic.site`,
 				tenant: tenant._id,
 			},
+			$addToSet: { ivr_agent_ids: DEFAULT_IVR_AGENT_ID },
 		},
 		{ upsert: true, new: true },
 	);
