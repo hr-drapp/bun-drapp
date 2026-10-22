@@ -188381,40 +188381,48 @@ webhookRoutes.use(bolna_routes_default);
 
 // src/api/webhook/knowlarity/knowlarity.schema.ts
 var name15 = "get-agent";
+var callParams = {
+  caller_number: t2.Optional(t2.String()),
+  knowlarity_number: t2.Optional(t2.String()),
+  call_uuid: t2.Optional(t2.String()),
+  call_start_time: t2.Optional(t2.String())
+};
+var getAgent = {
+  headers: t2.Object({
+    "x-api-key": t2.Optional(t2.String())
+  }),
+  body: t2.Object(callParams),
+  response: {
+    200: t2.Object({
+      status: t2.Boolean(),
+      message: t2.String(),
+      data: t2.Union([
+        t2.Null(),
+        t2.Object({
+          is_registered: t2.Boolean(),
+          agent_number: t2.String(),
+          hold_sound: t2.String()
+        })
+      ])
+    }, { description: `${name15} response, tells the IVR which agent to dial` }),
+    401: t2.Object({
+      status: t2.Boolean(),
+      message: t2.String(),
+      data: t2.Null()
+    })
+  },
+  detail: { operationId: "getAgent" }
+};
 var knowlarity_schema_default = {
   meta: {
     name: name15
   },
-  getAgent: {
-    headers: t2.Object({
-      "x-api-key": t2.Optional(t2.String())
-    }),
-    body: t2.Object({
-      caller_number: t2.Optional(t2.String()),
-      knowlarity_number: t2.Optional(t2.String()),
-      call_uuid: t2.Optional(t2.String()),
-      call_start_time: t2.Optional(t2.String())
-    }),
-    response: {
-      200: t2.Object({
-        status: t2.Boolean(),
-        message: t2.String(),
-        data: t2.Union([
-          t2.Null(),
-          t2.Object({
-            is_registered: t2.Boolean(),
-            agent_number: t2.String(),
-            hold_sound: t2.String()
-          })
-        ])
-      }, { description: `${name15} response, tells the IVR which agent to dial` }),
-      401: t2.Object({
-        status: t2.Boolean(),
-        message: t2.String(),
-        data: t2.Null()
-      })
-    },
-    detail: { operationId: "getAgent" }
+  getAgent,
+  getAgentQuery: {
+    headers: getAgent.headers,
+    query: t2.Object(callParams),
+    response: getAgent.response,
+    detail: { operationId: "getAgentQuery" }
   }
 };
 
@@ -188461,17 +188469,22 @@ var lookupCaller = async (callerNumber, trace) => {
 };
 
 // src/api/webhook/knowlarity/knowlarity.routes.ts
+var DEFAULT_AGENT_NUMBER = "+919983396152";
 var UNAUTHORIZED2 = { status: false, message: "Unauthorized", data: null };
-var knowlarity_routes_default = createElysia({ prefix: knowlarity_schema_default.meta.name }).guard({
-  detail: { tags: ["webhook"] }
-}, (app) => app.post("/", async ({ body, headers, request, set, path }) => {
+async function handleGetAgent({
+  params,
+  headers,
+  request,
+  set,
+  path
+}) {
   const trace = await WebhookTrace.start({
     provider: "knowlarity",
     event: "get-agent",
     method: request.method,
     path,
     ip: headers["x-forwarded-for"] || headers["x-real-ip"],
-    body
+    body: params
   });
   if (!isValidApiKey(headers["x-api-key"])) {
     trace.step(headers["x-api-key"] ? "x-api-key mismatch, rejected with 401" : "No x-api-key sent, rejected with 401");
@@ -188482,19 +188495,19 @@ var knowlarity_routes_default = createElysia({ prefix: knowlarity_schema_default
   }
   trace.step(process.env.KNOWLARITY_API_KEY ? "API key verified" : "KNOWLARITY_API_KEY not set, API key check skipped");
   try {
-    trace.step(`get-agent: caller_number="${body.caller_number ?? ""}", knowlarity_number="${body.knowlarity_number ?? "-"}", call_uuid="${body.call_uuid ?? "-"}", call_start_time="${body.call_start_time ?? "-"}"`);
-    const isRegistered = body.caller_number ? await lookupCaller(body.caller_number, trace) : (trace.step("caller_number missing, treating as new patient"), false);
+    trace.step(`get-agent: caller_number="${params.caller_number ?? ""}", knowlarity_number="${params.knowlarity_number ?? "-"}", call_uuid="${params.call_uuid ?? "-"}", call_start_time="${params.call_start_time ?? "-"}"`);
+    const isRegistered = params.caller_number ? await lookupCaller(params.caller_number, trace) : (trace.step("caller_number missing, treating as new patient"), false);
     const response = {
       status: true,
       message: isRegistered ? "Registered patient" : "New patient",
       data: {
         is_registered: isRegistered,
-        agent_number: process.env.KNOWLARITY_AGENT_NUMBER ?? "",
+        agent_number: process.env.KNOWLARITY_AGENT_NUMBER || DEFAULT_AGENT_NUMBER,
         hold_sound: isRegistered ? "registered" : "new"
       }
     };
-    if (!response.data.agent_number) {
-      trace.step("KNOWLARITY_AGENT_NUMBER is not set, agent_number returned empty");
+    if (!process.env.KNOWLARITY_AGENT_NUMBER) {
+      trace.step(`KNOWLARITY_AGENT_NUMBER is not set, using default agent_number ${DEFAULT_AGENT_NUMBER}`);
     }
     trace.step(`Responded: ${response.message}, hold_sound="${response.data.hold_sound}"`);
     trace.set({ http_status: 200 });
@@ -188506,7 +188519,10 @@ var knowlarity_routes_default = createElysia({ prefix: knowlarity_schema_default
     trace.finish("failed" /* FAILED */, { error: error?.stack || error?.message });
     throw error;
   }
-}, knowlarity_schema_default.getAgent));
+}
+var knowlarity_routes_default = createElysia({ prefix: knowlarity_schema_default.meta.name }).guard({
+  detail: { tags: ["webhook"] }
+}, (app) => app.post("/", ({ body, headers, request, set, path }) => handleGetAgent({ params: body, headers, request, set, path }), knowlarity_schema_default.getAgent).get("/", ({ query, headers, request, set, path }) => handleGetAgent({ params: query, headers, request, set, path }), knowlarity_schema_default.getAgentQuery));
 
 // src/index.ts
 var import_bearer = __toESM(require_cjs5(), 1);
