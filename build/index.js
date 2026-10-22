@@ -141121,7 +141121,7 @@ var require_node5 = __commonJS((exports, module) => {
   exports.inspectOpts = Object.keys(process.env).filter((key) => {
     return /^debug_/i.test(key);
   }).reduce((obj, key) => {
-    const prop8 = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_3, k2) => {
+    const prop9 = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_3, k2) => {
       return k2.toUpperCase();
     });
     let val = process.env[key];
@@ -141134,7 +141134,7 @@ var require_node5 = __commonJS((exports, module) => {
     } else {
       val = Number(val);
     }
-    obj[prop8] = val;
+    obj[prop9] = val;
     return obj;
   }, {});
   function useColors() {
@@ -148636,7 +148636,7 @@ var require_moment = __commonJS((exports, module) => {
     }
     var momentProperties = hooks.momentProperties = [], updateInProgress = false;
     function copyConfig(to2, from2) {
-      var i2, prop8, val, momentPropertiesLen = momentProperties.length;
+      var i2, prop9, val, momentPropertiesLen = momentProperties.length;
       if (!isUndefined(from2._isAMomentObject)) {
         to2._isAMomentObject = from2._isAMomentObject;
       }
@@ -148669,10 +148669,10 @@ var require_moment = __commonJS((exports, module) => {
       }
       if (momentPropertiesLen > 0) {
         for (i2 = 0;i2 < momentPropertiesLen; i2++) {
-          prop8 = momentProperties[i2];
-          val = from2[prop8];
+          prop9 = momentProperties[i2];
+          val = from2[prop9];
           if (!isUndefined(val)) {
-            to2[prop8] = val;
+            to2[prop9] = val;
           }
         }
       }
@@ -148746,14 +148746,14 @@ Arguments: ` + Array.prototype.slice.call(args).join("") + `
       return typeof Function !== "undefined" && input instanceof Function || Object.prototype.toString.call(input) === "[object Function]";
     }
     function set(config) {
-      var prop8, i2;
+      var prop9, i2;
       for (i2 in config) {
         if (hasOwnProp(config, i2)) {
-          prop8 = config[i2];
-          if (isFunction(prop8)) {
-            this[i2] = prop8;
+          prop9 = config[i2];
+          if (isFunction(prop9)) {
+            this[i2] = prop9;
           } else {
-            this["_" + i2] = prop8;
+            this["_" + i2] = prop9;
           }
         }
       }
@@ -148761,23 +148761,23 @@ Arguments: ` + Array.prototype.slice.call(args).join("") + `
       this._dayOfMonthOrdinalParseLenient = new RegExp((this._dayOfMonthOrdinalParse.source || this._ordinalParse.source) + "|" + /\d{1,2}/.source);
     }
     function mergeConfigs(parentConfig, childConfig) {
-      var res = extend({}, parentConfig), prop8;
-      for (prop8 in childConfig) {
-        if (hasOwnProp(childConfig, prop8)) {
-          if (isObject2(parentConfig[prop8]) && isObject2(childConfig[prop8])) {
-            res[prop8] = {};
-            extend(res[prop8], parentConfig[prop8]);
-            extend(res[prop8], childConfig[prop8]);
-          } else if (childConfig[prop8] != null) {
-            res[prop8] = childConfig[prop8];
+      var res = extend({}, parentConfig), prop9;
+      for (prop9 in childConfig) {
+        if (hasOwnProp(childConfig, prop9)) {
+          if (isObject2(parentConfig[prop9]) && isObject2(childConfig[prop9])) {
+            res[prop9] = {};
+            extend(res[prop9], parentConfig[prop9]);
+            extend(res[prop9], childConfig[prop9]);
+          } else if (childConfig[prop9] != null) {
+            res[prop9] = childConfig[prop9];
           } else {
-            delete res[prop8];
+            delete res[prop9];
           }
         }
       }
-      for (prop8 in parentConfig) {
-        if (hasOwnProp(parentConfig, prop8) && !hasOwnProp(childConfig, prop8) && isObject2(parentConfig[prop8])) {
-          res[prop8] = extend({}, res[prop8]);
+      for (prop9 in parentConfig) {
+        if (hasOwnProp(parentConfig, prop9) && !hasOwnProp(childConfig, prop9) && isObject2(parentConfig[prop9])) {
+          res[prop9] = extend({}, res[prop9]);
         }
       }
       return res;
@@ -148992,12 +148992,12 @@ Arguments: ` + Array.prototype.slice.call(args).join("") + `
       return typeof units === "string" ? aliases[units] || aliases[units.toLowerCase()] : undefined;
     }
     function normalizeObjectUnits(inputObject) {
-      var normalizedInput = {}, normalizedProp, prop8;
-      for (prop8 in inputObject) {
-        if (hasOwnProp(inputObject, prop8)) {
-          normalizedProp = normalizeUnits(prop8);
+      var normalizedInput = {}, normalizedProp, prop9;
+      for (prop9 in inputObject) {
+        if (hasOwnProp(inputObject, prop9)) {
+          normalizedProp = normalizeUnits(prop9);
           if (normalizedProp) {
-            normalizedInput[normalizedProp] = inputObject[prop8];
+            normalizedInput[normalizedProp] = inputObject[prop9];
           }
         }
       }
@@ -183975,6 +183975,57 @@ AdminClass = __legacyDecorateClassTS([
 ], AdminClass);
 var Admin_default = import_typegoose6.getModelForClass(AdminClass);
 
+// src/models/clicknic/Patient.ts
+var import_typegoose7 = __toESM(require_typegoose(), 1);
+class PatientClass {
+}
+__legacyDecorateClassTS([
+  import_typegoose7.prop({}),
+  __legacyMetadataTS("design:type", Number)
+], PatientClass.prototype, "id", undefined);
+__legacyDecorateClassTS([
+  import_typegoose7.prop({ ref: () => ClinicClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], PatientClass.prototype, "clinic", undefined);
+__legacyDecorateClassTS([
+  import_typegoose7.prop({ ref: () => TenantClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], PatientClass.prototype, "tenant", undefined);
+__legacyDecorateClassTS([
+  import_typegoose7.prop({}),
+  __legacyMetadataTS("design:type", String)
+], PatientClass.prototype, "name", undefined);
+__legacyDecorateClassTS([
+  import_typegoose7.prop({}),
+  __legacyMetadataTS("design:type", String)
+], PatientClass.prototype, "phone", undefined);
+__legacyDecorateClassTS([
+  import_typegoose7.prop({}),
+  __legacyMetadataTS("design:type", Number)
+], PatientClass.prototype, "age", undefined);
+__legacyDecorateClassTS([
+  import_typegoose7.prop({}),
+  __legacyMetadataTS("design:type", Number)
+], PatientClass.prototype, "gender", undefined);
+__legacyDecorateClassTS([
+  import_typegoose7.prop({}),
+  __legacyMetadataTS("design:type", String)
+], PatientClass.prototype, "profile_pic", undefined);
+__legacyDecorateClassTS([
+  import_typegoose7.prop({ default: false }),
+  __legacyMetadataTS("design:type", Boolean)
+], PatientClass.prototype, "deleted", undefined);
+PatientClass = __legacyDecorateClassTS([
+  import_typegoose7.pre("save", async function(next) {
+    if (!this.id) {
+      this.id = await GetAutoIncrId(0 /* CLINIC */);
+    }
+    next();
+  }),
+  import_typegoose7.modelOptions({ schemaOptions: { collection: "patient", timestamps: true } })
+], PatientClass);
+var Patient_default = import_typegoose7.getModelForClass(PatientClass);
+
 // src/utils/auth.ts
 var import_bcryptjs = __toESM(require_bcrypt(), 1);
 var HashPassword = (password) => {
@@ -184144,6 +184195,31 @@ var logSeederCredentials = (clinics) => {
   }
   consola.box(formatClinicCredentialLog(clinics));
 };
+var KNOWLARITY_TEST_PATIENT = {
+  name: "Knowlarity Test Patient",
+  phone: "9711374160",
+  age: 30,
+  gender: 1
+};
+var seedKnowlarityTestPatient = async () => {
+  const clinic = await Clinic_default.findOne({ default: true }).lean();
+  if (!clinic)
+    return null;
+  const scope = { clinic: clinic._id, tenant: clinic.tenant };
+  const { phone } = KNOWLARITY_TEST_PATIENT;
+  const existing = await Patient_default.findOne({
+    ...scope,
+    phone: { $in: [phone, `0${phone}`, `91${phone}`, `+91${phone}`] },
+    deleted: false
+  }).lean();
+  if (existing)
+    return existing;
+  return Patient_default.create({
+    ...scope,
+    ...KNOWLARITY_TEST_PATIENT,
+    profile_pic: ""
+  });
+};
 var seeder = async () => {
   const tenant = await Tenant_default.findOneAndUpdate({ default: true }, { $set: tenantPayload }, { upsert: true, new: true });
   clinicPayload.tenant = tenant._id;
@@ -184213,6 +184289,7 @@ var seeder = async () => {
     Role_default.updateOne({ _id: receptionistRoleDoc._id }, { total_admins: receptionistCount })
   ]);
   const seededClinics = await Promise.all(DEFAULT_CLINIC_NAMES.map((clinicName) => seedClinicDefaults(clinicName)));
+  await seedKnowlarityTestPatient();
   logSeederCredentials([
     {
       clinic: clinicPayload.name,
@@ -184394,50 +184471,50 @@ var createElysia = (config) => new Elysia({
 var import_mongoose4 = __toESM(require_mongoose2(), 1);
 
 // src/models/clicknic/AccessGrant.ts
-var import_typegoose7 = __toESM(require_typegoose(), 1);
+var import_typegoose8 = __toESM(require_typegoose(), 1);
 var import_mongoose3 = __toESM(require_mongoose2(), 1);
 class AccessGrantClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose7.prop({ ref: () => AdminClass, required: true }),
+  import_typegoose8.prop({ ref: () => AdminClass, required: true }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AccessGrantClass.prototype, "grantee", undefined);
 __legacyDecorateClassTS([
-  import_typegoose7.prop({ ref: () => AdminClass, required: true }),
+  import_typegoose8.prop({ ref: () => AdminClass, required: true }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AccessGrantClass.prototype, "granted_by", undefined);
 __legacyDecorateClassTS([
-  import_typegoose7.prop({ required: true }),
+  import_typegoose8.prop({ required: true }),
   __legacyMetadataTS("design:type", typeof AccessGrantResource === "undefined" ? Object : AccessGrantResource)
 ], AccessGrantClass.prototype, "resource", undefined);
 __legacyDecorateClassTS([
-  import_typegoose7.prop({ type: () => [import_mongoose3.default.Schema.Types.ObjectId], default: [] }),
+  import_typegoose8.prop({ type: () => [import_mongoose3.default.Schema.Types.ObjectId], default: [] }),
   __legacyMetadataTS("design:type", Array)
 ], AccessGrantClass.prototype, "resource_ids", undefined);
 __legacyDecorateClassTS([
-  import_typegoose7.prop({ type: () => [Object], default: [] }),
+  import_typegoose8.prop({ type: () => [Object], default: [] }),
   __legacyMetadataTS("design:type", Array)
 ], AccessGrantClass.prototype, "filters", undefined);
 __legacyDecorateClassTS([
-  import_typegoose7.prop({ ref: () => TenantClass }),
+  import_typegoose8.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AccessGrantClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose7.prop(),
+  import_typegoose8.prop(),
   __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
 ], AccessGrantClass.prototype, "expires_at", undefined);
 AccessGrantClass = __legacyDecorateClassTS([
-  import_typegoose7.index({ grantee: 1, resource: 1 }),
-  import_typegoose7.index({ granted_by: 1, resource: 1 }),
-  import_typegoose7.index({ expires_at: 1 }),
-  import_typegoose7.modelOptions({
+  import_typegoose8.index({ grantee: 1, resource: 1 }),
+  import_typegoose8.index({ granted_by: 1, resource: 1 }),
+  import_typegoose8.index({ expires_at: 1 }),
+  import_typegoose8.modelOptions({
     schemaOptions: {
       collection: "accessgrants",
       timestamps: true
     }
   })
 ], AccessGrantClass);
-var AccessGrant_default = import_typegoose7.getModelForClass(AccessGrantClass);
+var AccessGrant_default = import_typegoose8.getModelForClass(AccessGrantClass);
 
 // src/config/redis.ts
 var import_dotenv2 = __toESM(require_main(), 1);
@@ -185699,53 +185776,53 @@ var doctor_time_slot_schema_default = {
 };
 
 // src/models/clicknic/DoctorTimeSlot.ts
-var import_typegoose8 = __toESM(require_typegoose(), 1);
+var import_typegoose9 = __toESM(require_typegoose(), 1);
 class DoctorTimeSlotClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose8.prop({}),
+  import_typegoose9.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], DoctorTimeSlotClass.prototype, "id", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({ ref: () => ClinicClass }),
+  import_typegoose9.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], DoctorTimeSlotClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({ ref: () => TenantClass }),
+  import_typegoose9.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], DoctorTimeSlotClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({ ref: () => DoctorClass }),
+  import_typegoose9.prop({ ref: () => DoctorClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], DoctorTimeSlotClass.prototype, "doctor", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({}),
+  import_typegoose9.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], DoctorTimeSlotClass.prototype, "start", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({}),
+  import_typegoose9.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], DoctorTimeSlotClass.prototype, "end", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({ default: 0 /* RESULT_PENDING */ }),
+  import_typegoose9.prop({ default: 0 /* RESULT_PENDING */ }),
   __legacyMetadataTS("design:type", Number)
 ], DoctorTimeSlotClass.prototype, "status", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({ default: false }),
+  import_typegoose9.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], DoctorTimeSlotClass.prototype, "deleted", undefined);
 DoctorTimeSlotClass = __legacyDecorateClassTS([
-  import_typegoose8.pre("save", async function(next) {
+  import_typegoose9.pre("save", async function(next) {
     if (!this.id) {
       this.id = await GetAutoIncrId(0 /* CLINIC */);
     }
     next();
   }),
-  import_typegoose8.modelOptions({
+  import_typegoose9.modelOptions({
     schemaOptions: { collection: "doctor_time_slot", timestamps: true }
   })
 ], DoctorTimeSlotClass);
-var DoctorTimeSlot_default = import_typegoose8.getModelForClass(DoctorTimeSlotClass);
+var DoctorTimeSlot_default = import_typegoose9.getModelForClass(DoctorTimeSlotClass);
 
 // src/api/admin/doctor-time-slot/doctor-time-slot.routes.ts
 var doctor_time_slot_routes_default = createElysia({ prefix: doctor_time_slot_schema_default.meta.name }).guard({
@@ -186254,57 +186331,6 @@ var patient_schema_default = {
     }
   }
 };
-
-// src/models/clicknic/Patient.ts
-var import_typegoose9 = __toESM(require_typegoose(), 1);
-class PatientClass {
-}
-__legacyDecorateClassTS([
-  import_typegoose9.prop({}),
-  __legacyMetadataTS("design:type", Number)
-], PatientClass.prototype, "id", undefined);
-__legacyDecorateClassTS([
-  import_typegoose9.prop({ ref: () => ClinicClass }),
-  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
-], PatientClass.prototype, "clinic", undefined);
-__legacyDecorateClassTS([
-  import_typegoose9.prop({ ref: () => TenantClass }),
-  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
-], PatientClass.prototype, "tenant", undefined);
-__legacyDecorateClassTS([
-  import_typegoose9.prop({}),
-  __legacyMetadataTS("design:type", String)
-], PatientClass.prototype, "name", undefined);
-__legacyDecorateClassTS([
-  import_typegoose9.prop({}),
-  __legacyMetadataTS("design:type", String)
-], PatientClass.prototype, "phone", undefined);
-__legacyDecorateClassTS([
-  import_typegoose9.prop({}),
-  __legacyMetadataTS("design:type", Number)
-], PatientClass.prototype, "age", undefined);
-__legacyDecorateClassTS([
-  import_typegoose9.prop({}),
-  __legacyMetadataTS("design:type", Number)
-], PatientClass.prototype, "gender", undefined);
-__legacyDecorateClassTS([
-  import_typegoose9.prop({}),
-  __legacyMetadataTS("design:type", String)
-], PatientClass.prototype, "profile_pic", undefined);
-__legacyDecorateClassTS([
-  import_typegoose9.prop({ default: false }),
-  __legacyMetadataTS("design:type", Boolean)
-], PatientClass.prototype, "deleted", undefined);
-PatientClass = __legacyDecorateClassTS([
-  import_typegoose9.pre("save", async function(next) {
-    if (!this.id) {
-      this.id = await GetAutoIncrId(0 /* CLINIC */);
-    }
-    next();
-  }),
-  import_typegoose9.modelOptions({ schemaOptions: { collection: "patient", timestamps: true } })
-], PatientClass);
-var Patient_default = import_typegoose9.getModelForClass(PatientClass);
 
 // src/models/clicknic/Appointment.ts
 var import_typegoose10 = __toESM(require_typegoose(), 1);
@@ -188353,6 +188379,135 @@ var bolna_routes_default = createElysia({ prefix: bolna_schema_default.meta.name
 var webhookRoutes = createElysia({ prefix: "/webhook" });
 webhookRoutes.use(bolna_routes_default);
 
+// src/api/webhook/knowlarity/knowlarity.schema.ts
+var name15 = "get-agent";
+var knowlarity_schema_default = {
+  meta: {
+    name: name15
+  },
+  getAgent: {
+    headers: t2.Object({
+      "x-api-key": t2.Optional(t2.String())
+    }),
+    body: t2.Object({
+      caller_number: t2.Optional(t2.String()),
+      knowlarity_number: t2.Optional(t2.String()),
+      call_uuid: t2.Optional(t2.String()),
+      call_start_time: t2.Optional(t2.String())
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Union([
+          t2.Null(),
+          t2.Object({
+            is_registered: t2.Boolean(),
+            agent_number: t2.String(),
+            hold_sound: t2.String()
+          })
+        ])
+      }, { description: `${name15} response, tells the IVR which agent to dial` }),
+      401: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Null()
+      })
+    },
+    detail: { operationId: "getAgent" }
+  }
+};
+
+// src/api/webhook/knowlarity/knowlarity.service.ts
+import { timingSafeEqual } from "crypto";
+var isValidApiKey = (received) => {
+  const expected = process.env.KNOWLARITY_API_KEY;
+  if (!expected)
+    return true;
+  if (!received)
+    return false;
+  const a13 = Buffer.from(received);
+  const b2 = Buffer.from(expected);
+  return a13.length === b2.length && timingSafeEqual(a13, b2);
+};
+var lookupCaller = async (callerNumber, trace) => {
+  const phone = normalizePhone(callerNumber);
+  trace.set({ contact_number: phone.display });
+  if (phone.local.length < 10) {
+    trace.step(`Invalid caller number "${callerNumber}" (fewer than 10 digits), treating as new patient`);
+    return false;
+  }
+  trace.step(`Caller number "${callerNumber}" normalized to ${phone.local}`);
+  const clinic = await Clinic_default.findOne({ default: true }).lean();
+  if (!clinic) {
+    trace.step("No default clinic configured, treating as new patient");
+    return false;
+  }
+  trace.set({ clinic: clinic._id, tenant: clinic.tenant });
+  const patient = await Patient_default.findOne({
+    clinic: clinic._id,
+    tenant: clinic.tenant,
+    phone: { $in: phone.variants },
+    name: { $ne: IVR_UNKNOWN_PATIENT_NAME },
+    deleted: false
+  }).sort({ createdAt: 1 }).lean();
+  if (patient) {
+    trace.set({ patient: patient._id });
+    trace.step(`Registered patient found: "${patient.name}" (#${patient.id}, ${patient._id})`);
+  } else {
+    trace.step(`No registered patient with ${phone.local} in clinic "${clinic.name}"`);
+  }
+  return !!patient;
+};
+
+// src/api/webhook/knowlarity/knowlarity.routes.ts
+var UNAUTHORIZED2 = { status: false, message: "Unauthorized", data: null };
+var knowlarity_routes_default = createElysia({ prefix: knowlarity_schema_default.meta.name }).guard({
+  detail: { tags: ["webhook"] }
+}, (app) => app.post("/", async ({ body, headers, request, set, path }) => {
+  const trace = await WebhookTrace.start({
+    provider: "knowlarity",
+    event: "get-agent",
+    method: request.method,
+    path,
+    ip: headers["x-forwarded-for"] || headers["x-real-ip"],
+    body
+  });
+  if (!isValidApiKey(headers["x-api-key"])) {
+    trace.step(headers["x-api-key"] ? "x-api-key mismatch, rejected with 401" : "No x-api-key sent, rejected with 401");
+    trace.set({ http_status: 401 });
+    set.status = 401;
+    trace.finish("unauthorized" /* UNAUTHORIZED */, { response: UNAUTHORIZED2 });
+    return UNAUTHORIZED2;
+  }
+  trace.step(process.env.KNOWLARITY_API_KEY ? "API key verified" : "KNOWLARITY_API_KEY not set, API key check skipped");
+  try {
+    trace.step(`get-agent: caller_number="${body.caller_number ?? ""}", knowlarity_number="${body.knowlarity_number ?? "-"}", call_uuid="${body.call_uuid ?? "-"}", call_start_time="${body.call_start_time ?? "-"}"`);
+    const isRegistered = body.caller_number ? await lookupCaller(body.caller_number, trace) : (trace.step("caller_number missing, treating as new patient"), false);
+    const response = {
+      status: true,
+      message: isRegistered ? "Registered patient" : "New patient",
+      data: {
+        is_registered: isRegistered,
+        agent_number: process.env.KNOWLARITY_AGENT_NUMBER ?? "",
+        hold_sound: isRegistered ? "registered" : "new"
+      }
+    };
+    if (!response.data.agent_number) {
+      trace.step("KNOWLARITY_AGENT_NUMBER is not set, agent_number returned empty");
+    }
+    trace.step(`Responded: ${response.message}, hold_sound="${response.data.hold_sound}"`);
+    trace.set({ http_status: 200 });
+    trace.finish("success" /* SUCCESS */, { response });
+    return response;
+  } catch (error) {
+    trace.step(`Error: ${error?.message}`);
+    trace.set({ http_status: 500 });
+    trace.finish("failed" /* FAILED */, { error: error?.stack || error?.message });
+    throw error;
+  }
+}, knowlarity_schema_default.getAgent));
+
 // src/index.ts
 var import_bearer = __toESM(require_cjs5(), 1);
 process.env.TZ = "Asia/Kolkata";
@@ -188427,10 +188582,10 @@ api.onAfterHandle((ctx) => {
   };
   const toOpenApiPath = (path) => path.split("/").map((segment) => {
     if (segment.startsWith(":")) {
-      let name15 = segment.slice(1);
-      if (name15.endsWith("?"))
-        name15 = name15.slice(0, -1);
-      return `{${name15}}`;
+      let name16 = segment.slice(1);
+      if (name16.endsWith("?"))
+        name16 = name16.slice(0, -1);
+      return `{${name16}}`;
     }
     return segment;
   }).join("/");
@@ -188551,6 +188706,7 @@ api.use(swagger({
 api.use(adminRoutes);
 api.use(manglamCityRoutes);
 api.use(webhookRoutes);
+api.use(knowlarity_routes_default);
 api.get("/admin-doc", () => `<!doctype html>
 <html lang="en">
   <head>

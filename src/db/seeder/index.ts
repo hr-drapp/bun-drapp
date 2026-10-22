@@ -4,6 +4,7 @@ import { ModuleId } from "src/config/modules";
 import Admin, { AdminClass } from "src/models/clicknic/Admin";
 import Clinic, { ClinicClass } from "src/models/clicknic/Clinic";
 import Doctor, { DoctorClass } from "src/models/clicknic/Doctor";
+import Patient from "src/models/clicknic/Patient";
 import Role, {
 	RoleLevel,
 	RoleClass,
@@ -235,6 +236,39 @@ const logSeederCredentials = (clinics: SeededClinicLog[]) => {
 
 // TENANT->CLINIC->ROLES->ADMINS->DOCTOR
 
+/** Number registered as a patient so Knowlarity can test the "registered" IVR flow. */
+const KNOWLARITY_TEST_PATIENT = {
+	name: "Knowlarity Test Patient",
+	phone: "9711374160",
+	age: 30,
+	gender: 1,
+};
+
+/**
+ * Registers the Knowlarity test number in the same clinic /get-agent looks up
+ * (the default one). Created through Patient.create so the auto-increment id
+ * is assigned; skipped when a patient with this number already exists.
+ */
+export const seedKnowlarityTestPatient = async () => {
+	const clinic = await Clinic.findOne({ default: true }).lean();
+	if (!clinic) return null;
+
+	const scope = { clinic: clinic._id, tenant: clinic.tenant };
+	const { phone } = KNOWLARITY_TEST_PATIENT;
+	const existing = await Patient.findOne({
+		...scope,
+		phone: { $in: [phone, `0${phone}`, `91${phone}`, `+91${phone}`] },
+		deleted: false,
+	}).lean();
+	if (existing) return existing;
+
+	return Patient.create({
+		...scope,
+		...KNOWLARITY_TEST_PATIENT,
+		profile_pic: "",
+	});
+};
+
 export const seeder = async () => {
 	// 1. Tenant
 	const tenant = await Tenant.findOneAndUpdate(
@@ -365,6 +399,8 @@ export const seeder = async () => {
 	const seededClinics = await Promise.all(
 		DEFAULT_CLINIC_NAMES.map((clinicName) => seedClinicDefaults(clinicName)),
 	);
+
+	await seedKnowlarityTestPatient();
 
 	logSeederCredentials([
 		{
