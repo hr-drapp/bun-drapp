@@ -80,6 +80,17 @@ export default {
 		},
 		detail: { operationId: "update" },
 	},
+	// ── end (manual hang-up when the provider's status webhook never came) ──
+	end: {
+		query: t.Object({ id: t.String() }),
+		response: {
+			200: t.Object(
+				{ status: t.Boolean(), message: t.String(), data: detailSchema },
+				{ description: `${name} end response` },
+			),
+		},
+		detail: { operationId: "end" },
+	},
 	// ── detail ────────────────────────────────────────────────────────
 	detail: {
 		query: t.Object({ id: t.String() }),

@@ -143,6 +143,44 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 				},
 				schema.update,
 			)
+			.put(
+				"/end",
+				async ({ query, user }) => {
+					const existing = await IvrCallRequest.findOne(
+						scopeFilter({ _id: query.id }, user),
+					).lean();
+					if (!existing) return customError("Invalid entry");
+
+					// Already ended (webhook arrived or someone else ended it): no-op.
+					if (!existing.is_active) {
+						const entry = await IvrCallRequest.findById(existing._id)
+							.populate(patientPopulate)
+							.lean();
+						return R("call already ended", entry);
+					}
+
+					const endedAt = new Date();
+					const entry = await IvrCallRequest.findByIdAndUpdate(
+						existing._id,
+						{
+							is_active: false,
+							status: "ended-manually",
+							ended_at: endedAt,
+							...(!existing.duration && {
+								duration: Math.round(
+									(endedAt.getTime() - new Date((existing as any).createdAt).getTime()) / 1000,
+								),
+							}),
+						},
+						{ new: true },
+					)
+						.populate(patientPopulate)
+						.lean();
+
+					return R("call ended", entry);
+				},
+				schema.end,
+			)
 			.get(
 				"/detail",
 				async ({ query, user }) => {

@@ -187452,6 +187452,13 @@ var ivr_call_request_schema_default = {
     },
     detail: { operationId: "update" }
   },
+  end: {
+    query: t2.Object({ id: t2.String() }),
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: detailSchema8 }, { description: `${name11} end response` })
+    },
+    detail: { operationId: "end" }
+  },
   detail: {
     query: t2.Object({ id: t2.String() }),
     response: {
@@ -187635,7 +187642,25 @@ var ivr_call_request_routes_default = createElysia({ prefix: ivr_call_request_sc
   if (!entry)
     return customError("Invalid entry");
   return R3("entry updated", entry);
-}, ivr_call_request_schema_default.update).get("/detail", async ({ query, user }) => {
+}, ivr_call_request_schema_default.update).put("/end", async ({ query, user }) => {
+  const existing = await IvrCallRequest_default.findOne(scopeFilter({ _id: query.id }, user)).lean();
+  if (!existing)
+    return customError("Invalid entry");
+  if (!existing.is_active) {
+    const entry2 = await IvrCallRequest_default.findById(existing._id).populate(patientPopulate).lean();
+    return R3("call already ended", entry2);
+  }
+  const endedAt = new Date;
+  const entry = await IvrCallRequest_default.findByIdAndUpdate(existing._id, {
+    is_active: false,
+    status: "ended-manually",
+    ended_at: endedAt,
+    ...!existing.duration && {
+      duration: Math.round((endedAt.getTime() - new Date(existing.createdAt).getTime()) / 1000)
+    }
+  }, { new: true }).populate(patientPopulate).lean();
+  return R3("call ended", entry);
+}, ivr_call_request_schema_default.end).get("/detail", async ({ query, user }) => {
   const entry = await IvrCallRequest_default.findOne(scopeFilter({ _id: query.id }, user)).populate(patientPopulate).lean();
   if (!entry)
     return customError("Invalid entry");
