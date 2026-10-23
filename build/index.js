@@ -188439,9 +188439,14 @@ var isValidApiKey = (received) => {
   const b2 = Buffer.from(expected);
   return a13.length === b2.length && timingSafeEqual(a13, b2);
 };
-var lookupCaller = async (callerNumber, trace) => {
+var lookupCaller = async ({
+  callerNumber,
+  knowlarityNumber,
+  callUuid,
+  trace
+}) => {
   const phone = normalizePhone(callerNumber);
-  trace.set({ contact_number: phone.display });
+  trace.set({ contact_number: phone.display, execution_id: callUuid });
   if (phone.local.length < 10) {
     trace.step(`Invalid caller number "${callerNumber}" (fewer than 10 digits), treating as new patient`);
     return false;
@@ -188454,27 +188459,60 @@ var lookupCaller = async (callerNumber, trace) => {
   }
   trace.set({ clinic: clinic._id, tenant: clinic.tenant });
   const scope = { clinic: clinic._id, tenant: clinic.tenant };
-  const patient = await Patient_default.findOne({
+  let isNewPatient = false;
+  let patient = await Patient_default.findOne({
     ...scope,
     phone: { $in: phone.variants },
     deleted: false
   }).sort({ createdAt: 1 }).lean();
   if (patient) {
-    trace.set({ patient: patient._id });
     trace.step(`Registered patient found: "${patient.name}" (#${patient.id}, ${patient._id})`);
-    return true;
+  } else {
+    const created = await Patient_default.create({
+      ...scope,
+      name: IVR_UNKNOWN_PATIENT_NAME,
+      phone: phone.local,
+      age: 0,
+      gender: 3,
+      profile_pic: ""
+    });
+    patient = created.toObject();
+    isNewPatient = true;
+    trace.step(`No patient with ${phone.local} in clinic "${clinic.name}", registered new patient #${created.id} (${created._id})`);
   }
-  const created = await Patient_default.create({
-    ...scope,
-    name: IVR_UNKNOWN_PATIENT_NAME,
-    phone: phone.local,
-    age: 0,
-    gender: 3,
-    profile_pic: ""
-  });
-  trace.set({ patient: created._id });
-  trace.step(`No patient with ${phone.local} in clinic "${clinic.name}", registered new patient #${created.id} (${created._id})`);
-  return false;
+  trace.set({ patient: patient._id });
+  await recordCall({ scope, patientId: patient._id, phone: phone.display, knowlarityNumber, callUuid, isNewPatient, trace });
+  return !isNewPatient;
+};
+var recordCall = async ({
+  scope,
+  patientId,
+  phone,
+  knowlarityNumber,
+  callUuid,
+  isNewPatient,
+  trace
+}) => {
+  if (!callUuid) {
+    trace.step("No call_uuid sent, IVR call request not recorded");
+    return;
+  }
+  const status3 = "in-progress";
+  const result = await IvrCallRequest_default.findOneAndUpdate({ execution_id: callUuid }, {
+    $setOnInsert: {
+      ...scope,
+      patient: patientId,
+      contact_number: phone,
+      agent_id: knowlarityNumber,
+      execution_id: callUuid,
+      status: status3,
+      is_active: isActiveStatus(status3),
+      is_new_patient: isNewPatient
+    }
+  }, { upsert: true, new: true, includeResultMetadata: true }).lean();
+  const callRequest = result.value;
+  trace.set({ ivr_call_request: callRequest?._id });
+  trace.step(result.lastErrorObject?.updatedExisting ? `IVR call request already existed for call ${callUuid} (retry), left unchanged` : `IVR call request created (${callRequest?._id}) with status "${status3}"`);
 };
 
 // src/api/webhook/knowlarity/knowlarity.routes.ts
@@ -188507,7 +188545,12 @@ async function handleGetAgent({
   trace.step(process.env.KNOWLARITY_API_KEY ? "API key verified" : "KNOWLARITY_API_KEY not set, API key check skipped");
   try {
     trace.step(`get-agent: caller_number="${params.caller_number ?? ""}", knowlarity_number="${params.knowlarity_number ?? "-"}", call_uuid="${params.call_uuid ?? "-"}", call_start_time="${params.call_start_time ?? "-"}"`);
-    const isRegistered = params.caller_number ? await lookupCaller(params.caller_number, trace) : (trace.step("caller_number missing, treating as new patient"), false);
+    const isRegistered = params.caller_number ? await lookupCaller({
+      callerNumber: params.caller_number,
+      knowlarityNumber: params.knowlarity_number,
+      callUuid: params.call_uuid,
+      trace
+    }) : (trace.step("caller_number missing, treating as new patient"), false);
     const response = {
       status: true,
       message: isRegistered ? "Registered patient" : "New patient",

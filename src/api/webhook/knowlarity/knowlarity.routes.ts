@@ -67,7 +67,12 @@ async function handleGetAgent({
 		);
 
 		const isRegistered = params.caller_number
-			? await lookupCaller(params.caller_number, trace)
+			? await lookupCaller({
+					callerNumber: params.caller_number,
+					knowlarityNumber: params.knowlarity_number,
+					callUuid: params.call_uuid,
+					trace,
+				})
 			: (trace.step("caller_number missing, treating as new patient"), false);
 
 		const response = {

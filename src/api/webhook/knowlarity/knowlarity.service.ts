@@ -1,9 +1,11 @@
 import { timingSafeEqual } from "crypto";
 import Clinic from "src/models/clicknic/Clinic";
 import Patient from "src/models/clicknic/Patient";
+import IvrCallRequest from "src/models/clicknic/IvrCallRequest";
 import { WebhookTrace } from "src/utils/webhook-trace";
 import {
 	IVR_UNKNOWN_PATIENT_NAME,
+	isActiveStatus,
 	normalizePhone,
 } from "../bolna/bolna.service";
 
@@ -26,10 +28,21 @@ export const isValidApiKey = (received?: string) => {
  * Registered = a patient with this number already exists in the clinic.
  * A first-time caller is registered as "Unknown Caller" and answered as new,
  * so the next call from the same number comes back as registered.
+ * Like Bolna, the call is recorded in ivr_call_request, idempotent per call_uuid.
  */
-export const lookupCaller = async (callerNumber: string, trace: WebhookTrace) => {
+export const lookupCaller = async ({
+	callerNumber,
+	knowlarityNumber,
+	callUuid,
+	trace,
+}: {
+	callerNumber: string;
+	knowlarityNumber?: string;
+	callUuid?: string;
+	trace: WebhookTrace;
+}) => {
 	const phone = normalizePhone(callerNumber);
-	trace.set({ contact_number: phone.display });
+	trace.set({ contact_number: phone.display, execution_id: callUuid });
 
 	if (phone.local.length < 10) {
 		trace.step(`Invalid caller number "${callerNumber}" (fewer than 10 digits), treating as new patient`);
@@ -46,7 +59,8 @@ export const lookupCaller = async (callerNumber: string, trace: WebhookTrace) =>
 	trace.set({ clinic: clinic._id, tenant: clinic.tenant });
 
 	const scope = { clinic: clinic._id, tenant: clinic.tenant };
-	const patient = await Patient.findOne({
+	let isNewPatient = false;
+	let patient = await Patient.findOne({
 		...scope,
 		phone: { $in: phone.variants },
 		deleted: false,
@@ -55,20 +69,77 @@ export const lookupCaller = async (callerNumber: string, trace: WebhookTrace) =>
 		.lean();
 
 	if (patient) {
-		trace.set({ patient: patient._id });
 		trace.step(`Registered patient found: "${patient.name}" (#${patient.id}, ${patient._id})`);
-		return true;
+	} else {
+		const created = await Patient.create({
+			...scope,
+			name: IVR_UNKNOWN_PATIENT_NAME,
+			phone: phone.local,
+			age: 0,
+			gender: 3,
+			profile_pic: "",
+		});
+		patient = created.toObject();
+		isNewPatient = true;
+		trace.step(`No patient with ${phone.local} in clinic "${clinic.name}", registered new patient #${created.id} (${created._id})`);
+	}
+	trace.set({ patient: patient._id });
+
+	await recordCall({ scope, patientId: patient._id, phone: phone.display, knowlarityNumber, callUuid, isNewPatient, trace });
+
+	return !isNewPatient;
+};
+
+/** Adds the call to ivr_call_request; Knowlarity retries with the same call_uuid are no-ops. */
+const recordCall = async ({
+	scope,
+	patientId,
+	phone,
+	knowlarityNumber,
+	callUuid,
+	isNewPatient,
+	trace,
+}: {
+	scope: { clinic: any; tenant: any };
+	patientId: any;
+	phone: string;
+	knowlarityNumber?: string;
+	callUuid?: string;
+	isNewPatient: boolean;
+	trace: WebhookTrace;
+}) => {
+	if (!callUuid) {
+		trace.step("No call_uuid sent, IVR call request not recorded");
+		return;
 	}
 
-	const created = await Patient.create({
-		...scope,
-		name: IVR_UNKNOWN_PATIENT_NAME,
-		phone: phone.local,
-		age: 0,
-		gender: 3,
-		profile_pic: "",
-	});
-	trace.set({ patient: created._id });
-	trace.step(`No patient with ${phone.local} in clinic "${clinic.name}", registered new patient #${created.id} (${created._id})`);
-	return false;
+	const status = "in-progress";
+	// Typings ignore includeResultMetadata on lean(); the shape is { value, lastErrorObject }.
+	const result = (await IvrCallRequest.findOneAndUpdate(
+		{ execution_id: callUuid },
+		{
+			$setOnInsert: {
+				...scope,
+				patient: patientId,
+				contact_number: phone,
+				agent_id: knowlarityNumber,
+				execution_id: callUuid,
+				status,
+				is_active: isActiveStatus(status),
+				is_new_patient: isNewPatient,
+			},
+		},
+		{ upsert: true, new: true, includeResultMetadata: true },
+	).lean()) as unknown as {
+		value: any;
+		lastErrorObject?: { updatedExisting?: boolean };
+	};
+
+	const callRequest = result.value;
+	trace.set({ ivr_call_request: callRequest?._id });
+	trace.step(
+		result.lastErrorObject?.updatedExisting
+			? `IVR call request already existed for call ${callUuid} (retry), left unchanged`
+			: `IVR call request created (${callRequest?._id}) with status "${status}"`,
+	);
 };
