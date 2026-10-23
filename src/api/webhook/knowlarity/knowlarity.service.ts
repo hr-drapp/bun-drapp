@@ -23,9 +23,9 @@ export const isValidApiKey = (received?: string) => {
 };
 
 /**
- * Registered = a real patient with this number exists in the default clinic.
- * Callers auto-created by the Bolna flow ("Unknown Caller") are not real
- * registrations, so they still count as new patients.
+ * Registered = a patient with this number already exists in the clinic.
+ * A first-time caller is registered as "Unknown Caller" and answered as new,
+ * so the next call from the same number comes back as registered.
  */
 export const lookupCaller = async (callerNumber: string, trace: WebhookTrace) => {
 	const phone = normalizePhone(callerNumber);
@@ -45,11 +45,10 @@ export const lookupCaller = async (callerNumber: string, trace: WebhookTrace) =>
 	}
 	trace.set({ clinic: clinic._id, tenant: clinic.tenant });
 
+	const scope = { clinic: clinic._id, tenant: clinic.tenant };
 	const patient = await Patient.findOne({
-		clinic: clinic._id,
-		tenant: clinic.tenant,
+		...scope,
 		phone: { $in: phone.variants },
-		name: { $ne: IVR_UNKNOWN_PATIENT_NAME },
 		deleted: false,
 	})
 		.sort({ createdAt: 1 })
@@ -58,8 +57,18 @@ export const lookupCaller = async (callerNumber: string, trace: WebhookTrace) =>
 	if (patient) {
 		trace.set({ patient: patient._id });
 		trace.step(`Registered patient found: "${patient.name}" (#${patient.id}, ${patient._id})`);
-	} else {
-		trace.step(`No registered patient with ${phone.local} in clinic "${clinic.name}"`);
+		return true;
 	}
-	return !!patient;
+
+	const created = await Patient.create({
+		...scope,
+		name: IVR_UNKNOWN_PATIENT_NAME,
+		phone: phone.local,
+		age: 0,
+		gender: 3,
+		profile_pic: "",
+	});
+	trace.set({ patient: created._id });
+	trace.step(`No patient with ${phone.local} in clinic "${clinic.name}", registered new patient #${created.id} (${created._id})`);
+	return false;
 };
