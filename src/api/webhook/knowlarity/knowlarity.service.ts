@@ -7,6 +7,8 @@ import {
 	normalizePhone,
 } from "../bolna/bolna.service";
 
+const KNOWLARITY_CLINIC_ID = "69de8c299b532254712e76c0";
+
 /**
  * The API key is optional for now: while KNOWLARITY_API_KEY is unset every
  * request is allowed (testing phase). Set it to start enforcing `x-api-key`.
@@ -35,9 +37,10 @@ export const lookupCaller = async (callerNumber: string, trace: WebhookTrace) =>
 	}
 	trace.step(`Caller number "${callerNumber}" normalized to ${phone.local}`);
 
-	const clinic = await Clinic.findOne({ default: true }).lean();
+	// TEMP: pinned to clicknic Clinic until clinic is resolved from knowlarity_number
+	const clinic = await Clinic.findById(KNOWLARITY_CLINIC_ID).lean();
 	if (!clinic) {
-		trace.step("No default clinic configured, treating as new patient");
+		trace.step(`Clinic ${KNOWLARITY_CLINIC_ID} not found, treating as new patient`);
 		return false;
 	}
 	trace.set({ clinic: clinic._id, tenant: clinic.tenant });

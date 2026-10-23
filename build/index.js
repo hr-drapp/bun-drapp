@@ -188428,6 +188428,7 @@ var knowlarity_schema_default = {
 
 // src/api/webhook/knowlarity/knowlarity.service.ts
 import { timingSafeEqual } from "crypto";
+var KNOWLARITY_CLINIC_ID = "69de8c299b532254712e76c0";
 var isValidApiKey = (received) => {
   const expected = process.env.KNOWLARITY_API_KEY;
   if (!expected)
@@ -188446,9 +188447,9 @@ var lookupCaller = async (callerNumber, trace) => {
     return false;
   }
   trace.step(`Caller number "${callerNumber}" normalized to ${phone.local}`);
-  const clinic = await Clinic_default.findOne({ default: true }).lean();
+  const clinic = await Clinic_default.findById(KNOWLARITY_CLINIC_ID).lean();
   if (!clinic) {
-    trace.step("No default clinic configured, treating as new patient");
+    trace.step(`Clinic ${KNOWLARITY_CLINIC_ID} not found, treating as new patient`);
     return false;
   }
   trace.set({ clinic: clinic._id, tenant: clinic.tenant });
@@ -188490,7 +188491,9 @@ async function handleGetAgent({
     trace.step(headers["x-api-key"] ? "x-api-key mismatch, rejected with 401" : "No x-api-key sent, rejected with 401");
     trace.set({ http_status: 401 });
     set.status = 401;
-    trace.finish("unauthorized" /* UNAUTHORIZED */, { response: UNAUTHORIZED2 });
+    trace.finish("unauthorized" /* UNAUTHORIZED */, {
+      response: UNAUTHORIZED2
+    });
     return UNAUTHORIZED2;
   }
   trace.step(process.env.KNOWLARITY_API_KEY ? "API key verified" : "KNOWLARITY_API_KEY not set, API key check skipped");
@@ -188516,7 +188519,9 @@ async function handleGetAgent({
   } catch (error) {
     trace.step(`Error: ${error?.message}`);
     trace.set({ http_status: 500 });
-    trace.finish("failed" /* FAILED */, { error: error?.stack || error?.message });
+    trace.finish("failed" /* FAILED */, {
+      error: error?.stack || error?.message
+    });
     throw error;
   }
 }

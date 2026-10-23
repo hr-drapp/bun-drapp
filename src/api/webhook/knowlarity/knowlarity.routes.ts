@@ -6,7 +6,7 @@ import { isValidApiKey, lookupCaller } from "./knowlarity.service";
 
 const DEFAULT_AGENT_NUMBER = "+919983396152";
 
-const UNAUTHORIZED ={ status: false, message: "Unauthorized", data: null };
+const UNAUTHORIZED = { status: false, message: "Unauthorized", data: null };
 
 type CallParams = {
 	caller_number?: string;
@@ -46,7 +46,9 @@ async function handleGetAgent({
 		);
 		trace.set({ http_status: 401 });
 		set.status = 401;
-		void trace.finish(WebhookLogStatus.UNAUTHORIZED, { response: UNAUTHORIZED });
+		void trace.finish(WebhookLogStatus.UNAUTHORIZED, {
+			response: UNAUTHORIZED,
+		});
 		return UNAUTHORIZED;
 	}
 	trace.step(
@@ -57,7 +59,11 @@ async function handleGetAgent({
 
 	try {
 		trace.step(
-			`get-agent: caller_number="${params.caller_number ?? ""}", knowlarity_number="${params.knowlarity_number ?? "-"}", call_uuid="${params.call_uuid ?? "-"}", call_start_time="${params.call_start_time ?? "-"}"`,
+			`get-agent: caller_number="${
+				params.caller_number ?? ""
+			}", knowlarity_number="${params.knowlarity_number ?? "-"}", call_uuid="${
+				params.call_uuid ?? "-"
+			}", call_start_time="${params.call_start_time ?? "-"}"`,
 		);
 
 		const isRegistered = params.caller_number
@@ -69,14 +75,19 @@ async function handleGetAgent({
 			message: isRegistered ? "Registered patient" : "New patient",
 			data: {
 				is_registered: isRegistered,
-				agent_number: process.env.KNOWLARITY_AGENT_NUMBER || DEFAULT_AGENT_NUMBER,
+				agent_number:
+					process.env.KNOWLARITY_AGENT_NUMBER || DEFAULT_AGENT_NUMBER,
 				hold_sound: isRegistered ? "registered" : "new",
 			},
 		};
 		if (!process.env.KNOWLARITY_AGENT_NUMBER) {
-			trace.step(`KNOWLARITY_AGENT_NUMBER is not set, using default agent_number ${DEFAULT_AGENT_NUMBER}`);
+			trace.step(
+				`KNOWLARITY_AGENT_NUMBER is not set, using default agent_number ${DEFAULT_AGENT_NUMBER}`,
+			);
 		}
-		trace.step(`Responded: ${response.message}, hold_sound="${response.data.hold_sound}"`);
+		trace.step(
+			`Responded: ${response.message}, hold_sound="${response.data.hold_sound}"`,
+		);
 
 		trace.set({ http_status: 200 });
 		void trace.finish(WebhookLogStatus.SUCCESS, { response });
@@ -84,7 +95,9 @@ async function handleGetAgent({
 	} catch (error: any) {
 		trace.step(`Error: ${error?.message}`);
 		trace.set({ http_status: 500 });
-		void trace.finish(WebhookLogStatus.FAILED, { error: error?.stack || error?.message });
+		void trace.finish(WebhookLogStatus.FAILED, {
+			error: error?.stack || error?.message,
+		});
 		throw error;
 	}
 }
