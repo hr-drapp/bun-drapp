@@ -188539,6 +188539,86 @@ var recordCall = async ({
   trace.set({ ivr_call_request: callRequest?._id });
   trace.step(result.lastErrorObject?.updatedExisting ? `IVR call request already existed for call ${callUuid} (retry), left unchanged` : `IVR call request created (${callRequest?._id}) with status "${status3}"`);
 };
+var STREAM_STATUS = {
+  ORIGINATE: "ringing",
+  ANSWER: "ringing",
+  CUSTOMER_CALL: "ringing",
+  CUSTOMER_ANSWER: "ringing",
+  AGENT_CALL: "ringing",
+  AGENT_ANSWER: "in-progress",
+  BRIDGE: "in-progress"
+};
+var hangupStatus = (event) => /unanswered|missed/i.test(`${event.business_call_type ?? ""}`) ? "no-answer" : "completed";
+var applyStreamEvent = async (event, trace) => {
+  const callUuid = event.uuid;
+  const isCdr = event.type === "CDR";
+  const kind = isCdr ? "CDR" : `${event.event_type ?? ""}`;
+  if (!callUuid) {
+    trace.step(`${kind || "Event"} has no uuid, ignored`);
+    return null;
+  }
+  trace.set({ execution_id: callUuid });
+  const inbound = isCdr ? event.Call_Type === "Incoming" : event.call_direction === "Inbound";
+  const customer = isCdr ? event.caller_id : event.customer_number;
+  trace.step(`${kind} for call ${callUuid}: direction="${event.call_direction ?? event.Call_Type ?? "-"}", customer="${customer ?? "-"}"`);
+  let existing = await IvrCallRequest_default.findOne({ execution_id: callUuid }).lean();
+  if (existing) {
+    trace.step(`Found IVR call request ${existing._id} (status "${existing.status}", active=${existing.is_active})`);
+  } else {
+    if (!inbound) {
+      trace.step("No IVR call request and call is not inbound, ignored");
+      return null;
+    }
+    if (!customer) {
+      trace.step("No IVR call request and event has no customer number, ignored");
+      return null;
+    }
+    trace.step(`No IVR call request yet, registering caller ${customer} from this event`);
+    await lookupCaller({
+      callerNumber: customer,
+      knowlarityNumber: event.knowlarity_number ?? event.dispnumber,
+      callUuid,
+      trace
+    });
+    existing = await IvrCallRequest_default.findOne({ execution_id: callUuid }).lean();
+    if (!existing)
+      return null;
+  }
+  trace.set({
+    clinic: existing.clinic,
+    tenant: existing.tenant,
+    patient: existing.patient,
+    ivr_call_request: existing._id,
+    contact_number: existing.contact_number
+  });
+  const update = {};
+  const recording = isCdr ? event.resource_url : event.call_recording;
+  if (recording)
+    update.recording_url = recording;
+  const duration = Number(event.call_duration);
+  if (isCdr && Number.isFinite(duration) && duration > 0)
+    update.duration = duration;
+  const status3 = kind === "HANGUP" ? hangupStatus(event) : isCdr ? existing.is_active ? "completed" : undefined : STREAM_STATUS[kind];
+  if (!status3) {
+    trace.step(isCdr ? "Call already ended, status left unchanged" : `Event "${kind}" has no status mapping, status left unchanged`);
+  } else if (isActiveStatus(status3) && !existing.is_active) {
+    trace.step(`Out-of-order status "${status3}" ignored, call already ended as "${existing.status}"`);
+  } else if (!existing.is_active) {
+    trace.step(`Call already ended as "${existing.status}", status left unchanged`);
+  } else if (status3 !== existing.status) {
+    update.status = status3;
+    update.is_active = isActiveStatus(status3);
+    if (!update.is_active)
+      update.ended_at = new Date;
+    trace.step(`Status "${existing.status}" → "${status3}" (${update.is_active ? "call live" : "call ended"})`);
+  }
+  const saved = Object.keys(update).filter((key2) => !["status", "is_active", "ended_at"].includes(key2));
+  if (saved.length)
+    trace.step(`Saved: ${saved.join(", ")}`);
+  if (!Object.keys(update).length)
+    return existing;
+  return IvrCallRequest_default.findByIdAndUpdate(existing._id, update, { new: true }).lean();
+};
 
 // src/api/webhook/knowlarity/knowlarity.routes.ts
 var DEFAULT_AGENT_NUMBER = "+919983396152";
@@ -188604,6 +188684,97 @@ async function handleGetAgent({
 var knowlarity_routes_default = createElysia({ prefix: knowlarity_schema_default.meta.name }).guard({
   detail: { tags: ["webhook"] }
 }, (app) => app.post("/", ({ body, headers, request, set, path }) => handleGetAgent({ params: body, headers, request, set, path }), knowlarity_schema_default.getAgent).get("/", ({ query, headers, request, set, path }) => handleGetAgent({ params: query, headers, request, set, path }), knowlarity_schema_default.getAgentQuery));
+
+// src/api/webhook/knowlarity/knowlarity.stream.ts
+var STREAM_URL = (apiKey) => `https://konnect.knowlarity.com:8100/update-stream/${encodeURIComponent(apiKey)}/konnect`;
+var RETRY_MIN_MS = 1000;
+var RETRY_MAX_MS = 30000;
+var log = (message) => console.log(`\uD83D\uDCDE Knowlarity stream: ${message}`);
+var parseLine = (line) => {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.startsWith(":"))
+    return null;
+  const payload = trimmed.startsWith("data:") ? trimmed.slice(5).trim() : trimmed;
+  if (!payload.startsWith("{"))
+    return null;
+  try {
+    return JSON.parse(payload);
+  } catch {
+    return null;
+  }
+};
+var handleEvent = async (event) => {
+  const trace = await WebhookTrace.start({
+    provider: "knowlarity",
+    event: `stream-${event.type === "CDR" ? "cdr" : `${event.event_type ?? "unknown"}`.toLowerCase()}`,
+    method: "STREAM",
+    path: "/update-stream",
+    body: event
+  });
+  try {
+    const result = await applyStreamEvent(event, trace);
+    trace.finish(result ? "success" /* SUCCESS */ : "ignored" /* IGNORED */);
+  } catch (error) {
+    trace.step(`Error: ${error?.message}`);
+    trace.finish("failed" /* FAILED */, { error: error?.stack || error?.message });
+  }
+};
+var queue2 = Promise.resolve();
+var enqueue = (event) => {
+  queue2 = queue2.then(() => handleEvent(event));
+};
+var connectOnce = async (apiKey, onOpen) => {
+  const res = await fetch(STREAM_URL(apiKey), {
+    headers: { Accept: "text/event-stream" }
+  });
+  if (!res.ok || !res.body) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status} ${res.statusText} ${text.slice(0, 200)}`.trim());
+  }
+  log("connected, waiting for calls");
+  onOpen();
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder;
+  let buffer = "";
+  for (;; ) {
+    const { value, done } = await reader.read();
+    if (done)
+      return;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      const event = parseLine(line);
+      if (event)
+        enqueue(event);
+    }
+  }
+};
+var startKnowlarityStream = async () => {
+  const apiKey = process.env.KNOWLARITY_SR_API_KEY;
+  if (process.env.KNOWLARITY_STREAM_ENABLED !== "true")
+    return;
+  if (!apiKey) {
+    log("KNOWLARITY_STREAM_ENABLED is set but KNOWLARITY_SR_API_KEY is missing, not started");
+    return;
+  }
+  let retryMs = RETRY_MIN_MS;
+  for (;; ) {
+    try {
+      await connectOnce(apiKey, () => retryMs = RETRY_MIN_MS);
+      log("closed by server");
+    } catch (error) {
+      log(`connection error: ${error?.message}`);
+      if (/^HTTP 40[13]/.test(error?.message ?? "")) {
+        log("stopped, Knowlarity rejected KNOWLARITY_SR_API_KEY");
+        return;
+      }
+    }
+    log(`reconnecting in ${retryMs / 1000}s`);
+    await new Promise((resolve2) => setTimeout(resolve2, retryMs));
+    retryMs = Math.min(retryMs * 2, RETRY_MAX_MS);
+  }
+};
 
 // src/index.ts
 var import_bearer = __toESM(require_cjs5(), 1);
@@ -188843,6 +189014,7 @@ connectDB("APP").then((d2) => {
     hostname: "0.0.0.0"
   });
   console.log(`\uD83E\uDD8A Elysia is running at ${api.server?.hostname}:${process.env.APP_PORT || 8080}`);
+  startKnowlarityStream();
 });
 export {
   routeMap

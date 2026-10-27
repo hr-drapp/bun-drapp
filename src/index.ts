@@ -16,6 +16,7 @@ import { adminRoutes } from "./api/admin/admin.index";
 import { manglamCityRoutes } from "./api/manglam-city/manglam-city.index";
 import { webhookRoutes } from "./api/webhook/webhook.index";
 import knowlarityRoutes from "./api/webhook/knowlarity/knowlarity.routes";
+import { startKnowlarityStream } from "./api/webhook/knowlarity/knowlarity.stream";
 import { staticPlugin } from "@elysiajs/static";
 import { bearer } from "@elysiajs/bearer";
 import { ModuleId } from "./config/modules";
@@ -335,4 +336,6 @@ connectDB("APP").then((d) => {
 			process.env.APP_PORT || 8080
 		}`,
 	);
+	// TEMP: replaces Knowlarity's call status webhook until it works.
+	void startKnowlarityStream();
 });
