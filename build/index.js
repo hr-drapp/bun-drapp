@@ -141437,7 +141437,7 @@ WD9f
 
 // node_modules/ioredis/built/utils/index.js
 var require_utils12 = __commonJS((exports) => {
-  var __dirname = "/Users/harshraiswami/Documents/code/drapp/clicknic-stack/bun-drapp/node_modules/ioredis/built/utils";
+  var __dirname = "/home/harsh/Documents/code/drapp/clicknic-stack/bun-drapp/node_modules/ioredis/built/utils";
   Object.defineProperty(exports, "__esModule", { value: true });
   exports.noop = exports.defaults = exports.Debug = exports.getPackageMeta = exports.zipMap = exports.CONNECTION_CLOSED_ERROR_MSG = exports.shuffle = exports.sample = exports.resolveTLSProfile = exports.parseURL = exports.optimizeErrorStack = exports.toArg = exports.convertMapToArray = exports.convertObjectToArray = exports.timeout = exports.packObject = exports.isInt = exports.wrapMultiResult = exports.convertBufferToString = undefined;
   var fs_1 = __require("fs");
@@ -141723,7 +141723,7 @@ var require_argumentParsers = __commonJS((exports) => {
 
 // node_modules/ioredis/built/Command.js
 var require_Command = __commonJS((exports) => {
-  var __dirname = "/Users/harshraiswami/Documents/code/drapp/clicknic-stack/bun-drapp/node_modules/ioredis/built";
+  var __dirname = "/home/harsh/Documents/code/drapp/clicknic-stack/bun-drapp/node_modules/ioredis/built";
   Object.defineProperty(exports, "__esModule", { value: true });
   var commands_1 = require_built();
   var calculateSlot = require_lib7();
@@ -184051,14 +184051,7 @@ var clinicPayload = {
   id: undefined
 };
 var DEFAULT_IVR_AGENT_ID = "724f62ec-3dc4-41c9-b2ad-a58756231b09";
-var doctorPayload = {
-  name: "Dr Arjun",
-  profile_pic: "https://clicknic.me/assets/images/logo.svg",
-  pictures: [],
-  tenant: undefined,
-  clinic: undefined,
-  id: undefined
-};
+var DOCTOR_PROFILE_PIC = "https://clicknic.me/assets/images/logo.svg";
 var { READ, CREATE, UPDATE, DELETE } = AbilitiMap;
 var FULL_PERMISSION = [READ, CREATE, UPDATE, DELETE];
 var superAdminPermissions = {
@@ -184095,14 +184088,11 @@ var doctorRole = {
   super_admin: true,
   total_admins: 0
 };
-var doctor = {
-  name: "DOC",
-  clinic: undefined,
-  tenant: undefined,
-  email: "doc@clicknic.site",
-  phone: "9982615248",
-  password: "Admin@123"
-};
+var IVR_DOCTORS = [
+  { name: "Dr Madhu", email: "madhu@clicknic.site", phone: "7827981356" },
+  { name: "Dr Vrenda", email: "vrenda@clicknic.site", phone: "9811855974" }
+];
+var RETIRED_DOCTOR = { name: "Dr Arjun", phone: "9982615248" };
 var receptionistPermissions = {
   [1 /* DASHBOARD */]: {
     ability: FULL_PERMISSION
@@ -184124,59 +184114,7 @@ var receptionist = {
   phone: "9982615249",
   password: "Admin@123"
 };
-var DEFAULT_CLINIC_NAMES = ["manjima", "kirthi", "nobin", "krishna"];
 var DEFAULT_SEED_PASSWORD = "Admin@123";
-var sanitizeClinicName = (clinicName) => clinicName.trim();
-var slugifyClinicName = (clinicName) => sanitizeClinicName(clinicName).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "clinic";
-var createSeedHash = (value) => {
-  let hash2 = 0;
-  for (const char of value) {
-    hash2 = (hash2 * 31 + char.charCodeAt(0)) % 1e7;
-  }
-  return hash2;
-};
-var buildSeedPhone = (clinicName, offset) => {
-  const phoneBase = 6000000000;
-  const hash2 = createSeedHash(slugifyClinicName(clinicName));
-  return String(phoneBase + (hash2 + offset) % 1e9);
-};
-var buildClinicSeedCredentials = (clinicName) => {
-  const slug = slugifyClinicName(clinicName);
-  return {
-    superAdmin: {
-      name: "Super Admin",
-      email: `super.${slug}@clicknic.site`,
-      phone: buildSeedPhone(clinicName, 1),
-      password: DEFAULT_SEED_PASSWORD
-    },
-    doctor: {
-      name: "DOC",
-      email: `doc.${slug}@clicknic.site`,
-      phone: buildSeedPhone(clinicName, 2),
-      password: DEFAULT_SEED_PASSWORD
-    },
-    receptionist: {
-      name: "ANITA",
-      email: `anita.${slug}@clicknic.site`,
-      phone: buildSeedPhone(clinicName, 3),
-      password: DEFAULT_SEED_PASSWORD
-    }
-  };
-};
-var getOrCreateDefaultRoles = async () => {
-  const superAdminRoleDoc = await Role_default.findOneAndUpdate({ name: superAdminRole.name }, { $set: superAdminRole }, { upsert: true, new: true });
-  const doctorRoleDoc = await Role_default.findOneAndUpdate({ name: doctorRole.name }, { $set: doctorRole }, { upsert: true, new: true });
-  const receptionistRoleDoc = await Role_default.findOneAndUpdate({ name: receptionistRole.name }, { $set: receptionistRole }, { upsert: true, new: true });
-  return {
-    superAdminRoleDoc,
-    doctorRoleDoc,
-    receptionistRoleDoc
-  };
-};
-var syncRoleAdminCounts = async (roleIds) => {
-  const counts = await Promise.all(roleIds.map((roleId) => Admin_default.countDocuments({ role: roleId })));
-  await Promise.all(roleIds.map((roleId, index2) => Role_default.updateOne({ _id: roleId }, { total_admins: counts[index2] })));
-};
 var formatClinicCredentialLog = (clinics) => [
   "",
   "Seeded clinic credentials",
@@ -184194,6 +184132,21 @@ var logSeederCredentials = (clinics) => {
     return;
   }
   consola.box(formatClinicCredentialLog(clinics));
+};
+var removeOtherClinicsAndDoctors = async (tenantId, clinicId) => {
+  const otherClinics = await Clinic_default.find({ _id: { $ne: clinicId } }, { _id: 1 }).lean();
+  const otherClinicIds = otherClinics.map((c3) => c3._id);
+  await Promise.all([
+    Admin_default.deleteMany({ clinic: { $in: otherClinicIds } }),
+    Doctor_default.deleteMany({ clinic: { $in: otherClinicIds } }),
+    Clinic_default.deleteMany({ _id: { $in: otherClinicIds } }),
+    Tenant_default.deleteMany({ _id: { $ne: tenantId } }),
+    Doctor_default.updateMany({ clinic: clinicId, name: RETIRED_DOCTOR.name, deleted: false }, { $set: { deleted: true } }),
+    Admin_default.updateMany({ phone: RETIRED_DOCTOR.phone, deleted: false }, { $set: { deleted: true } })
+  ]);
+  if (otherClinicIds.length) {
+    consola.info(`Seeder removed ${otherClinicIds.length} other clinic(s)`);
+  }
 };
 var KNOWLARITY_TEST_PATIENT = {
   name: "Knowlarity Test Patient",
@@ -184245,21 +184198,6 @@ var seeder = async () => {
       clinic: clinic._id
     }
   }, { upsert: true, new: true });
-  await Admin_default.findOneAndUpdate({ phone: doctor.phone }, {
-    $set: {
-      name: doctor.name,
-      email: doctor.email,
-      phone: doctor.phone,
-      password: HashPassword(doctor.password),
-      role: doctorRoleDoc._id,
-      role_id: doctorRoleDoc._id.toString(),
-      super_admin: false,
-      permissions: doctorPermissions,
-      parent: superAdminDoc._id,
-      tenant: tenant._id,
-      clinic: clinic._id
-    }
-  }, { upsert: true, new: true });
   await Admin_default.findOneAndUpdate({ phone: receptionist.phone }, {
     $set: {
       name: receptionist.name,
@@ -184275,9 +184213,34 @@ var seeder = async () => {
       clinic: clinic._id
     }
   }, { upsert: true, new: true });
-  doctorPayload.tenant = tenant._id;
-  doctorPayload.clinic = clinic._id;
-  await Doctor_default.findOneAndUpdate({ name: doctorPayload.name, tenant: tenant._id }, { $set: doctorPayload }, { upsert: true, new: true });
+  for (const ivrDoctor of IVR_DOCTORS) {
+    await Doctor_default.findOneAndUpdate({ name: ivrDoctor.name, tenant: tenant._id, clinic: clinic._id }, {
+      $set: {
+        name: ivrDoctor.name,
+        profile_pic: DOCTOR_PROFILE_PIC,
+        tenant: tenant._id,
+        clinic: clinic._id,
+        deleted: false
+      }
+    }, { upsert: true, new: true });
+    await Admin_default.findOneAndUpdate({ phone: ivrDoctor.phone }, {
+      $set: {
+        name: ivrDoctor.name,
+        email: ivrDoctor.email,
+        phone: ivrDoctor.phone,
+        password: HashPassword(DEFAULT_SEED_PASSWORD),
+        role: doctorRoleDoc._id,
+        role_id: doctorRoleDoc._id.toString(),
+        super_admin: false,
+        permissions: doctorPermissions,
+        parent: superAdminDoc._id,
+        tenant: tenant._id,
+        clinic: clinic._id,
+        deleted: false
+      }
+    }, { upsert: true, new: true });
+  }
+  await removeOtherClinicsAndDoctors(tenant._id, clinic._id);
   const [superAdminCount, doctorCount, receptionistCount] = await Promise.all([
     Admin_default.countDocuments({ role: superAdminRoleDoc._id }),
     Admin_default.countDocuments({ role: doctorRoleDoc._id }),
@@ -184288,7 +184251,6 @@ var seeder = async () => {
     Role_default.updateOne({ _id: doctorRoleDoc._id }, { total_admins: doctorCount }),
     Role_default.updateOne({ _id: receptionistRoleDoc._id }, { total_admins: receptionistCount })
   ]);
-  const seededClinics = await Promise.all(DEFAULT_CLINIC_NAMES.map((clinicName) => seedClinicDefaults(clinicName)));
   await seedKnowlarityTestPatient();
   logSeederCredentials([
     {
@@ -184300,108 +184262,18 @@ var seeder = async () => {
         password: superAdmin.password
       }
     },
-    ...seededClinics.map((clinicData) => ({
-      clinic: clinicData.clinic,
-      domain: clinicData.domain,
+    ...IVR_DOCTORS.map((ivrDoctor) => ({
+      clinic: `${clinicPayload.name} · ${ivrDoctor.name}`,
+      domain: clinicPayload.domain,
       primary: {
-        email: clinicData.credentials.superAdmin.email,
-        phone: clinicData.credentials.superAdmin.phone,
-        password: clinicData.credentials.superAdmin.password
+        email: ivrDoctor.email,
+        phone: ivrDoctor.phone,
+        password: DEFAULT_SEED_PASSWORD
       }
     }))
   ]);
   console.log("Seeder completed successfully");
   return true;
-};
-var seedClinicDefaults = async (clinicName) => {
-  const normalizedClinicName = sanitizeClinicName(clinicName);
-  if (!normalizedClinicName) {
-    throw new Error("clinicName is required");
-  }
-  const clinicSlug = slugifyClinicName(normalizedClinicName);
-  const credentials = buildClinicSeedCredentials(normalizedClinicName);
-  const tenant = await Tenant_default.findOneAndUpdate({ name: normalizedClinicName }, {
-    $set: {
-      name: normalizedClinicName,
-      default: false
-    }
-  }, { upsert: true, new: true });
-  const clinic = await Clinic_default.findOneAndUpdate({ domain: `${clinicSlug}.clicknic.site`, tenant: tenant._id }, {
-    $set: {
-      name: normalizedClinicName,
-      logo: clinicPayload.logo,
-      default: false,
-      domain: `${clinicSlug}.clicknic.site`,
-      tenant: tenant._id
-    },
-    $addToSet: { ivr_agent_ids: DEFAULT_IVR_AGENT_ID }
-  }, { upsert: true, new: true });
-  const { superAdminRoleDoc, doctorRoleDoc, receptionistRoleDoc } = await getOrCreateDefaultRoles();
-  const superAdminDoc = await Admin_default.findOneAndUpdate({ phone: credentials.superAdmin.phone }, {
-    $set: {
-      name: credentials.superAdmin.name,
-      email: credentials.superAdmin.email,
-      phone: credentials.superAdmin.phone,
-      password: HashPassword(credentials.superAdmin.password),
-      role: superAdminRoleDoc._id,
-      role_id: superAdminRoleDoc._id.toString(),
-      super_admin: true,
-      permissions: superAdminPermissions,
-      tenant: tenant._id,
-      clinic: clinic._id
-    }
-  }, { upsert: true, new: true });
-  await Admin_default.findOneAndUpdate({ phone: credentials.doctor.phone }, {
-    $set: {
-      name: credentials.doctor.name,
-      email: credentials.doctor.email,
-      phone: credentials.doctor.phone,
-      password: HashPassword(credentials.doctor.password),
-      role: doctorRoleDoc._id,
-      role_id: doctorRoleDoc._id.toString(),
-      super_admin: false,
-      permissions: doctorPermissions,
-      parent: superAdminDoc._id,
-      tenant: tenant._id,
-      clinic: clinic._id
-    }
-  }, { upsert: true, new: true });
-  await Admin_default.findOneAndUpdate({ phone: credentials.receptionist.phone }, {
-    $set: {
-      name: credentials.receptionist.name,
-      email: credentials.receptionist.email,
-      phone: credentials.receptionist.phone,
-      password: HashPassword(credentials.receptionist.password),
-      role: receptionistRoleDoc._id,
-      role_id: receptionistRoleDoc._id.toString(),
-      super_admin: false,
-      permissions: receptionistPermissions,
-      parent: superAdminDoc._id,
-      tenant: tenant._id,
-      clinic: clinic._id
-    }
-  }, { upsert: true, new: true });
-  await Doctor_default.findOneAndUpdate({ name: normalizedClinicName, tenant: tenant._id, clinic: clinic._id }, {
-    $set: {
-      name: normalizedClinicName,
-      profile_pic: doctorPayload.profile_pic,
-      pictures: [],
-      tenant: tenant._id,
-      clinic: clinic._id
-    }
-  }, { upsert: true, new: true });
-  await syncRoleAdminCounts([
-    superAdminRoleDoc._id.toString(),
-    doctorRoleDoc._id.toString(),
-    receptionistRoleDoc._id.toString()
-  ]);
-  return {
-    clinic: normalizedClinicName,
-    tenantId: tenant._id,
-    clinicId: clinic._id,
-    domain: `${clinicSlug}.clicknic.site`,
-    credentials
-  };
 };
 
 // src/db/mongo.ts
@@ -187399,6 +187271,7 @@ var detailSchema8 = t2.Object({
   }),
   contact_number: t2.String(),
   agent_id: t2.Optional(t2.String()),
+  agent_number: t2.Optional(t2.String()),
   execution_id: t2.String(),
   status: t2.String(),
   is_active: t2.Boolean(),
@@ -187514,6 +187387,10 @@ __legacyDecorateClassTS([
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "agent_id", undefined);
 __legacyDecorateClassTS([
+  import_typegoose14.prop({}),
+  __legacyMetadataTS("design:type", String)
+], IvrCallRequestClass.prototype, "agent_number", undefined);
+__legacyDecorateClassTS([
   import_typegoose14.prop({ required: true }),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "execution_id", undefined);
@@ -187560,11 +187437,178 @@ __legacyDecorateClassTS([
 IvrCallRequestClass = __legacyDecorateClassTS([
   import_typegoose14.index({ execution_id: 1 }, { unique: true }),
   import_typegoose14.index({ clinic: 1, tenant: 1, createdAt: -1 }),
+  import_typegoose14.index({ clinic: 1, tenant: 1, agent_number: 1, createdAt: -1 }),
   import_typegoose14.modelOptions({
     schemaOptions: { collection: "ivr_call_request", timestamps: true }
   })
 ], IvrCallRequestClass);
 var IvrCallRequest_default = import_typegoose14.getModelForClass(IvrCallRequestClass);
+
+// src/api/webhook/bolna/bolna.service.ts
+var IVR_UNKNOWN_PATIENT_NAME = "Unknown Caller";
+var normalizePhone = (raw) => {
+  const digits2 = `${raw ?? ""}`.replace(/\D/g, "");
+  const local = digits2.slice(-10);
+  return {
+    local,
+    display: digits2.length > 10 ? `+${digits2}` : digits2,
+    variants: Array.from(new Set([local, `0${local}`, `91${local}`, `+91${local}`, digits2]))
+  };
+};
+var resolveClinicForAgent = async (agentId, trace) => {
+  if (agentId) {
+    const clinic2 = await Clinic_default.findOne({ ivr_agent_ids: agentId }).sort({ default: -1, createdAt: 1 }).lean();
+    if (clinic2) {
+      trace?.step(`Clinic resolved by agent mapping: "${clinic2.name}" (${clinic2._id})`);
+      return clinic2;
+    }
+    trace?.step(`No clinic has agent ${agentId} in ivr_agent_ids, trying default clinic`);
+  } else {
+    trace?.step("No agent_id sent, trying default clinic");
+  }
+  const clinic = await Clinic_default.findOne({ default: true }).lean();
+  if (clinic) {
+    trace?.step(`Clinic resolved by default fallback: "${clinic.name}" (${clinic._id})`);
+  }
+  return clinic;
+};
+var isActiveStatus = (status3) => IVR_ACTIVE_STATUSES.includes(`${status3 ?? ""}`.toLowerCase());
+var registerIncomingCall = async ({
+  contactNumber,
+  agentId,
+  executionId,
+  status: status3 = "in-progress",
+  trace
+}) => {
+  const phone = normalizePhone(contactNumber);
+  trace?.set({ contact_number: phone.display, execution_id: executionId });
+  if (phone.local.length < 10) {
+    trace?.step(`Invalid caller number "${contactNumber}" (fewer than 10 digits), stopping`);
+    return null;
+  }
+  trace?.step(`Caller number "${contactNumber}" normalized to ${phone.local}`);
+  const clinic = await resolveClinicForAgent(agentId, trace);
+  if (!clinic) {
+    trace?.step("No clinic found (no agent mapping and no default clinic), stopping");
+    return null;
+  }
+  const scope = { clinic: clinic._id, tenant: clinic.tenant };
+  trace?.set(scope);
+  let isNewPatient = false;
+  let patient = await Patient_default.findOne({
+    ...scope,
+    phone: { $in: phone.variants },
+    deleted: false
+  }).sort({ createdAt: 1 }).lean();
+  if (patient) {
+    trace?.step(`Existing patient found: "${patient.name}" (#${patient.id}, ${patient._id})`);
+  } else {
+    const created = await Patient_default.create({
+      ...scope,
+      name: IVR_UNKNOWN_PATIENT_NAME,
+      phone: phone.local,
+      age: 0,
+      gender: 3,
+      profile_pic: ""
+    });
+    patient = created.toObject();
+    isNewPatient = true;
+    trace?.step(`No patient with this number, registered new patient #${patient.id} (${patient._id})`);
+  }
+  trace?.set({ patient: patient._id });
+  if (!executionId) {
+    trace?.step("No execution_id sent, IVR call request not recorded");
+    return { clinic, patient, isNewPatient, callRequest: null };
+  }
+  const result = await IvrCallRequest_default.findOneAndUpdate({ execution_id: executionId }, {
+    $setOnInsert: {
+      ...scope,
+      patient: patient._id,
+      contact_number: phone.display,
+      agent_id: agentId,
+      execution_id: executionId,
+      status: status3,
+      is_active: isActiveStatus(status3),
+      is_new_patient: isNewPatient
+    }
+  }, { upsert: true, new: true, includeResultMetadata: true }).lean();
+  const callRequest = result.value;
+  trace?.set({ ivr_call_request: callRequest?._id });
+  trace?.step(result.lastErrorObject?.updatedExisting ? `IVR call request already existed for execution ${executionId} (retry), left unchanged` : `IVR call request created (${callRequest?._id}) with status "${status3}"`);
+  return { clinic, patient, isNewPatient, callRequest };
+};
+var applyExecutionUpdate = async (payload, trace) => {
+  const executionId = payload?.id || payload?.execution_id;
+  if (!executionId) {
+    trace?.step("Payload has no execution id (id / execution_id), ignored");
+    return null;
+  }
+  const status3 = `${payload?.status ?? ""}`.toLowerCase();
+  const telephony = payload?.telephony_data ?? {};
+  trace?.set({ execution_id: executionId });
+  trace?.step(`Status update for execution ${executionId}: status="${status3 || "-"}", call_type="${telephony.call_type || "-"}"`);
+  let existing = await IvrCallRequest_default.findOne({
+    execution_id: executionId
+  }).lean();
+  if (existing) {
+    trace?.step(`Found IVR call request ${existing._id} (status "${existing.status}", active=${existing.is_active})`);
+  } else {
+    const from = telephony.from_number || payload?.user_number;
+    if (telephony.call_type && telephony.call_type !== "inbound") {
+      trace?.step(`No IVR call request and call is ${telephony.call_type}, ignored`);
+      return null;
+    }
+    if (!from) {
+      trace?.step("No IVR call request and payload has no caller number, ignored");
+      return null;
+    }
+    trace?.step(`No IVR call request yet, registering caller ${from} from this payload`);
+    const registered = await registerIncomingCall({
+      contactNumber: from,
+      agentId: payload?.agent_id,
+      executionId,
+      status: status3 || undefined,
+      trace
+    });
+    existing = registered?.callRequest ?? null;
+    if (!existing)
+      return null;
+  }
+  trace?.set({
+    clinic: existing.clinic,
+    tenant: existing.tenant,
+    patient: existing.patient,
+    ivr_call_request: existing._id,
+    contact_number: existing.contact_number
+  });
+  const update = {};
+  const duration = Number(telephony.duration ?? payload?.conversation_duration);
+  if (Number.isFinite(duration) && duration > 0)
+    update.duration = duration;
+  if (telephony.recording_url)
+    update.recording_url = telephony.recording_url;
+  if (payload?.summary)
+    update.summary = payload.summary;
+  if (payload?.transcript)
+    update.transcript = payload.transcript;
+  if (!status3) {
+    trace?.step("Payload has no status, status left unchanged");
+  } else if (isActiveStatus(status3) && !existing.is_active) {
+    trace?.step(`Out-of-order status "${status3}" ignored, call already ended as "${existing.status}"`);
+  } else {
+    update.status = status3;
+    update.is_active = isActiveStatus(status3);
+    if (!update.is_active && existing.is_active)
+      update.ended_at = new Date;
+    trace?.step(`Status "${existing.status}" → "${status3}" (${update.is_active ? "call live" : "call ended"})`);
+  }
+  const saved = Object.keys(update).filter((key2) => !["status", "is_active"].includes(key2));
+  if (saved.length)
+    trace?.step(`Saved: ${saved.join(", ")}`);
+  return IvrCallRequest_default.findByIdAndUpdate(existing._id, update, {
+    new: true
+  }).lean();
+};
 
 // src/api/admin/ivr-call-request/ivr-call-request.routes.ts
 var import_moment5 = __toESM(require_moment(), 1);
@@ -187572,8 +187616,12 @@ var patientPopulate = {
   path: "patient",
   select: "_id id name phone age gender profile_pic"
 };
+var isDoctorLogin = (user) => !user?.super_admin && user?.role?.level === 2 /* L2 */;
 var scopeFilter = (query, user) => {
-  const { doctor: doctor2, ...filter } = normalizeQuery(query, user);
+  const { doctor, ...filter } = normalizeQuery(query, user);
+  if (isDoctorLogin(user)) {
+    filter.agent_number = normalizePhone(user.phone).local;
+  }
   return filter;
 };
 var expireStaleCalls = (scope) => IvrCallRequest_default.updateMany({
@@ -187599,7 +187647,11 @@ var ivr_call_request_routes_default = createElysia({ prefix: ivr_call_request_sc
   let patientIds;
   if (search) {
     const regex3 = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-    const patients = await Patient_default.find({ ...scope, $or: [{ name: regex3 }, { phone: regex3 }] }, { _id: 1 }).lean();
+    const patients = await Patient_default.find({
+      tenant: scope.tenant,
+      clinic: scope.clinic,
+      $or: [{ name: regex3 }, { phone: regex3 }]
+    }, { _id: 1 }).lean();
     patientIds = patients.map((p) => p._id);
   }
   const filter = scopeFilter({
@@ -188100,172 +188152,6 @@ var bolna_schema_default = {
   }
 };
 
-// src/api/webhook/bolna/bolna.service.ts
-var IVR_UNKNOWN_PATIENT_NAME = "Unknown Caller";
-var normalizePhone = (raw) => {
-  const digits2 = `${raw ?? ""}`.replace(/\D/g, "");
-  const local = digits2.slice(-10);
-  return {
-    local,
-    display: digits2.length > 10 ? `+${digits2}` : digits2,
-    variants: Array.from(new Set([local, `0${local}`, `91${local}`, `+91${local}`, digits2]))
-  };
-};
-var resolveClinicForAgent = async (agentId, trace) => {
-  if (agentId) {
-    const clinic2 = await Clinic_default.findOne({ ivr_agent_ids: agentId }).sort({ default: -1, createdAt: 1 }).lean();
-    if (clinic2) {
-      trace?.step(`Clinic resolved by agent mapping: "${clinic2.name}" (${clinic2._id})`);
-      return clinic2;
-    }
-    trace?.step(`No clinic has agent ${agentId} in ivr_agent_ids, trying default clinic`);
-  } else {
-    trace?.step("No agent_id sent, trying default clinic");
-  }
-  const clinic = await Clinic_default.findOne({ default: true }).lean();
-  if (clinic) {
-    trace?.step(`Clinic resolved by default fallback: "${clinic.name}" (${clinic._id})`);
-  }
-  return clinic;
-};
-var isActiveStatus = (status3) => IVR_ACTIVE_STATUSES.includes(`${status3 ?? ""}`.toLowerCase());
-var registerIncomingCall = async ({
-  contactNumber,
-  agentId,
-  executionId,
-  status: status3 = "in-progress",
-  trace
-}) => {
-  const phone = normalizePhone(contactNumber);
-  trace?.set({ contact_number: phone.display, execution_id: executionId });
-  if (phone.local.length < 10) {
-    trace?.step(`Invalid caller number "${contactNumber}" (fewer than 10 digits), stopping`);
-    return null;
-  }
-  trace?.step(`Caller number "${contactNumber}" normalized to ${phone.local}`);
-  const clinic = await resolveClinicForAgent(agentId, trace);
-  if (!clinic) {
-    trace?.step("No clinic found (no agent mapping and no default clinic), stopping");
-    return null;
-  }
-  const scope = { clinic: clinic._id, tenant: clinic.tenant };
-  trace?.set(scope);
-  let isNewPatient = false;
-  let patient = await Patient_default.findOne({
-    ...scope,
-    phone: { $in: phone.variants },
-    deleted: false
-  }).sort({ createdAt: 1 }).lean();
-  if (patient) {
-    trace?.step(`Existing patient found: "${patient.name}" (#${patient.id}, ${patient._id})`);
-  } else {
-    const created = await Patient_default.create({
-      ...scope,
-      name: IVR_UNKNOWN_PATIENT_NAME,
-      phone: phone.local,
-      age: 0,
-      gender: 3,
-      profile_pic: ""
-    });
-    patient = created.toObject();
-    isNewPatient = true;
-    trace?.step(`No patient with this number, registered new patient #${patient.id} (${patient._id})`);
-  }
-  trace?.set({ patient: patient._id });
-  if (!executionId) {
-    trace?.step("No execution_id sent, IVR call request not recorded");
-    return { clinic, patient, isNewPatient, callRequest: null };
-  }
-  const result = await IvrCallRequest_default.findOneAndUpdate({ execution_id: executionId }, {
-    $setOnInsert: {
-      ...scope,
-      patient: patient._id,
-      contact_number: phone.display,
-      agent_id: agentId,
-      execution_id: executionId,
-      status: status3,
-      is_active: isActiveStatus(status3),
-      is_new_patient: isNewPatient
-    }
-  }, { upsert: true, new: true, includeResultMetadata: true }).lean();
-  const callRequest = result.value;
-  trace?.set({ ivr_call_request: callRequest?._id });
-  trace?.step(result.lastErrorObject?.updatedExisting ? `IVR call request already existed for execution ${executionId} (retry), left unchanged` : `IVR call request created (${callRequest?._id}) with status "${status3}"`);
-  return { clinic, patient, isNewPatient, callRequest };
-};
-var applyExecutionUpdate = async (payload, trace) => {
-  const executionId = payload?.id || payload?.execution_id;
-  if (!executionId) {
-    trace?.step("Payload has no execution id (id / execution_id), ignored");
-    return null;
-  }
-  const status3 = `${payload?.status ?? ""}`.toLowerCase();
-  const telephony = payload?.telephony_data ?? {};
-  trace?.set({ execution_id: executionId });
-  trace?.step(`Status update for execution ${executionId}: status="${status3 || "-"}", call_type="${telephony.call_type || "-"}"`);
-  let existing = await IvrCallRequest_default.findOne({
-    execution_id: executionId
-  }).lean();
-  if (existing) {
-    trace?.step(`Found IVR call request ${existing._id} (status "${existing.status}", active=${existing.is_active})`);
-  } else {
-    const from = telephony.from_number || payload?.user_number;
-    if (telephony.call_type && telephony.call_type !== "inbound") {
-      trace?.step(`No IVR call request and call is ${telephony.call_type}, ignored`);
-      return null;
-    }
-    if (!from) {
-      trace?.step("No IVR call request and payload has no caller number, ignored");
-      return null;
-    }
-    trace?.step(`No IVR call request yet, registering caller ${from} from this payload`);
-    const registered = await registerIncomingCall({
-      contactNumber: from,
-      agentId: payload?.agent_id,
-      executionId,
-      status: status3 || undefined,
-      trace
-    });
-    existing = registered?.callRequest ?? null;
-    if (!existing)
-      return null;
-  }
-  trace?.set({
-    clinic: existing.clinic,
-    tenant: existing.tenant,
-    patient: existing.patient,
-    ivr_call_request: existing._id,
-    contact_number: existing.contact_number
-  });
-  const update = {};
-  const duration = Number(telephony.duration ?? payload?.conversation_duration);
-  if (Number.isFinite(duration) && duration > 0)
-    update.duration = duration;
-  if (telephony.recording_url)
-    update.recording_url = telephony.recording_url;
-  if (payload?.summary)
-    update.summary = payload.summary;
-  if (payload?.transcript)
-    update.transcript = payload.transcript;
-  if (!status3) {
-    trace?.step("Payload has no status, status left unchanged");
-  } else if (isActiveStatus(status3) && !existing.is_active) {
-    trace?.step(`Out-of-order status "${status3}" ignored, call already ended as "${existing.status}"`);
-  } else {
-    update.status = status3;
-    update.is_active = isActiveStatus(status3);
-    if (!update.is_active && existing.is_active)
-      update.ended_at = new Date;
-    trace?.step(`Status "${existing.status}" → "${status3}" (${update.is_active ? "call live" : "call ended"})`);
-  }
-  const saved = Object.keys(update).filter((key2) => !["status", "is_active"].includes(key2));
-  if (saved.length)
-    trace?.step(`Saved: ${saved.join(", ")}`);
-  return IvrCallRequest_default.findByIdAndUpdate(existing._id, update, {
-    new: true
-  }).lean();
-};
-
 // src/utils/webhook-trace.ts
 var import_mongoose6 = __toESM(require_mongoose2(), 1);
 class WebhookTrace {
@@ -188598,6 +188484,12 @@ var applyStreamEvent = async (event, trace) => {
   const duration = Number(event.call_duration);
   if (isCdr && Number.isFinite(duration) && duration > 0)
     update.duration = duration;
+  const agentRaw = isCdr ? existing.agent_number ? undefined : event.destination : event.agent_number;
+  const agent = agentRaw ? normalizePhone(agentRaw).local : "";
+  if (agent.length === 10 && agent !== existing.agent_number && (existing.is_active || !existing.agent_number)) {
+    update.agent_number = agent;
+    trace.step(`Agent "${existing.agent_number ?? "-"}" → "${agent}"`);
+  }
   const status3 = kind === "HANGUP" ? hangupStatus(event) : isCdr ? existing.is_active ? "completed" : undefined : STREAM_STATUS[kind];
   if (!status3) {
     trace.step(isCdr ? "Call already ended, status left unchanged" : `Event "${kind}" has no status mapping, status left unchanged`);

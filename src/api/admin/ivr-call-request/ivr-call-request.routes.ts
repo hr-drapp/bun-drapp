@@ -9,6 +9,8 @@ import { customError } from "src/utils/AppErr";
 import { isAdminAuthenticated } from "src/guard/auth.guard";
 import { Summary } from "src/config/modules";
 import { normalizeQuery } from "src/utils/access-grants";
+import { RoleLevel } from "src/models/clicknic/Role";
+import { normalizePhone } from "src/api/webhook/bolna/bolna.service";
 import moment from "moment";
 
 const patientPopulate = {
@@ -16,9 +18,16 @@ const patientPopulate = {
 	select: "_id id name phone age gender profile_pic",
 };
 
-/** Clinic/tenant scope only — IVR calls are not tied to a doctor. */
+/** Doctor logins see only calls routed to their own phone; everyone else sees the clinic. */
+const isDoctorLogin = (user: any) =>
+	!user?.super_admin && user?.role?.level === RoleLevel.L2;
+
+/** Clinic/tenant scope, narrowed to the doctor's calls (by agent_number) for doctor logins. */
 const scopeFilter = <T extends Record<string, any>>(query: T, user: any) => {
 	const { doctor, ...filter } = normalizeQuery(query, user) as any;
+	if (isDoctorLogin(user)) {
+		filter.agent_number = normalizePhone(user.phone).local;
+	}
 	return filter as T & { tenant: any; clinic: any };
 };
 
@@ -66,7 +75,11 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 							"i",
 						);
 						const patients = await Patient.find(
-							{ ...scope, $or: [{ name: regex }, { phone: regex }] },
+							{
+								tenant: scope.tenant,
+								clinic: scope.clinic,
+								$or: [{ name: regex }, { phone: regex }],
+							},
 							{ _id: 1 },
 						).lean();
 						patientIds = patients.map((p) => p._id);

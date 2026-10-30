@@ -17,6 +17,7 @@ const detailSchema = t.Object({
 	}),
 	contact_number: t.String(),
 	agent_id: t.Optional(t.String()),
+	agent_number: t.Optional(t.String()),
 	execution_id: t.String(),
 	status: t.String(),
 	is_active: t.Boolean(),

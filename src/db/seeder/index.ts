@@ -3,7 +3,7 @@ import moment from "moment";
 import { ModuleId } from "src/config/modules";
 import Admin, { AdminClass } from "src/models/clicknic/Admin";
 import Clinic, { ClinicClass } from "src/models/clicknic/Clinic";
-import Doctor, { DoctorClass } from "src/models/clicknic/Doctor";
+import Doctor from "src/models/clicknic/Doctor";
 import Patient from "src/models/clicknic/Patient";
 import Role, {
 	RoleLevel,
@@ -31,14 +31,7 @@ const clinicPayload: ClinicClass = {
 /** Bolna IVR agent attached to every seeded clinic. */
 const DEFAULT_IVR_AGENT_ID = "724f62ec-3dc4-41c9-b2ad-a58756231b09";
 
-const doctorPayload: DoctorClass = {
-	name: "Dr Arjun",
-	profile_pic: "https://clicknic.me/assets/images/logo.svg",
-	pictures: [],
-	tenant: undefined as any,
-	clinic: undefined as any,
-	id: undefined as any,
-};
+const DOCTOR_PROFILE_PIC = "https://clicknic.me/assets/images/logo.svg";
 
 const { READ, CREATE, UPDATE, DELETE } = AbilitiMap;
 const FULL_PERMISSION = [READ, CREATE, UPDATE, DELETE];
@@ -78,14 +71,18 @@ const doctorRole: RoleClass = {
 	super_admin: true,
 	total_admins: 0,
 };
-const doctor: Partial<AdminClass> = {
-	name: "DOC",
-	clinic: undefined,
-	tenant: undefined,
-	email: "doc@clicknic.site",
-	phone: "9982615248",
-	password: "Admin@123",
-};
+/**
+ * Doctors taking Knowlarity IVR calls, seeded into the default clinic. The
+ * phone is both the login and the agent number Knowlarity bridges to, so each
+ * doctor's IVR dashboard shows only the calls routed to them.
+ */
+const IVR_DOCTORS = [
+	{ name: "Dr Madhu", email: "madhu@clicknic.site", phone: "7827981356" },
+	{ name: "Dr Vrenda", email: "vrenda@clicknic.site", phone: "9811855974" },
+] as const;
+
+/** Doctors earlier seeder versions created; retired so only IVR_DOCTORS remain. */
+const RETIRED_DOCTOR = { name: "Dr Arjun", phone: "9982615248" };
 
 const receptionistPermissions: Permission = {
 	[ModuleId.DASHBOARD]: {
@@ -109,97 +106,7 @@ const receptionist: Partial<AdminClass> = {
 	password: "Admin@123",
 };
 
-const DEFAULT_CLINIC_NAMES = ["manjima", "kirthi", "nobin", "krishna"] as const;
-
 const DEFAULT_SEED_PASSWORD = "Admin@123";
-
-const sanitizeClinicName = (clinicName: string) => clinicName.trim();
-
-const slugifyClinicName = (clinicName: string) =>
-	sanitizeClinicName(clinicName)
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-+|-+$/g, "") || "clinic";
-
-const createSeedHash = (value: string) => {
-	let hash = 0;
-
-	for (const char of value) {
-		hash = (hash * 31 + char.charCodeAt(0)) % 10000000;
-	}
-
-	return hash;
-};
-
-const buildSeedPhone = (clinicName: string, offset: number) => {
-	const phoneBase = 6000000000;
-	const hash = createSeedHash(slugifyClinicName(clinicName));
-
-	return String(phoneBase + ((hash + offset) % 1000000000));
-};
-
-const buildClinicSeedCredentials = (clinicName: string) => {
-	const slug = slugifyClinicName(clinicName);
-
-	return {
-		superAdmin: {
-			name: "Super Admin",
-			email: `super.${slug}@clicknic.site`,
-			phone: buildSeedPhone(clinicName, 1),
-			password: DEFAULT_SEED_PASSWORD,
-		},
-		doctor: {
-			name: "DOC",
-			email: `doc.${slug}@clicknic.site`,
-			phone: buildSeedPhone(clinicName, 2),
-			password: DEFAULT_SEED_PASSWORD,
-		},
-		receptionist: {
-			name: "ANITA",
-			email: `anita.${slug}@clicknic.site`,
-			phone: buildSeedPhone(clinicName, 3),
-			password: DEFAULT_SEED_PASSWORD,
-		},
-	};
-};
-
-const getOrCreateDefaultRoles = async () => {
-	const superAdminRoleDoc = await Role.findOneAndUpdate(
-		{ name: superAdminRole.name },
-		{ $set: superAdminRole },
-		{ upsert: true, new: true },
-	);
-
-	const doctorRoleDoc = await Role.findOneAndUpdate(
-		{ name: doctorRole.name },
-		{ $set: doctorRole },
-		{ upsert: true, new: true },
-	);
-
-	const receptionistRoleDoc = await Role.findOneAndUpdate(
-		{ name: receptionistRole.name },
-		{ $set: receptionistRole },
-		{ upsert: true, new: true },
-	);
-
-	return {
-		superAdminRoleDoc,
-		doctorRoleDoc,
-		receptionistRoleDoc,
-	};
-};
-
-const syncRoleAdminCounts = async (roleIds: string[]) => {
-	const counts = await Promise.all(
-		roleIds.map((roleId) => Admin.countDocuments({ role: roleId })),
-	);
-
-	await Promise.all(
-		roleIds.map((roleId, index) =>
-			Role.updateOne({ _id: roleId }, { total_admins: counts[index] }),
-		),
-	);
-};
 
 type PrimaryCred = {
 	email?: string;
@@ -232,6 +139,35 @@ const logSeederCredentials = (clinics: SeededClinicLog[]) => {
 	}
 
 	consola.box(formatClinicCredentialLog(clinics));
+};
+
+/**
+ * Keeps a single tenant + clinic: every other clinic and tenant is deleted with
+ * its admins and doctors. In the default clinic only the old seeded doctor
+ * (Dr Arjun / DOC login) is retired, so doctors added from the dashboard stay.
+ */
+const removeOtherClinicsAndDoctors = async (tenantId: any, clinicId: any) => {
+	const otherClinics = await Clinic.find({ _id: { $ne: clinicId } }, { _id: 1 }).lean();
+	const otherClinicIds = otherClinics.map((c) => c._id);
+
+	await Promise.all([
+		Admin.deleteMany({ clinic: { $in: otherClinicIds } }),
+		Doctor.deleteMany({ clinic: { $in: otherClinicIds } }),
+		Clinic.deleteMany({ _id: { $in: otherClinicIds } }),
+		Tenant.deleteMany({ _id: { $ne: tenantId } }),
+		Doctor.updateMany(
+			{ clinic: clinicId, name: RETIRED_DOCTOR.name, deleted: false },
+			{ $set: { deleted: true } },
+		),
+		Admin.updateMany(
+			{ phone: RETIRED_DOCTOR.phone, deleted: false },
+			{ $set: { deleted: true } },
+		),
+	]);
+
+	if (otherClinicIds.length) {
+		consola.info(`Seeder removed ${otherClinicIds.length} other clinic(s)`);
+	}
 };
 
 // TENANT->CLINIC->ROLES->ADMINS->DOCTOR
@@ -330,26 +266,6 @@ export const seeder = async () => {
 	);
 
 	await Admin.findOneAndUpdate(
-		{ phone: doctor.phone },
-		{
-			$set: {
-				name: doctor.name,
-				email: doctor.email,
-				phone: doctor.phone,
-				password: HashPassword(doctor.password!),
-				role: doctorRoleDoc._id,
-				role_id: doctorRoleDoc._id.toString(),
-				super_admin: false,
-				permissions: doctorPermissions,
-				parent: superAdminDoc._id,
-				tenant: tenant._id,
-				clinic: clinic._id,
-			},
-		},
-		{ upsert: true, new: true },
-	);
-
-	await Admin.findOneAndUpdate(
 		{ phone: receptionist.phone },
 		{
 			$set: {
@@ -369,14 +285,47 @@ export const seeder = async () => {
 		{ upsert: true, new: true },
 	);
 
-	// 5. Doctor
-	doctorPayload.tenant = tenant._id;
-	doctorPayload.clinic = clinic._id;
-	await Doctor.findOneAndUpdate(
-		{ name: doctorPayload.name, tenant: tenant._id },
-		{ $set: doctorPayload },
-		{ upsert: true, new: true },
-	);
+	// 5. Doctors (IVR call handlers), each with a DOCTOR login
+	for (const ivrDoctor of IVR_DOCTORS) {
+		await Doctor.findOneAndUpdate(
+			{ name: ivrDoctor.name, tenant: tenant._id, clinic: clinic._id },
+			{
+				$set: {
+					name: ivrDoctor.name,
+					profile_pic: DOCTOR_PROFILE_PIC,
+					tenant: tenant._id,
+					clinic: clinic._id,
+					deleted: false,
+				},
+			},
+			{ upsert: true, new: true },
+		);
+
+		// Admin.doctor is left unset on purpose: normalizeQuery would then scope
+		// patients/doctors/media by doctor and those models have no doctor field.
+		await Admin.findOneAndUpdate(
+			{ phone: ivrDoctor.phone },
+			{
+				$set: {
+					name: ivrDoctor.name,
+					email: ivrDoctor.email,
+					phone: ivrDoctor.phone,
+					password: HashPassword(DEFAULT_SEED_PASSWORD),
+					role: doctorRoleDoc._id,
+					role_id: doctorRoleDoc._id.toString(),
+					super_admin: false,
+					permissions: doctorPermissions,
+					parent: superAdminDoc._id,
+					tenant: tenant._id,
+					clinic: clinic._id,
+					deleted: false,
+				},
+			},
+			{ upsert: true, new: true },
+		);
+	}
+
+	await removeOtherClinicsAndDoctors(tenant._id, clinic._id);
 
 	// Update total_admins count on roles
 	const [superAdminCount, doctorCount, receptionistCount] = await Promise.all([
@@ -396,10 +345,6 @@ export const seeder = async () => {
 		),
 	]);
 
-	const seededClinics = await Promise.all(
-		DEFAULT_CLINIC_NAMES.map((clinicName) => seedClinicDefaults(clinicName)),
-	);
-
 	await seedKnowlarityTestPatient();
 
 	logSeederCredentials([
@@ -412,144 +357,17 @@ export const seeder = async () => {
 				password: superAdmin.password,
 			},
 		},
-		...seededClinics.map((clinicData) => ({
-			clinic: clinicData.clinic,
-			domain: clinicData.domain,
+		...IVR_DOCTORS.map((ivrDoctor) => ({
+			clinic: `${clinicPayload.name} · ${ivrDoctor.name}`,
+			domain: clinicPayload.domain,
 			primary: {
-				email: clinicData.credentials.superAdmin.email,
-				phone: clinicData.credentials.superAdmin.phone,
-				password: clinicData.credentials.superAdmin.password,
+				email: ivrDoctor.email,
+				phone: ivrDoctor.phone,
+				password: DEFAULT_SEED_PASSWORD,
 			},
 		})),
 	]);
 
 	console.log("Seeder completed successfully");
 	return true;
-};
-
-export const seedClinicDefaults = async (clinicName: string) => {
-	const normalizedClinicName = sanitizeClinicName(clinicName);
-
-	if (!normalizedClinicName) {
-		throw new Error("clinicName is required");
-	}
-
-	const clinicSlug = slugifyClinicName(normalizedClinicName);
-	const credentials = buildClinicSeedCredentials(normalizedClinicName);
-
-	const tenant = await Tenant.findOneAndUpdate(
-		{ name: normalizedClinicName },
-		{
-			$set: {
-				name: normalizedClinicName,
-				default: false,
-			},
-		},
-		{ upsert: true, new: true },
-	);
-
-	const clinic = await Clinic.findOneAndUpdate(
-		{ domain: `${clinicSlug}.clicknic.site`, tenant: tenant._id },
-		{
-			$set: {
-				name: normalizedClinicName,
-				logo: clinicPayload.logo,
-				default: false,
-				domain: `${clinicSlug}.clicknic.site`,
-				tenant: tenant._id,
-			},
-			$addToSet: { ivr_agent_ids: DEFAULT_IVR_AGENT_ID },
-		},
-		{ upsert: true, new: true },
-	);
-
-	const { superAdminRoleDoc, doctorRoleDoc, receptionistRoleDoc } =
-		await getOrCreateDefaultRoles();
-
-	const superAdminDoc = await Admin.findOneAndUpdate(
-		{ phone: credentials.superAdmin.phone },
-		{
-			$set: {
-				name: credentials.superAdmin.name,
-				email: credentials.superAdmin.email,
-				phone: credentials.superAdmin.phone,
-				password: HashPassword(credentials.superAdmin.password),
-				role: superAdminRoleDoc._id,
-				role_id: superAdminRoleDoc._id.toString(),
-				super_admin: true,
-				permissions: superAdminPermissions,
-				tenant: tenant._id,
-				clinic: clinic._id,
-			},
-		},
-		{ upsert: true, new: true },
-	);
-
-	await Admin.findOneAndUpdate(
-		{ phone: credentials.doctor.phone },
-		{
-			$set: {
-				name: credentials.doctor.name,
-				email: credentials.doctor.email,
-				phone: credentials.doctor.phone,
-				password: HashPassword(credentials.doctor.password),
-				role: doctorRoleDoc._id,
-				role_id: doctorRoleDoc._id.toString(),
-				super_admin: false,
-				permissions: doctorPermissions,
-				parent: superAdminDoc._id,
-				tenant: tenant._id,
-				clinic: clinic._id,
-			},
-		},
-		{ upsert: true, new: true },
-	);
-
-	await Admin.findOneAndUpdate(
-		{ phone: credentials.receptionist.phone },
-		{
-			$set: {
-				name: credentials.receptionist.name,
-				email: credentials.receptionist.email,
-				phone: credentials.receptionist.phone,
-				password: HashPassword(credentials.receptionist.password),
-				role: receptionistRoleDoc._id,
-				role_id: receptionistRoleDoc._id.toString(),
-				super_admin: false,
-				permissions: receptionistPermissions,
-				parent: superAdminDoc._id,
-				tenant: tenant._id,
-				clinic: clinic._id,
-			},
-		},
-		{ upsert: true, new: true },
-	);
-
-	await Doctor.findOneAndUpdate(
-		{ name: normalizedClinicName, tenant: tenant._id, clinic: clinic._id },
-		{
-			$set: {
-				name: normalizedClinicName,
-				profile_pic: doctorPayload.profile_pic,
-				pictures: [],
-				tenant: tenant._id,
-				clinic: clinic._id,
-			},
-		},
-		{ upsert: true, new: true },
-	);
-
-	await syncRoleAdminCounts([
-		superAdminRoleDoc._id.toString(),
-		doctorRoleDoc._id.toString(),
-		receptionistRoleDoc._id.toString(),
-	]);
-
-	return {
-		clinic: normalizedClinicName,
-		tenantId: tenant._id,
-		clinicId: clinic._id,
-		domain: `${clinicSlug}.clicknic.site`,
-		credentials,
-	};
 };

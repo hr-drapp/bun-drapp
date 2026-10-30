@@ -153,7 +153,9 @@ export type KnowlarityStreamEvent = {
 	Call_Type?: string;
 	business_call_type?: string;
 	customer_number?: string | null;
+	agent_number?: string | null;
 	caller_id?: string;
+	destination?: string;
 	knowlarity_number?: string;
 	dispnumber?: string;
 	call_recording?: string | null;
@@ -233,6 +235,15 @@ export const applyStreamEvent = async (event: KnowlarityStreamEvent, trace: Webh
 	if (recording) update.recording_url = recording;
 	const duration = Number(event.call_duration);
 	if (isCdr && Number.isFinite(duration) && duration > 0) update.duration = duration;
+
+	// Latest agent leg wins while the call is live (hunt: ring A, no answer, ring B).
+	// The CDR's destination only fills a call that never reported its agent.
+	const agentRaw = isCdr ? (existing.agent_number ? undefined : event.destination) : event.agent_number;
+	const agent = agentRaw ? normalizePhone(agentRaw).local : "";
+	if (agent.length === 10 && agent !== existing.agent_number && (existing.is_active || !existing.agent_number)) {
+		update.agent_number = agent;
+		trace.step(`Agent "${existing.agent_number ?? "-"}" → "${agent}"`);
+	}
 
 	// A CDR only ends a call that never got its HANGUP.
 	const status =

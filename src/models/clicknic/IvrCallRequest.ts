@@ -22,6 +22,7 @@ export const IVR_ACTIVE_TIMEOUT_MINUTES = 30;
 
 @index({ execution_id: 1 }, { unique: true })
 @index({ clinic: 1, tenant: 1, createdAt: -1 })
+@index({ clinic: 1, tenant: 1, agent_number: 1, createdAt: -1 })
 @modelOptions({
 	schemaOptions: { collection: "ivr_call_request", timestamps: true },
 })
@@ -41,6 +42,13 @@ export class IvrCallRequestClass {
 
 	@prop({})
 	public agent_id!: string;
+
+	/**
+	 * Doctor's phone the call was routed to (10-digit local), from the Knowlarity
+	 * stream. A doctor login only sees calls whose agent_number is their phone.
+	 */
+	@prop({})
+	public agent_number?: string;
 
 	@prop({ required: true })
 	public execution_id!: string;
