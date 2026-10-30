@@ -183967,6 +183967,10 @@ __legacyDecorateClassTS([
   __legacyMetadataTS("design:type", Boolean)
 ], AdminClass.prototype, "deleted", undefined);
 __legacyDecorateClassTS([
+  import_typegoose6.prop({ required: false, default: "" }),
+  __legacyMetadataTS("design:type", String)
+], AdminClass.prototype, "ivr_agent_number", undefined);
+__legacyDecorateClassTS([
   import_typegoose6.prop(),
   __legacyMetadataTS("design:type", Array)
 ], AdminClass.prototype, "games", undefined);
@@ -184089,8 +184093,18 @@ var doctorRole = {
   total_admins: 0
 };
 var IVR_DOCTORS = [
-  { name: "Dr Madhu", email: "madhu@clicknic.site", phone: "7827981356" },
-  { name: "Dr Vrenda", email: "vrenda@clicknic.site", phone: "9811855974" }
+  {
+    name: "Dr Madhu",
+    email: "madhu@clicknic.site",
+    phone: "7827981356",
+    agent_number: "9982615247"
+  },
+  {
+    name: "Dr Vrenda",
+    email: "vrenda@clicknic.site",
+    phone: "9811855974",
+    agent_number: "8955857637"
+  }
 ];
 var RETIRED_DOCTOR = { name: "Dr Arjun", phone: "9982615248" };
 var receptionistPermissions = {
@@ -184228,6 +184242,7 @@ var seeder = async () => {
         name: ivrDoctor.name,
         email: ivrDoctor.email,
         phone: ivrDoctor.phone,
+        ivr_agent_number: ivrDoctor.agent_number,
         password: HashPassword(DEFAULT_SEED_PASSWORD),
         role: doctorRoleDoc._id,
         role_id: doctorRoleDoc._id.toString(),
@@ -187620,7 +187635,7 @@ var isDoctorLogin = (user) => !user?.super_admin && user?.role?.level === 2 /* L
 var scopeFilter = (query, user) => {
   const { doctor, ...filter } = normalizeQuery(query, user);
   if (isDoctorLogin(user)) {
-    filter.agent_number = normalizePhone(user.phone).local;
+    filter.agent_number = normalizePhone(user.ivr_agent_number || user.phone).local;
   }
   return filter;
 };

@@ -26,7 +26,7 @@ const isDoctorLogin = (user: any) =>
 const scopeFilter = <T extends Record<string, any>>(query: T, user: any) => {
 	const { doctor, ...filter } = normalizeQuery(query, user) as any;
 	if (isDoctorLogin(user)) {
-		filter.agent_number = normalizePhone(user.phone).local;
+		filter.agent_number = normalizePhone(user.ivr_agent_number || user.phone).local;
 	}
 	return filter as T & { tenant: any; clinic: any };
 };

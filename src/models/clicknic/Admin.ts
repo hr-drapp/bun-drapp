@@ -71,6 +71,13 @@ export class AdminClass {
 	@prop({ default: false })
 	public deleted!: boolean;
 
+	/**
+	 * Knowlarity agent number this doctor answers IVR calls on, when it differs
+	 * from their login phone. Empty means the phone is the agent number.
+	 */
+	@prop({ required: false, default: "" })
+	public ivr_agent_number?: string;
+
 	@prop()
 	public games?: string[];
 }

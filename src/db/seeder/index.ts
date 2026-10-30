@@ -72,14 +72,30 @@ const doctorRole: RoleClass = {
 	total_admins: 0,
 };
 /**
- * Doctors taking Knowlarity IVR calls, seeded into the default clinic. The
- * phone is both the login and the agent number Knowlarity bridges to, so each
- * doctor's IVR dashboard shows only the calls routed to them.
+ * Doctors taking Knowlarity IVR calls, seeded into the default clinic. Each
+ * doctor's IVR dashboard shows only calls Knowlarity bridged to their agent
+ * number: `agent_number` while testing, else their login phone.
+ * TODO: clear agent_number once testing is done and Knowlarity rings the phones.
  */
-const IVR_DOCTORS = [
-	{ name: "Dr Madhu", email: "madhu@clicknic.site", phone: "7827981356" },
-	{ name: "Dr Vrenda", email: "vrenda@clicknic.site", phone: "9811855974" },
-] as const;
+const IVR_DOCTORS: {
+	name: string;
+	email: string;
+	phone: string;
+	agent_number: string;
+}[] = [
+	{
+		name: "Dr Madhu",
+		email: "madhu@clicknic.site",
+		phone: "7827981356",
+		agent_number: "9982615247",
+	},
+	{
+		name: "Dr Vrenda",
+		email: "vrenda@clicknic.site",
+		phone: "9811855974",
+		agent_number: "8955857637",
+	},
+];
 
 /** Doctors earlier seeder versions created; retired so only IVR_DOCTORS remain. */
 const RETIRED_DOCTOR = { name: "Dr Arjun", phone: "9982615248" };
@@ -310,6 +326,7 @@ export const seeder = async () => {
 					name: ivrDoctor.name,
 					email: ivrDoctor.email,
 					phone: ivrDoctor.phone,
+					ivr_agent_number: ivrDoctor.agent_number,
 					password: HashPassword(DEFAULT_SEED_PASSWORD),
 					role: doctorRoleDoc._id,
 					role_id: doctorRoleDoc._id.toString(),
