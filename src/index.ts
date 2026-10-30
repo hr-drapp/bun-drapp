@@ -42,11 +42,20 @@ api.onError(({ error, code, set, ...rest }: any) => {
 		return R(error.message, null, false);
 	}
 
-	const errorType = "type" in error ? error.type : "internal";
+	// Elysia can hand over a non-object (e.g. a thrown string or a status code).
+	const errorType =
+		error && typeof error === "object" && "type" in error
+			? error.type
+			: "internal";
 
 	if (errorType == "internal") {
 		set.status = "OK";
-		return { status: false, message: error.message, data: null };
+		console.log(`🚨 ~ ${code} ~`, error);
+		return {
+			status: false,
+			message: error?.message ?? String(error ?? code),
+			data: null,
+		};
 	} else if (errorType == "response") {
 		set.status = "OK";
 		const result = JSON.parse(error?.message);

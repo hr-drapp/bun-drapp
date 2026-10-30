@@ -178,7 +178,12 @@ export default createElysia({ prefix: "/auth" }).guard(
 						};
 					}
 
-					return R("admin data", user);
+					// lean() keeps ObjectIds; the response schema validates _id as a string.
+					return R("admin data", {
+						...user,
+						_id: String(user._id),
+						role: { ...(user.role as any), _id: String((user.role as any)?._id) },
+					});
 				},
 				{
 					beforeHandle: isAdminAuthenticated,

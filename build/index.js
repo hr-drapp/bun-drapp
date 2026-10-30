@@ -184972,7 +184972,11 @@ var auth_routes_default = createElysia({ prefix: "/auth" }).guard({
       ...user.permissions
     };
   }
-  return R3("admin data", user);
+  return R3("admin data", {
+    ...user,
+    _id: String(user._id),
+    role: { ...user.role, _id: String(user.role?._id) }
+  });
 }, {
   beforeHandle: isAdminAuthenticated,
   response: {
@@ -188715,10 +188719,15 @@ api.onError(({ error, code, set, ...rest }) => {
     set.status = "OK";
     return R3(error.message, null, false);
   }
-  const errorType = "type" in error ? error.type : "internal";
+  const errorType = error && typeof error === "object" && "type" in error ? error.type : "internal";
   if (errorType == "internal") {
     set.status = "OK";
-    return { status: false, message: error.message, data: null };
+    console.log(`\uD83D\uDEA8 ~ ${code} ~`, error);
+    return {
+      status: false,
+      message: error?.message ?? String(error ?? code),
+      data: null
+    };
   } else if (errorType == "response") {
     set.status = "OK";
     const result = JSON.parse(error?.message);
