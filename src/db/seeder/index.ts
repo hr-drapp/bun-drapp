@@ -82,18 +82,21 @@ const IVR_DOCTORS: {
 	email: string;
 	phone: string;
 	agent_number: string;
+	password: string;
 }[] = [
 	{
 		name: "Dr Madhu",
 		email: "madhu@clicknic.site",
-		phone: "7827981356",
-		agent_number: "9982615247",
+		phone: "9582150563",
+		agent_number: "9582150563",
+		password: "42@NeemVan",
 	},
 	{
 		name: "Dr Vrenda",
 		email: "vrenda@clicknic.site",
 		phone: "9811855974",
-		agent_number: "8955857637",
+		agent_number: "9811855974",
+		password: "73@TalKund",
 	},
 ];
 
@@ -121,8 +124,6 @@ const receptionist: Partial<AdminClass> = {
 	phone: "9982615249",
 	password: "Admin@123",
 };
-
-const DEFAULT_SEED_PASSWORD = "Admin@123";
 
 type PrimaryCred = {
 	email?: string;
@@ -319,15 +320,16 @@ export const seeder = async () => {
 
 		// Admin.doctor is left unset on purpose: normalizeQuery would then scope
 		// patients/doctors/media by doctor and those models have no doctor field.
+		// Matched by email so a doctor's login follows them when their phone changes.
 		await Admin.findOneAndUpdate(
-			{ phone: ivrDoctor.phone },
+			{ email: ivrDoctor.email },
 			{
 				$set: {
 					name: ivrDoctor.name,
 					email: ivrDoctor.email,
 					phone: ivrDoctor.phone,
 					ivr_agent_number: ivrDoctor.agent_number,
-					password: HashPassword(DEFAULT_SEED_PASSWORD),
+					password: HashPassword(ivrDoctor.password),
 					role: doctorRoleDoc._id,
 					role_id: doctorRoleDoc._id.toString(),
 					super_admin: false,
@@ -380,7 +382,7 @@ export const seeder = async () => {
 			primary: {
 				email: ivrDoctor.email,
 				phone: ivrDoctor.phone,
-				password: DEFAULT_SEED_PASSWORD,
+				password: ivrDoctor.password,
 			},
 		})),
 	]);
