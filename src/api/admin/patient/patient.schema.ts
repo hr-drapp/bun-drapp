@@ -13,6 +13,17 @@ const detailSchema = t.Object({
 	phone: t.String(),
 	age: t.Number(),
 	gender: t.Number(),
+	village: t.Optional(
+		t.Union([
+			t.String(),
+			t.Object({
+				_id: t.String(),
+				id: t.Optional(t.Number()),
+				name: t.String(),
+			}),
+			t.Null(),
+		]),
+	),
 	profile_pic: t.String(),
 	deleted: t.Boolean(),
 	recent_appointment: appointmentSchema.meta.detail,
@@ -57,6 +68,7 @@ export default {
 			phone: t.String(),
 			age: t.Number(),
 			gender: t.Number(),
+			village: t.Optional(t.String()),
 			profile_pic: t.Optional(t.String()),
 		}),
 		response: {
@@ -81,6 +93,7 @@ export default {
 			phone: t.Optional(t.String()),
 			age: t.Optional(t.Number()),
 			gender: t.Optional(t.Number()),
+			village: t.Optional(t.String()),
 			profile_pic: t.Optional(t.String()),
 		}),
 		query: t.Object({

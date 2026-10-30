@@ -15,7 +15,11 @@ import moment from "moment";
 
 const patientPopulate = {
 	path: "patient",
-	select: "_id id name phone age gender profile_pic",
+	select: "_id id name phone age gender profile_pic village",
+	populate: {
+		path: "village",
+		select: "_id id name",
+	},
 };
 
 /** Doctor logins see only calls routed to their own phone; everyone else sees the clinic. */

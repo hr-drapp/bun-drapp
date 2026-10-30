@@ -8,6 +8,7 @@ import adminsRoutes from "./admins/admins.routes";
 import doctorRoutes from "./doctor/doctor.routes";
 import doctorTimeSlotRoutes from "./doctor-time-slot/doctor-time-slot.routes";
 import patientRoutes from "./patient/patient.routes";
+import villageRoutes from "./village/village.routes";
 import appointmentRoutes from "./appointment/appointment.routes";
 import prescriptionRoutes from "./prescription/prescription.routes";
 import patientHealthRecordRoutes from "./patient-health-record/patient-health-record.routes";
@@ -29,6 +30,9 @@ adminRoutes.use(doctorTimeSlotRoutes);
 
 // Patient Route
 adminRoutes.use(patientRoutes);
+
+// Village Route
+adminRoutes.use(villageRoutes);
 
 // Appointment Route
 adminRoutes.use(appointmentRoutes);

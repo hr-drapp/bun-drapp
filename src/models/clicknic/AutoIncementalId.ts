@@ -10,6 +10,7 @@ export enum AutoIncIdModel {
 	CLINIC = 0,
 	DOCTOR = 1,
 	PATIENT = 2,
+	VILLAGE = 3,
 }
 
 @index({ seq: 1 })

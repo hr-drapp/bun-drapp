@@ -5,6 +5,7 @@ import { abilityHttpMap } from "src/models/clicknic/Role";
 import { APIResponse } from "src/types/global";
 import { buildScopedQuery } from "src/utils/access-grants";
 import JWT from "src/utils/jwt";
+import { ModuleId } from "src/config/modules";
 
 const attachAccessBuilder = (ctx: any, user: any) => {
 	ctx.buildAccessQuery = (resource: any, baseFilter?: any, options?: any) =>
@@ -107,7 +108,11 @@ export const isAdminAuthenticated = async (
 
 		const permission =
 			(user as any)?.permissions?.[moduleId]?.ability ??
-			(user.role as any)?.permissions?.[moduleId]?.ability;
+			(user.role as any)?.permissions?.[moduleId]?.ability ??
+			(moduleId === `${ModuleId.VILLAGES}`
+				? ((user as any)?.permissions?.[`${ModuleId.PATIENTS}`]?.ability ??
+				  (user.role as any)?.permissions?.[`${ModuleId.PATIENTS}`]?.ability)
+				: undefined);
 
 		if (!permission) {
 			return {

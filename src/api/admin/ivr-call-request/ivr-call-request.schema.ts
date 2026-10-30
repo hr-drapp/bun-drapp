@@ -13,6 +13,17 @@ const detailSchema = t.Object({
 		phone: t.String(),
 		age: t.Optional(t.Number()),
 		gender: t.Optional(t.Number()),
+		village: t.Optional(
+			t.Union([
+				t.String(),
+				t.Object({
+					_id: t.String(),
+					id: t.Optional(t.Number()),
+					name: t.String(),
+				}),
+				t.Null(),
+			]),
+		),
 		profile_pic: t.Optional(t.String()),
 	}),
 	contact_number: t.String(),

@@ -11,6 +11,7 @@ import { AutoIncIdModel } from "./AutoIncementalId";
 import { ClinicClass } from "./Clinic";
 import { AdminClass } from "./Admin";
 import { TenantClass } from "./Tenant";
+import { VillageClass } from "./Village";
 
 @pre<PatientClass>("save", async function (next) {
 	if (!this.id) {
@@ -41,6 +42,9 @@ export class PatientClass {
 
 	@prop({}) // 0 female, 1 male
 	public gender!: number;
+
+	@prop({ ref: () => VillageClass })
+	public village!: Ref<VillageClass>;
 
 	@prop({})
 	public profile_pic!: string;
