@@ -184582,6 +184582,7 @@ var RoleSchema = t2.Object({
   name: t2.String(),
   permissions: t2.Record(t2.String(), t2.Any()),
   order: t2.Numeric(),
+  level: t2.Optional(t2.Numeric()),
   super_admin: t2.Boolean()
 });
 var MetaPaginationSchema2 = t2.Object({
@@ -184680,6 +184681,8 @@ var AdminSchema = t2.Object({
   token: t2.Optional(t2.String()),
   name: t2.Optional(t2.String()),
   email: t2.Optional(t2.String()),
+  super_admin: t2.Optional(t2.Boolean()),
+  ivr_agent_number: t2.Optional(t2.String()),
   role: RoleSchema
 });
 var AdminLoginSchema = {
@@ -187406,6 +187409,10 @@ __legacyDecorateClassTS([
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "agent_number", undefined);
 __legacyDecorateClassTS([
+  import_typegoose14.prop({ default: false }),
+  __legacyMetadataTS("design:type", Boolean)
+], IvrCallRequestClass.prototype, "agent_answered", undefined);
+__legacyDecorateClassTS([
   import_typegoose14.prop({ required: true }),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "execution_id", undefined);
@@ -188501,9 +188508,19 @@ var applyStreamEvent = async (event, trace) => {
     update.duration = duration;
   const agentRaw = isCdr ? existing.agent_number ? undefined : event.destination : event.agent_number;
   const agent = agentRaw ? normalizePhone(agentRaw).local : "";
-  if (agent.length === 10 && agent !== existing.agent_number && (existing.is_active || !existing.agent_number)) {
-    update.agent_number = agent;
-    trace.step(`Agent "${existing.agent_number ?? "-"}" → "${agent}"`);
+  const answered = kind === "AGENT_ANSWER" || kind === "BRIDGE";
+  if (agent.length === 10) {
+    if (existing.agent_answered) {
+      if (agent !== existing.agent_number)
+        trace.step(`Agent ${agent} ignored, call already answered by ${existing.agent_number}`);
+    } else if (answered && existing.is_active) {
+      update.agent_number = agent;
+      update.agent_answered = true;
+      trace.step(`Answered by agent ${agent}`);
+    } else if (agent !== existing.agent_number && (existing.is_active || !existing.agent_number)) {
+      update.agent_number = agent;
+      trace.step(`Agent "${existing.agent_number ?? "-"}" → "${agent}"`);
+    }
   }
   const status3 = kind === "HANGUP" ? hangupStatus(event) : isCdr ? existing.is_active ? "completed" : undefined : STREAM_STATUS[kind];
   if (!status3) {

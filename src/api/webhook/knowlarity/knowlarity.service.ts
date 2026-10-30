@@ -236,13 +236,23 @@ export const applyStreamEvent = async (event: KnowlarityStreamEvent, trace: Webh
 	const duration = Number(event.call_duration);
 	if (isCdr && Number.isFinite(duration) && duration > 0) update.duration = duration;
 
-	// Latest agent leg wins while the call is live (hunt: ring A, no answer, ring B).
-	// The CDR's destination only fills a call that never reported its agent.
+	// The agent who picks up owns the call; other legs' events (ring-all, their
+	// HANGUP/cancel) must not move it. Before pickup the latest ringing leg wins
+	// (hunt: ring A, no answer, ring B). The CDR only fills a call with no agent.
 	const agentRaw = isCdr ? (existing.agent_number ? undefined : event.destination) : event.agent_number;
 	const agent = agentRaw ? normalizePhone(agentRaw).local : "";
-	if (agent.length === 10 && agent !== existing.agent_number && (existing.is_active || !existing.agent_number)) {
-		update.agent_number = agent;
-		trace.step(`Agent "${existing.agent_number ?? "-"}" → "${agent}"`);
+	const answered = kind === "AGENT_ANSWER" || kind === "BRIDGE";
+	if (agent.length === 10) {
+		if (existing.agent_answered) {
+			if (agent !== existing.agent_number) trace.step(`Agent ${agent} ignored, call already answered by ${existing.agent_number}`);
+		} else if (answered && existing.is_active) {
+			update.agent_number = agent;
+			update.agent_answered = true;
+			trace.step(`Answered by agent ${agent}`);
+		} else if (agent !== existing.agent_number && (existing.is_active || !existing.agent_number)) {
+			update.agent_number = agent;
+			trace.step(`Agent "${existing.agent_number ?? "-"}" → "${agent}"`);
+		}
 	}
 
 	// A CDR only ends a call that never got its HANGUP.

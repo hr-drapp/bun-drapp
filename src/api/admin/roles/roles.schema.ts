@@ -7,6 +7,7 @@ export const RoleSchema = t.Object({
 	name: t.String(),
 	permissions: t.Record(t.String(), t.Any()),
 	order: t.Numeric(),
+	level: t.Optional(t.Numeric()),
 	super_admin: t.Boolean(),
 });
 

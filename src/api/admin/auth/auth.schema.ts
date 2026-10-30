@@ -9,6 +9,8 @@ export const AdminSchema = t.Object({
 	token: t.Optional(t.String()),
 	name: t.Optional(t.String()),
 	email: t.Optional(t.String()),
+	super_admin: t.Optional(t.Boolean()),
+	ivr_agent_number: t.Optional(t.String()),
 	role: RoleSchema,
 });
 

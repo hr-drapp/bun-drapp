@@ -50,6 +50,10 @@ export class IvrCallRequestClass {
 	@prop({})
 	public agent_number?: string;
 
+	/** Set once an agent picks up (AGENT_ANSWER/BRIDGE); agent_number is then final. */
+	@prop({ default: false })
+	public agent_answered?: boolean;
+
 	@prop({ required: true })
 	public execution_id!: string;
 
