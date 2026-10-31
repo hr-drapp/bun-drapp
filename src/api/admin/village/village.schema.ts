@@ -8,9 +8,6 @@ const detailSchema = t.Object({
 	_id: t.String(),
 	id: t.Optional(t.Number()),
 	name: t.String(),
-	district: t.Optional(t.String()),
-	state: t.Optional(t.String()),
-	pincode: t.Optional(t.String()),
 	deleted: t.Boolean(),
 	createdAt: t.String(),
 	updatedAt: t.String(),
@@ -49,9 +46,6 @@ export default {
 	create: {
 		body: t.Object({
 			name: t.String({ minLength: 1 }),
-			district: t.Optional(t.String()),
-			state: t.Optional(t.String()),
-			pincode: t.Optional(t.String()),
 		}),
 		response: {
 			200: t.Object(
@@ -72,9 +66,6 @@ export default {
 	update: {
 		body: t.Object({
 			name: t.Optional(t.String({ minLength: 1 })),
-			district: t.Optional(t.String()),
-			state: t.Optional(t.String()),
-			pincode: t.Optional(t.String()),
 		}),
 		query: t.Object({
 			id: t.String(),

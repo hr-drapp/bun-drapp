@@ -31,15 +31,6 @@ export class VillageClass {
 	@prop({ required: true, trim: true })
 	public name!: string;
 
-	@prop({ trim: true })
-	public district?: string;
-
-	@prop({ trim: true })
-	public state?: string;
-
-	@prop({ trim: true })
-	public pincode?: string;
-
 	@prop({ default: false })
 	public deleted!: boolean;
 }
