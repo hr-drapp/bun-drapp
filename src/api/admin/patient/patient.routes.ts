@@ -50,6 +50,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 
 					const [list, total] = await Promise.all([
 						Patient.find(filter)
+							.populate("village")
 							.skip(page * size)
 							.limit(size)
 							.sort({ createdAt: -1 }),
@@ -71,11 +72,13 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.post(
 				"/",
 				async ({ body, user }) => {
-					const entry = await Patient.create({
+					const created = await Patient.create({
 						...body,
 						clinic: user.clinic,
 						tenant: user.tenant,
 					});
+
+					const entry = await Patient.findById(created._id).populate("village");
 
 					return R("entry created", entry);
 				},
@@ -84,7 +87,9 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.put(
 				"/",
 				async ({ body, query }) => {
-					const entry = await Patient.findByIdAndUpdate(query.id, body as any);
+					const entry = await Patient.findByIdAndUpdate(query.id, body as any, {
+						new: true,
+					}).populate("village");
 
 					return R("entry updated", entry);
 				},
@@ -93,7 +98,9 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 			.get(
 				"/detail",
 				async ({ body, query }) => {
-					const entry = await Patient.findById(query.id).lean();
+					const entry = await Patient.findById(query.id)
+						.populate("village")
+						.lean();
 
 					if (!entry) return customError("Invalid Patient");
 

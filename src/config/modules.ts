@@ -26,6 +26,7 @@ export enum ModuleId {
 	PATIENT_HEALTH_RECORDS = 19,
 	IVR_CALL_REQUESTS = 20,
 	WEBHOOK_LOGS = 21,
+	VILLAGES = 22,
 }
 
 export const FULL_ACCESS_ABILITIES: Ability = [
@@ -57,5 +58,6 @@ export const AdditionalModuleList = [
 	gen(ModuleId.SPINNER_HOME_SITE, "Home Site"),
 	gen(ModuleId.SPINNER_MARKET, "11 Market"),
 	gen(ModuleId.WALLET, "Wallet"),
+	gen(ModuleId.VILLAGES, "Villages"),
 ];
 export const ModuleList = [...BasicModuleList, ...AdditionalModuleList];
