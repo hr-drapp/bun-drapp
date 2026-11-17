@@ -4,6 +4,7 @@ import { WebhookTrace } from "src/utils/webhook-trace";
 import { WebhookLogStatus } from "src/models/clicknic/WebhookLog";
 import {
 	VOBIZ_PROVIDER,
+	cleanEnv,
 	dialXml,
 	fetchRecording,
 	hangupXml,
@@ -163,7 +164,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 						return {
 							xml: dialXml({
 								number: to,
-								callerId: process.env.VOBIZ_NUMBER || params.From || "",
+								callerId: cleanEnv("VOBIZ_NUMBER") || params.From || "",
 								actionUrl: webhookUrl("/click-result"),
 								callbackUrl: webhookUrl("/click-event"),
 							}),

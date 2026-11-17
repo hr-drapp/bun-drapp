@@ -31,12 +31,22 @@ const VOBIZ_DEFAULT_PUBLIC_URL = "https://test-api.clicknic.site";
  */
 export const VOBIZ_WEBHOOK_TOKEN = "7f098cb14b0066be260a5aea442f08cee5703934f3cf0c3f";
 
+/**
+ * Env value without a trailing "# comment", whitespace or wrapping quotes.
+ * Service env files (systemd/pm2) keep inline comments as part of the value.
+ */
+export const cleanEnv = (key: string) =>
+	`${process.env[key] ?? ""}`
+		.replace(/\s+#.*$/, "")
+		.trim()
+		.replace(/^(["'])(.*)\1$/, "$2");
+
 const env = () => ({
-	authId: process.env.VOBIZ_AUTH_ID || "",
-	authToken: process.env.VOBIZ_AUTH_TOKEN || "",
-	number: process.env.VOBIZ_NUMBER || "",
-	publicUrl: (process.env.VOBIZ_PUBLIC_URL || VOBIZ_DEFAULT_PUBLIC_URL).replace(/\/+$/, ""),
-	webhookToken: process.env.VOBIZ_WEBHOOK_TOKEN || VOBIZ_WEBHOOK_TOKEN,
+	authId: cleanEnv("VOBIZ_AUTH_ID"),
+	authToken: cleanEnv("VOBIZ_AUTH_TOKEN"),
+	number: cleanEnv("VOBIZ_NUMBER"),
+	publicUrl: (cleanEnv("VOBIZ_PUBLIC_URL") || VOBIZ_DEFAULT_PUBLIC_URL).replace(/\/+$/, ""),
+	webhookToken: cleanEnv("VOBIZ_WEBHOOK_TOKEN") || VOBIZ_WEBHOOK_TOKEN,
 });
 
 const authHeaders = () => {
@@ -107,12 +117,12 @@ export const signedTarget = (number: string) => ({ to: number, sig: sign(number)
 // ── XML ──────────────────────────────────────────────────────
 
 const recordXml = () =>
-	process.env.VOBIZ_RECORD_CALLS === "false"
+	cleanEnv("VOBIZ_RECORD_CALLS") === "false"
 		? ""
 		: `\n  <Record recordSession="true" maxLength="3600" fileFormat="mp3" playBeep="false" redirect="false" callbackUrl="${escapeXml(webhookUrl("/recording"))}" callbackMethod="POST"/>`;
 
 const dialTimeout = () => {
-	const n = Number(process.env.VOBIZ_DIAL_TIMEOUT);
+	const n = Number(cleanEnv("VOBIZ_DIAL_TIMEOUT"));
 	return Number.isFinite(n) && n > 0 ? Math.round(n) : 30;
 };
 
@@ -144,7 +154,7 @@ export const hangupXml = (message?: string) => `<?xml version="1.0" encoding="UT
 // ── REST: click-to-call ──────────────────────────────────────
 
 export const missingClickToCallConfig = () =>
-	["VOBIZ_AUTH_ID", "VOBIZ_AUTH_TOKEN", "VOBIZ_NUMBER"].filter((key) => !process.env[key]);
+	["VOBIZ_AUTH_ID", "VOBIZ_AUTH_TOKEN", "VOBIZ_NUMBER"].filter((key) => !cleanEnv(key));
 
 export type MakeCallResult = {
 	ok: boolean;

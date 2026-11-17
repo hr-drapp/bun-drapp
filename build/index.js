@@ -161953,6 +161953,7 @@ var exports_Vobiz = {};
 __export(exports_Vobiz, {
   VOBIZ_PROVIDER: () => VOBIZ_PROVIDER,
   VOBIZ_WEBHOOK_TOKEN: () => VOBIZ_WEBHOOK_TOKEN,
+  cleanEnv: () => cleanEnv,
   dialXml: () => dialXml,
   escapeXml: () => escapeXml,
   fetchRecording: () => fetchRecording,
@@ -186959,12 +186960,13 @@ var API_BASE = "https://api.vobiz.ai/api/v1";
 var VOBIZ_PROVIDER = "vobiz";
 var VOBIZ_DEFAULT_PUBLIC_URL = "https://test-api.clicknic.site";
 var VOBIZ_WEBHOOK_TOKEN = "7f098cb14b0066be260a5aea442f08cee5703934f3cf0c3f";
+var cleanEnv = (key) => `${process.env[key] ?? ""}`.replace(/\s+#.*$/, "").trim().replace(/^(["'])(.*)\1$/, "$2");
 var env5 = () => ({
-  authId: process.env.VOBIZ_AUTH_ID || "",
-  authToken: process.env.VOBIZ_AUTH_TOKEN || "",
-  number: process.env.VOBIZ_NUMBER || "",
-  publicUrl: (process.env.VOBIZ_PUBLIC_URL || VOBIZ_DEFAULT_PUBLIC_URL).replace(/\/+$/, ""),
-  webhookToken: process.env.VOBIZ_WEBHOOK_TOKEN || VOBIZ_WEBHOOK_TOKEN
+  authId: cleanEnv("VOBIZ_AUTH_ID"),
+  authToken: cleanEnv("VOBIZ_AUTH_TOKEN"),
+  number: cleanEnv("VOBIZ_NUMBER"),
+  publicUrl: (cleanEnv("VOBIZ_PUBLIC_URL") || VOBIZ_DEFAULT_PUBLIC_URL).replace(/\/+$/, ""),
+  webhookToken: cleanEnv("VOBIZ_WEBHOOK_TOKEN") || VOBIZ_WEBHOOK_TOKEN
 });
 var authHeaders = () => {
   const { authId, authToken } = env5();
@@ -187003,10 +187005,10 @@ var verifySignature = (value, signature) => {
 };
 var recordingProxyUrl = (recordingId) => `${env5().publicUrl}/webhook/vobiz/recording/${encodeURIComponent(recordingId)}?sig=${sign(recordingId)}`;
 var signedTarget = (number) => ({ to: number, sig: sign(number) });
-var recordXml = () => process.env.VOBIZ_RECORD_CALLS === "false" ? "" : `
+var recordXml = () => cleanEnv("VOBIZ_RECORD_CALLS") === "false" ? "" : `
   <Record recordSession="true" maxLength="3600" fileFormat="mp3" playBeep="false" redirect="false" callbackUrl="${escapeXml(webhookUrl("/recording"))}" callbackMethod="POST"/>`;
 var dialTimeout = () => {
-  const n = Number(process.env.VOBIZ_DIAL_TIMEOUT);
+  const n = Number(cleanEnv("VOBIZ_DIAL_TIMEOUT"));
   return Number.isFinite(n) && n > 0 ? Math.round(n) : 30;
 };
 var dialXml = ({
@@ -187026,7 +187028,7 @@ var hangupXml = (message) => `<?xml version="1.0" encoding="UTF-8"?>
   <Speak>${escapeXml(message)}</Speak>` : ""}
   <Hangup/>
 </Response>`;
-var missingClickToCallConfig2 = () => ["VOBIZ_AUTH_ID", "VOBIZ_AUTH_TOKEN", "VOBIZ_NUMBER"].filter((key) => !process.env[key]);
+var missingClickToCallConfig2 = () => ["VOBIZ_AUTH_ID", "VOBIZ_AUTH_TOKEN", "VOBIZ_NUMBER"].filter((key) => !cleanEnv(key));
 var makeClickToCall2 = async ({
   agentNumber,
   customerNumber
@@ -187066,7 +187068,7 @@ var fetchRecording = async (recordingId) => {
 };
 
 // src/api/admin/call/call.routes.ts
-var callProvider = () => process.env.CALL_PROVIDER === "vobiz" ? { name: "vobiz", label: "Vobiz", ...exports_Vobiz } : { name: "knowlarity", label: "Knowlarity", ...exports_Knowlarity };
+var callProvider = () => cleanEnv("CALL_PROVIDER") === "vobiz" ? { name: "vobiz", label: "Vobiz", ...exports_Vobiz } : { name: "knowlarity", label: "Knowlarity", ...exports_Knowlarity };
 var { toE164India: toE164India3 } = exports_Knowlarity;
 var call_routes_default = createElysia({ prefix: call_schema_default.meta.name }).guard({
   detail: {
@@ -187680,7 +187682,7 @@ var handleIncomingCall = async (params, trace) => {
     trace.step("No IVR call request (no CallUUID or clinic), cannot pick a clinic doctor");
   }
   if (!agent) {
-    const fallback = normalizePhone(process.env.VOBIZ_FALLBACK_AGENT_NUMBER || "").local;
+    const fallback = normalizePhone(cleanEnv("VOBIZ_FALLBACK_AGENT_NUMBER")).local;
     if (fallback.length === 10) {
       agent = fallback;
       trace.step(`Using VOBIZ_FALLBACK_AGENT_NUMBER ${agent}`);
@@ -187869,7 +187871,7 @@ var vobiz_routes_default = createElysia({ prefix: vobiz_schema_default.meta.name
   return {
     xml: dialXml({
       number: to,
-      callerId: process.env.VOBIZ_NUMBER || params.From || "",
+      callerId: cleanEnv("VOBIZ_NUMBER") || params.From || "",
       actionUrl: webhookUrl("/click-result"),
       callbackUrl: webhookUrl("/click-event")
     })

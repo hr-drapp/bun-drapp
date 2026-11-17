@@ -13,7 +13,7 @@ import * as Vobiz from "src/utils/Vobiz";
 
 /** CALL_PROVIDER=vobiz switches click-to-call to Vobiz; Knowlarity stays the default. */
 const callProvider = () =>
-	process.env.CALL_PROVIDER === "vobiz"
+	Vobiz.cleanEnv("CALL_PROVIDER") === "vobiz"
 		? { name: "vobiz", label: "Vobiz", ...Vobiz }
 		: { name: "knowlarity", label: "Knowlarity", ...Knowlarity };
 const { toE164India } = Knowlarity;

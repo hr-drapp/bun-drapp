@@ -5,7 +5,7 @@ import { RoleLevel } from "src/models/clicknic/Role";
 import { WebhookTrace } from "src/utils/webhook-trace";
 import { isActiveStatus, normalizePhone } from "../bolna/bolna.service";
 import { lookupCaller } from "../knowlarity/knowlarity.service";
-import { dialXml, hangupXml, recordingProxyUrl, toE164India, webhookUrl } from "src/utils/Vobiz";
+import { cleanEnv, dialXml, hangupXml, recordingProxyUrl, toE164India, webhookUrl } from "src/utils/Vobiz";
 
 /** Vobiz posts form fields; every value arrives as a string. */
 export type VobizParams = Record<string, string | undefined>;
@@ -79,7 +79,7 @@ export const handleIncomingCall = async (params: VobizParams, trace: WebhookTrac
 	}
 
 	if (!agent) {
-		const fallback = normalizePhone(process.env.VOBIZ_FALLBACK_AGENT_NUMBER || "").local;
+		const fallback = normalizePhone(cleanEnv("VOBIZ_FALLBACK_AGENT_NUMBER")).local;
 		if (fallback.length === 10) {
 			agent = fallback;
 			trace.step(`Using VOBIZ_FALLBACK_AGENT_NUMBER ${agent}`);
