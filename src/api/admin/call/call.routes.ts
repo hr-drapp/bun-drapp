@@ -8,11 +8,15 @@ import { Summary } from "src/config/modules";
 import { normalizeQuery } from "src/utils/access-grants";
 import { WebhookTrace } from "src/utils/webhook-trace";
 import { WebhookLogStatus } from "src/models/clicknic/WebhookLog";
-import {
-	makeClickToCall,
-	missingClickToCallConfig,
-	toE164India,
-} from "src/utils/Knowlarity";
+import * as Knowlarity from "src/utils/Knowlarity";
+import * as Vobiz from "src/utils/Vobiz";
+
+/** CALL_PROVIDER=vobiz switches click-to-call to Vobiz; Knowlarity stays the default. */
+const callProvider = () =>
+	process.env.CALL_PROVIDER === "vobiz"
+		? { name: "vobiz", label: "Vobiz", ...Vobiz }
+		: { name: "knowlarity", label: "Knowlarity", ...Knowlarity };
+const { toE164India } = Knowlarity;
 
 export default createElysia({ prefix: schema.meta.name }).guard(
 	{
@@ -26,7 +30,8 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 		app.post(
 			"/patient",
 			async ({ body, user, request, path }) => {
-				const missing = missingClickToCallConfig();
+				const provider = callProvider();
+				const missing = provider.missingClickToCallConfig();
 				if (missing.length) {
 					return customError(
 						`Calling is not set up yet (missing ${missing.join(", ")})`,
@@ -52,7 +57,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 				}
 
 				const trace = await WebhookTrace.start({
-					provider: "knowlarity",
+					provider: provider.name,
 					event: "click-to-call",
 					method: request.method,
 					path,
@@ -67,9 +72,9 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 				trace.step(`${user.name} (${agentNumber}) calling ${patient.name} (${customerNumber})`);
 
 				try {
-					const result = await makeClickToCall({ agentNumber, customerNumber });
+					const result = await provider.makeClickToCall({ agentNumber, customerNumber });
 					trace.set({ http_status: result.httpStatus });
-					trace.step(`Knowlarity: ${result.message}`);
+					trace.step(`${provider.label}: ${result.message}`);
 					void trace.finish(
 						result.ok ? WebhookLogStatus.SUCCESS : WebhookLogStatus.FAILED,
 						{ response: result.raw },
