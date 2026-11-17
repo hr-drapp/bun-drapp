@@ -187068,7 +187068,8 @@ var fetchRecording = async (recordingId) => {
 };
 
 // src/api/admin/call/call.routes.ts
-var callProvider = () => cleanEnv("CALL_PROVIDER") === "vobiz" ? { name: "vobiz", label: "Vobiz", ...exports_Vobiz } : { name: "knowlarity", label: "Knowlarity", ...exports_Knowlarity };
+var FORCE_KNOWLARITY_CLICK_TO_CALL = true;
+var callProvider = () => !FORCE_KNOWLARITY_CLICK_TO_CALL && cleanEnv("CALL_PROVIDER") === "vobiz" ? { name: "vobiz", label: "Vobiz", ...exports_Vobiz } : { name: "knowlarity", label: "Knowlarity", ...exports_Knowlarity };
 var { toE164India: toE164India3 } = exports_Knowlarity;
 var call_routes_default = createElysia({ prefix: call_schema_default.meta.name }).guard({
   detail: {
