@@ -187661,13 +187661,42 @@ var nextAgent = async (clinic, agents) => {
   const counter = await AutoIncementalId_default.findOneAndUpdate({ id: `vobiz-round-robin-${clinic}` }, { $inc: { seq: 1 } }, { upsert: true, new: true }).lean();
   return agents[((counter?.seq ?? 1) - 1) % agents.length];
 };
+var VOBIZ_CLINIC_ID = "69de8c299b532254712e76c0";
+var UNREGISTERED_MESSAGE = "Thank you for calling. This line is only for registered patients. Please visit the clinic to register. Goodbye.";
+var findRegisteredPatient = async (callerNumber, trace) => {
+  const phone = normalizePhone(callerNumber);
+  if (phone.local.length < 10) {
+    trace.step(`Invalid caller number "${callerNumber}" (fewer than 10 digits)`);
+    return null;
+  }
+  const clinic = await Clinic_default.findById(VOBIZ_CLINIC_ID).lean();
+  if (!clinic) {
+    trace.step(`Clinic ${VOBIZ_CLINIC_ID} not found`);
+    return null;
+  }
+  trace.set({ clinic: clinic._id, tenant: clinic.tenant, contact_number: phone.display });
+  const patient = await Patient_default.findOne({
+    clinic: clinic._id,
+    tenant: clinic.tenant,
+    phone: { $in: phone.variants },
+    deleted: false
+  }).sort({ createdAt: 1 }).lean();
+  trace.step(patient ? `Registered patient found: "${patient.name}" (#${patient.id}, ${patient._id})` : `No patient with ${phone.local} in clinic "${clinic.name}"`);
+  return patient;
+};
 var handleIncomingCall = async (params, trace) => {
   const callUuid = params.CallUUID;
   const from = params.From ?? "";
   const to = params.To ?? "";
   trace.step(`Incoming call: From="${from}", To="${to}", CallUUID="${callUuid ?? "-"}"`);
-  const isRegistered = from ? await lookupCaller({ callerNumber: from, knowlarityNumber: to, callUuid, trace }) : (trace.step("From missing, treating as new patient"), false);
-  trace.step(isRegistered ? "Registered patient" : "New patient");
+  trace.set({ execution_id: callUuid });
+  const patient = from ? await findRegisteredPatient(from, trace) : (trace.step("From missing"), null);
+  if (!patient) {
+    trace.step("Not a registered patient: playing the unregistered message and hanging up");
+    return hangupXml(UNREGISTERED_MESSAGE);
+  }
+  trace.set({ patient: patient._id });
+  await lookupCaller({ callerNumber: from, knowlarityNumber: to, callUuid, trace });
   const call = callUuid ? await IvrCallRequest_default.findOne({ execution_id: callUuid }).lean() : null;
   let agent = "";
   if (call) {

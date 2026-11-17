@@ -1,4 +1,6 @@
 import Admin from "src/models/clicknic/Admin";
+import Clinic from "src/models/clicknic/Clinic";
+import Patient from "src/models/clicknic/Patient";
 import IvrCallRequest from "src/models/clicknic/IvrCallRequest";
 import AutoIncementalId from "src/models/clicknic/AutoIncementalId";
 import { RoleLevel } from "src/models/clicknic/Role";
@@ -47,21 +49,68 @@ const nextAgent = async (clinic: any, agents: string[]) => {
 
 // ── Inbound call (Answer URL) ────────────────────────────────
 
+/** Same clinic Knowlarity's /get-agent is pinned to. */
+const VOBIZ_CLINIC_ID = "69de8c299b532254712e76c0";
+
+/** Spoken to callers who aren't registered patients; the call then ends. */
+export const UNREGISTERED_MESSAGE =
+	"Thank you for calling. This line is only for registered patients. Please visit the clinic to register. Goodbye.";
+
 /**
- * Registers the caller exactly like Knowlarity's /get-agent (patient lookup or
- * "Unknown Caller", ivr_call_request per CallUUID), then rings the next doctor.
- * Returns the XML for Vobiz.
+ * Registered = a patient with this number already exists in the clinic.
+ * Read-only: unlike Knowlarity's lookupCaller, an unknown number is NOT
+ * registered as "Unknown Caller", so it can't reach a doctor on a later call.
+ */
+const findRegisteredPatient = async (callerNumber: string, trace: WebhookTrace) => {
+	const phone = normalizePhone(callerNumber);
+	if (phone.local.length < 10) {
+		trace.step(`Invalid caller number "${callerNumber}" (fewer than 10 digits)`);
+		return null;
+	}
+	const clinic = await Clinic.findById(VOBIZ_CLINIC_ID).lean();
+	if (!clinic) {
+		trace.step(`Clinic ${VOBIZ_CLINIC_ID} not found`);
+		return null;
+	}
+	trace.set({ clinic: clinic._id, tenant: clinic.tenant, contact_number: phone.display });
+	const patient = await Patient.findOne({
+		clinic: clinic._id,
+		tenant: clinic.tenant,
+		phone: { $in: phone.variants },
+		deleted: false,
+	})
+		.sort({ createdAt: 1 })
+		.lean();
+	trace.step(
+		patient
+			? `Registered patient found: "${patient.name}" (#${patient.id}, ${patient._id})`
+			: `No patient with ${phone.local} in clinic "${clinic.name}"`,
+	);
+	return patient;
+};
+
+/**
+ * Registered patients only: records the call exactly like Knowlarity's
+ * /get-agent (ivr_call_request per CallUUID) and rings the next doctor.
+ * Unregistered callers hear UNREGISTERED_MESSAGE and the call ends — no
+ * patient, no ivr_call_request (only the webhook log). Returns Vobiz XML.
  */
 export const handleIncomingCall = async (params: VobizParams, trace: WebhookTrace) => {
 	const callUuid = params.CallUUID;
 	const from = params.From ?? "";
 	const to = params.To ?? "";
 	trace.step(`Incoming call: From="${from}", To="${to}", CallUUID="${callUuid ?? "-"}"`);
+	trace.set({ execution_id: callUuid });
 
-	const isRegistered = from
-		? await lookupCaller({ callerNumber: from, knowlarityNumber: to, callUuid, trace })
-		: (trace.step("From missing, treating as new patient"), false);
-	trace.step(isRegistered ? "Registered patient" : "New patient");
+	const patient = from ? await findRegisteredPatient(from, trace) : (trace.step("From missing"), null);
+	if (!patient) {
+		trace.step("Not a registered patient: playing the unregistered message and hanging up");
+		return hangupXml(UNREGISTERED_MESSAGE);
+	}
+	trace.set({ patient: patient._id });
+
+	// Patient exists, so lookupCaller only records the call (it never creates a patient here).
+	await lookupCaller({ callerNumber: from, knowlarityNumber: to, callUuid, trace });
 
 	const call = callUuid ? await IvrCallRequest.findOne({ execution_id: callUuid }).lean() : null;
 
