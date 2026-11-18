@@ -182561,7 +182561,7 @@ AdminClass = __legacyDecorateClassTS([
 var Admin_default = import_typegoose6.getModelForClass(AdminClass);
 
 // src/models/clicknic/Patient.ts
-var import_typegoose8 = __toESM(require_typegoose());
+var import_typegoose9 = __toESM(require_typegoose());
 
 // src/models/clicknic/Village.ts
 var import_typegoose7 = __toESM(require_typegoose());
@@ -182598,59 +182598,102 @@ VillageClass = __legacyDecorateClassTS([
 ], VillageClass);
 var Village_default = import_typegoose7.getModelForClass(VillageClass);
 
+// src/models/clicknic/Volunteer.ts
+var import_typegoose8 = __toESM(require_typegoose());
+class VolunteerClass {
+}
+__legacyDecorateClassTS([
+  import_typegoose8.prop({ ref: () => ClinicClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], VolunteerClass.prototype, "clinic", undefined);
+__legacyDecorateClassTS([
+  import_typegoose8.prop({ ref: () => TenantClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], VolunteerClass.prototype, "tenant", undefined);
+__legacyDecorateClassTS([
+  import_typegoose8.prop({ required: true, trim: true }),
+  __legacyMetadataTS("design:type", String)
+], VolunteerClass.prototype, "name", undefined);
+__legacyDecorateClassTS([
+  import_typegoose8.prop({ required: true, trim: true }),
+  __legacyMetadataTS("design:type", String)
+], VolunteerClass.prototype, "phone", undefined);
+__legacyDecorateClassTS([
+  import_typegoose8.prop({ required: true, select: false }),
+  __legacyMetadataTS("design:type", String)
+], VolunteerClass.prototype, "token", undefined);
+__legacyDecorateClassTS([
+  import_typegoose8.prop({}),
+  __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
+], VolunteerClass.prototype, "last_active_at", undefined);
+__legacyDecorateClassTS([
+  import_typegoose8.prop({ default: false }),
+  __legacyMetadataTS("design:type", Boolean)
+], VolunteerClass.prototype, "deleted", undefined);
+VolunteerClass = __legacyDecorateClassTS([
+  import_typegoose8.index({ clinic: 1, phone: 1 }, { unique: true }),
+  import_typegoose8.index({ token: 1 }, { unique: true }),
+  import_typegoose8.modelOptions({ schemaOptions: { collection: "volunteer", timestamps: true } })
+], VolunteerClass);
+var Volunteer_default = import_typegoose8.getModelForClass(VolunteerClass);
+
 // src/models/clicknic/Patient.ts
 class PatientClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose8.prop({}),
+  import_typegoose9.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], PatientClass.prototype, "id", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({ ref: () => ClinicClass }),
+  import_typegoose9.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PatientClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({ ref: () => TenantClass }),
+  import_typegoose9.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PatientClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({}),
+  import_typegoose9.prop({}),
   __legacyMetadataTS("design:type", String)
 ], PatientClass.prototype, "name", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({}),
+  import_typegoose9.prop({}),
   __legacyMetadataTS("design:type", String)
 ], PatientClass.prototype, "phone", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({}),
+  import_typegoose9.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], PatientClass.prototype, "age", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({}),
+  import_typegoose9.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], PatientClass.prototype, "gender", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({ ref: () => VillageClass }),
+  import_typegoose9.prop({ ref: () => VillageClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PatientClass.prototype, "village", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({}),
+  import_typegoose9.prop({}),
   __legacyMetadataTS("design:type", String)
 ], PatientClass.prototype, "profile_pic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose8.prop({ default: false }),
+  import_typegoose9.prop({ ref: () => VolunteerClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], PatientClass.prototype, "volunteer", undefined);
+__legacyDecorateClassTS([
+  import_typegoose9.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], PatientClass.prototype, "deleted", undefined);
 PatientClass = __legacyDecorateClassTS([
-  import_typegoose8.pre("save", async function(next) {
+  import_typegoose9.pre("save", async function(next) {
     if (!this.id) {
       this.id = await GetAutoIncrId(0 /* CLINIC */);
     }
     next();
   }),
-  import_typegoose8.modelOptions({ schemaOptions: { collection: "patient", timestamps: true } })
+  import_typegoose9.modelOptions({ schemaOptions: { collection: "patient", timestamps: true } })
 ], PatientClass);
-var Patient_default = import_typegoose8.getModelForClass(PatientClass);
+var Patient_default = import_typegoose9.getModelForClass(PatientClass);
 
 // src/utils/auth.ts
 var import_bcryptjs = __toESM(require_bcrypt());
@@ -182981,50 +183024,50 @@ var createElysia = (config) => new Elysia({
 var import_mongoose4 = __toESM(require_mongoose2());
 
 // src/models/clicknic/AccessGrant.ts
-var import_typegoose9 = __toESM(require_typegoose());
+var import_typegoose10 = __toESM(require_typegoose());
 var import_mongoose3 = __toESM(require_mongoose2());
 class AccessGrantClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose9.prop({ ref: () => AdminClass, required: true }),
+  import_typegoose10.prop({ ref: () => AdminClass, required: true }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AccessGrantClass.prototype, "grantee", undefined);
 __legacyDecorateClassTS([
-  import_typegoose9.prop({ ref: () => AdminClass, required: true }),
+  import_typegoose10.prop({ ref: () => AdminClass, required: true }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AccessGrantClass.prototype, "granted_by", undefined);
 __legacyDecorateClassTS([
-  import_typegoose9.prop({ required: true }),
+  import_typegoose10.prop({ required: true }),
   __legacyMetadataTS("design:type", typeof AccessGrantResource === "undefined" ? Object : AccessGrantResource)
 ], AccessGrantClass.prototype, "resource", undefined);
 __legacyDecorateClassTS([
-  import_typegoose9.prop({ type: () => [import_mongoose3.default.Schema.Types.ObjectId], default: [] }),
+  import_typegoose10.prop({ type: () => [import_mongoose3.default.Schema.Types.ObjectId], default: [] }),
   __legacyMetadataTS("design:type", Array)
 ], AccessGrantClass.prototype, "resource_ids", undefined);
 __legacyDecorateClassTS([
-  import_typegoose9.prop({ type: () => [Object], default: [] }),
+  import_typegoose10.prop({ type: () => [Object], default: [] }),
   __legacyMetadataTS("design:type", Array)
 ], AccessGrantClass.prototype, "filters", undefined);
 __legacyDecorateClassTS([
-  import_typegoose9.prop({ ref: () => TenantClass }),
+  import_typegoose10.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AccessGrantClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose9.prop(),
+  import_typegoose10.prop(),
   __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
 ], AccessGrantClass.prototype, "expires_at", undefined);
 AccessGrantClass = __legacyDecorateClassTS([
-  import_typegoose9.index({ grantee: 1, resource: 1 }),
-  import_typegoose9.index({ granted_by: 1, resource: 1 }),
-  import_typegoose9.index({ expires_at: 1 }),
-  import_typegoose9.modelOptions({
+  import_typegoose10.index({ grantee: 1, resource: 1 }),
+  import_typegoose10.index({ granted_by: 1, resource: 1 }),
+  import_typegoose10.index({ expires_at: 1 }),
+  import_typegoose10.modelOptions({
     schemaOptions: {
       collection: "accessgrants",
       timestamps: true
     }
   })
 ], AccessGrantClass);
-var AccessGrant_default = import_typegoose9.getModelForClass(AccessGrantClass);
+var AccessGrant_default = import_typegoose10.getModelForClass(AccessGrantClass);
 
 // src/config/redis.ts
 var import_dotenv2 = __toESM(require_main());
@@ -184335,53 +184378,53 @@ var doctor_time_slot_schema_default = {
 };
 
 // src/models/clicknic/DoctorTimeSlot.ts
-var import_typegoose10 = __toESM(require_typegoose());
+var import_typegoose11 = __toESM(require_typegoose());
 class DoctorTimeSlotClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose10.prop({}),
+  import_typegoose11.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], DoctorTimeSlotClass.prototype, "id", undefined);
 __legacyDecorateClassTS([
-  import_typegoose10.prop({ ref: () => ClinicClass }),
+  import_typegoose11.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], DoctorTimeSlotClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose10.prop({ ref: () => TenantClass }),
+  import_typegoose11.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], DoctorTimeSlotClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose10.prop({ ref: () => DoctorClass }),
+  import_typegoose11.prop({ ref: () => DoctorClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], DoctorTimeSlotClass.prototype, "doctor", undefined);
 __legacyDecorateClassTS([
-  import_typegoose10.prop({}),
+  import_typegoose11.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], DoctorTimeSlotClass.prototype, "start", undefined);
 __legacyDecorateClassTS([
-  import_typegoose10.prop({}),
+  import_typegoose11.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], DoctorTimeSlotClass.prototype, "end", undefined);
 __legacyDecorateClassTS([
-  import_typegoose10.prop({ default: 0 /* RESULT_PENDING */ }),
+  import_typegoose11.prop({ default: 0 /* RESULT_PENDING */ }),
   __legacyMetadataTS("design:type", Number)
 ], DoctorTimeSlotClass.prototype, "status", undefined);
 __legacyDecorateClassTS([
-  import_typegoose10.prop({ default: false }),
+  import_typegoose11.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], DoctorTimeSlotClass.prototype, "deleted", undefined);
 DoctorTimeSlotClass = __legacyDecorateClassTS([
-  import_typegoose10.pre("save", async function(next) {
+  import_typegoose11.pre("save", async function(next) {
     if (!this.id) {
       this.id = await GetAutoIncrId(0 /* CLINIC */);
     }
     next();
   }),
-  import_typegoose10.modelOptions({
+  import_typegoose11.modelOptions({
     schemaOptions: { collection: "doctor_time_slot", timestamps: true }
   })
 ], DoctorTimeSlotClass);
-var DoctorTimeSlot_default = import_typegoose10.getModelForClass(DoctorTimeSlotClass);
+var DoctorTimeSlot_default = import_typegoose11.getModelForClass(DoctorTimeSlotClass);
 
 // src/api/admin/doctor-time-slot/doctor-time-slot.routes.ts
 var doctor_time_slot_routes_default = createElysia({ prefix: doctor_time_slot_schema_default.meta.name }).guard({
@@ -184786,6 +184829,11 @@ var detailSchema6 = t2.Object({
     t2.Null()
   ])),
   profile_pic: t2.String(),
+  volunteer: t2.Optional(t2.Union([
+    t2.String(),
+    t2.Object({ _id: t2.String(), name: t2.String(), phone: t2.String() }),
+    t2.Null()
+  ])),
   deleted: t2.Boolean(),
   recent_appointment: appointment_schema_default.meta.detail,
   vitals: patient_health_record_schema_default.meta.detail,
@@ -184903,76 +184951,76 @@ var patient_schema_default = {
 };
 
 // src/models/clicknic/Appointment.ts
-var import_typegoose11 = __toESM(require_typegoose());
+var import_typegoose12 = __toESM(require_typegoose());
 var import_moment2 = __toESM(require_moment());
 class AppointmentClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose11.prop({}),
+  import_typegoose12.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], AppointmentClass.prototype, "id", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({}),
+  import_typegoose12.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], AppointmentClass.prototype, "token", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({ ref: () => ClinicClass }),
+  import_typegoose12.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AppointmentClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({ ref: () => TenantClass }),
+  import_typegoose12.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AppointmentClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({ ref: () => PatientClass }),
+  import_typegoose12.prop({ ref: () => PatientClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AppointmentClass.prototype, "patient", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({ ref: () => DoctorClass }),
+  import_typegoose12.prop({ ref: () => DoctorClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AppointmentClass.prototype, "doctor", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({ ref: () => DoctorTimeSlotClass }),
+  import_typegoose12.prop({ ref: () => DoctorTimeSlotClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], AppointmentClass.prototype, "time_slot", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({}),
+  import_typegoose12.prop({}),
   __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
 ], AppointmentClass.prototype, "date", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({}),
+  import_typegoose12.prop({}),
   __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
 ], AppointmentClass.prototype, "follow_up_date", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({}),
+  import_typegoose12.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], AppointmentClass.prototype, "type", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({}),
+  import_typegoose12.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], AppointmentClass.prototype, "source", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({ default: 0 /* BOOKED */ }),
+  import_typegoose12.prop({ default: 0 /* BOOKED */ }),
   __legacyMetadataTS("design:type", Number)
 ], AppointmentClass.prototype, "status", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({}),
+  import_typegoose12.prop({}),
   __legacyMetadataTS("design:type", String)
 ], AppointmentClass.prototype, "complaint", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({}),
+  import_typegoose12.prop({}),
   __legacyMetadataTS("design:type", String)
 ], AppointmentClass.prototype, "notes", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({}),
+  import_typegoose12.prop({}),
   __legacyMetadataTS("design:type", String)
 ], AppointmentClass.prototype, "diagnosis", undefined);
 __legacyDecorateClassTS([
-  import_typegoose11.prop({ default: false }),
+  import_typegoose12.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], AppointmentClass.prototype, "deleted", undefined);
 AppointmentClass = __legacyDecorateClassTS([
-  import_typegoose11.pre("save", async function(next) {
+  import_typegoose12.pre("save", async function(next) {
     if (!this.id) {
       this.id = await GetAutoIncrId(0 /* CLINIC */);
     }
@@ -184981,72 +185029,72 @@ AppointmentClass = __legacyDecorateClassTS([
     }
     next();
   }),
-  import_typegoose11.modelOptions({
+  import_typegoose12.modelOptions({
     schemaOptions: { collection: "appointment", timestamps: true }
   })
 ], AppointmentClass);
-var Appointment_default = import_typegoose11.getModelForClass(AppointmentClass);
+var Appointment_default = import_typegoose12.getModelForClass(AppointmentClass);
 
 // src/models/clicknic/PatientHealthRecord.ts
-var import_typegoose12 = __toESM(require_typegoose());
+var import_typegoose13 = __toESM(require_typegoose());
 class PatientHealthRecordClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose12.prop({}),
+  import_typegoose13.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], PatientHealthRecordClass.prototype, "id", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ ref: () => ClinicClass }),
+  import_typegoose13.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PatientHealthRecordClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ ref: () => TenantClass }),
+  import_typegoose13.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PatientHealthRecordClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ ref: () => PatientClass }),
+  import_typegoose13.prop({ ref: () => PatientClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PatientHealthRecordClass.prototype, "patient", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ ref: () => DoctorClass }),
+  import_typegoose13.prop({ ref: () => DoctorClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PatientHealthRecordClass.prototype, "doctor", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ ref: () => AppointmentClass }),
+  import_typegoose13.prop({ ref: () => AppointmentClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PatientHealthRecordClass.prototype, "appointment", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ default: 0 /* PENDING */ }),
+  import_typegoose13.prop({ default: 0 /* PENDING */ }),
   __legacyMetadataTS("design:type", Number)
 ], PatientHealthRecordClass.prototype, "status", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ default: 0 /* VITALS */ }),
+  import_typegoose13.prop({ default: 0 /* VITALS */ }),
   __legacyMetadataTS("design:type", Number)
 ], PatientHealthRecordClass.prototype, "type", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ type: () => [Object], default: [] }),
+  import_typegoose13.prop({ type: () => [Object], default: [] }),
   __legacyMetadataTS("design:type", Array)
 ], PatientHealthRecordClass.prototype, "values", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ default: [] }),
+  import_typegoose13.prop({ default: [] }),
   __legacyMetadataTS("design:type", Array)
 ], PatientHealthRecordClass.prototype, "attachments", undefined);
 __legacyDecorateClassTS([
-  import_typegoose12.prop({ default: false }),
+  import_typegoose13.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], PatientHealthRecordClass.prototype, "deleted", undefined);
 PatientHealthRecordClass = __legacyDecorateClassTS([
-  import_typegoose12.pre("save", async function(next) {
+  import_typegoose13.pre("save", async function(next) {
     if (!this.id) {
       this.id = await GetAutoIncrId(0 /* CLINIC */);
     }
     next();
   }),
-  import_typegoose12.modelOptions({
+  import_typegoose13.modelOptions({
     schemaOptions: { collection: "patient_health_record", timestamps: true }
   })
 ], PatientHealthRecordClass);
-var PatientHealthRecord_default = import_typegoose12.getModelForClass(PatientHealthRecordClass);
+var PatientHealthRecord_default = import_typegoose13.getModelForClass(PatientHealthRecordClass);
 
 // src/api/admin/patient/patient.routes.ts
 var patient_routes_default = createElysia({ prefix: patient_schema_default.meta.name }).guard({
@@ -185072,7 +185120,7 @@ var patient_routes_default = createElysia({ prefix: patient_schema_default.meta.
     deleted
   }, user);
   const [list, total] = await Promise.all([
-    Patient_default.find(filter).populate("village").skip(page * size).limit(size).sort({ createdAt: -1 }),
+    Patient_default.find(filter).populate("village").populate("volunteer", "name phone").skip(page * size).limit(size).sort({ createdAt: -1 }),
     Patient_default.countDocuments(filter)
   ]);
   const pages = Math.ceil(total / size);
@@ -185313,47 +185361,47 @@ var village_routes_default = createElysia({ prefix: village_schema_default.meta.
 }, village_schema_default.delete));
 
 // src/models/clicknic/Prescription.ts
-var import_typegoose13 = __toESM(require_typegoose());
+var import_typegoose14 = __toESM(require_typegoose());
 class PrescriptionClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose13.prop({ ref: () => ClinicClass }),
+  import_typegoose14.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PrescriptionClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({ ref: () => TenantClass }),
+  import_typegoose14.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PrescriptionClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({ ref: () => PatientClass }),
+  import_typegoose14.prop({ ref: () => PatientClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PrescriptionClass.prototype, "patient", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({ ref: () => DoctorClass }),
+  import_typegoose14.prop({ ref: () => DoctorClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PrescriptionClass.prototype, "doctor", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({ ref: () => AppointmentClass }),
+  import_typegoose14.prop({ ref: () => AppointmentClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], PrescriptionClass.prototype, "appointment", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({ type: () => [Object], default: [] }),
+  import_typegoose14.prop({ type: () => [Object], default: [] }),
   __legacyMetadataTS("design:type", Array)
 ], PrescriptionClass.prototype, "drugs", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({ type: () => [Object], default: [] }),
+  import_typegoose14.prop({ type: () => [Object], default: [] }),
   __legacyMetadataTS("design:type", Array)
 ], PrescriptionClass.prototype, "investigations", undefined);
 __legacyDecorateClassTS([
-  import_typegoose13.prop({ default: false }),
+  import_typegoose14.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], PrescriptionClass.prototype, "deleted", undefined);
 PrescriptionClass = __legacyDecorateClassTS([
-  import_typegoose13.modelOptions({
+  import_typegoose14.modelOptions({
     schemaOptions: { collection: "prescription", timestamps: true }
   })
 ], PrescriptionClass);
-var Prescription_default = import_typegoose13.getModelForClass(PrescriptionClass);
+var Prescription_default = import_typegoose14.getModelForClass(PrescriptionClass);
 
 // src/api/admin/appointment/appointment.routes.ts
 var import_moment3 = __toESM(require_moment());
@@ -185704,45 +185752,45 @@ var media_schema_default = {
 };
 
 // src/models/clicknic/media/Media.ts
-var import_typegoose14 = __toESM(require_typegoose());
+var import_typegoose15 = __toESM(require_typegoose());
 class MediaClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", String)
 ], MediaClass.prototype, "name", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", String)
 ], MediaClass.prototype, "media_type", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], MediaClass.prototype, "resource", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", String)
 ], MediaClass.prototype, "url", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({}),
+  import_typegoose15.prop({}),
   __legacyMetadataTS("design:type", String)
 ], MediaClass.prototype, "size", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({ ref: () => TenantClass }),
+  import_typegoose15.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], MediaClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({ ref: () => ClinicClass }),
+  import_typegoose15.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], MediaClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose14.prop({ default: false }),
+  import_typegoose15.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], MediaClass.prototype, "deleted", undefined);
 MediaClass = __legacyDecorateClassTS([
-  import_typegoose14.modelOptions({ schemaOptions: { collection: "media", timestamps: true } })
+  import_typegoose15.modelOptions({ schemaOptions: { collection: "media", timestamps: true } })
 ], MediaClass);
-var Media_default = import_typegoose14.getModelForClass(MediaClass);
+var Media_default = import_typegoose15.getModelForClass(MediaClass);
 
 // src/utils/AppWrite.ts
 var import_dotenv4 = __toESM(require_main());
@@ -186243,7 +186291,7 @@ var ivr_call_request_schema_default = {
 };
 
 // src/models/clicknic/IvrCallRequest.ts
-var import_typegoose15 = __toESM(require_typegoose());
+var import_typegoose16 = __toESM(require_typegoose());
 var IVR_ACTIVE_STATUSES = [
   "queued",
   "initiated",
@@ -186255,86 +186303,86 @@ var IVR_ACTIVE_TIMEOUT_MINUTES = 30;
 class IvrCallRequestClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ ref: () => ClinicClass }),
+  import_typegoose16.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], IvrCallRequestClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ ref: () => TenantClass }),
+  import_typegoose16.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], IvrCallRequestClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ ref: () => PatientClass }),
+  import_typegoose16.prop({ ref: () => PatientClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], IvrCallRequestClass.prototype, "patient", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "contact_number", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "agent_id", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "agent_number", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ default: false }),
+  import_typegoose16.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], IvrCallRequestClass.prototype, "agent_answered", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ required: true }),
+  import_typegoose16.prop({ required: true }),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "execution_id", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ default: "in-progress" }),
+  import_typegoose16.prop({ default: "in-progress" }),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "status", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ default: true }),
+  import_typegoose16.prop({ default: true }),
   __legacyMetadataTS("design:type", Boolean)
 ], IvrCallRequestClass.prototype, "is_active", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ default: false }),
+  import_typegoose16.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], IvrCallRequestClass.prototype, "is_new_patient", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ default: "" }),
+  import_typegoose16.prop({ default: "" }),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "note", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], IvrCallRequestClass.prototype, "duration", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "recording_url", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "summary", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", String)
 ], IvrCallRequestClass.prototype, "transcript", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({}),
+  import_typegoose16.prop({}),
   __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
 ], IvrCallRequestClass.prototype, "ended_at", undefined);
 __legacyDecorateClassTS([
-  import_typegoose15.prop({ default: false }),
+  import_typegoose16.prop({ default: false }),
   __legacyMetadataTS("design:type", Boolean)
 ], IvrCallRequestClass.prototype, "deleted", undefined);
 IvrCallRequestClass = __legacyDecorateClassTS([
-  import_typegoose15.index({ execution_id: 1 }, { unique: true }),
-  import_typegoose15.index({ clinic: 1, tenant: 1, createdAt: -1 }),
-  import_typegoose15.index({ clinic: 1, tenant: 1, agent_number: 1, createdAt: -1 }),
-  import_typegoose15.modelOptions({
+  import_typegoose16.index({ execution_id: 1 }, { unique: true }),
+  import_typegoose16.index({ clinic: 1, tenant: 1, createdAt: -1 }),
+  import_typegoose16.index({ clinic: 1, tenant: 1, agent_number: 1, createdAt: -1 }),
+  import_typegoose16.modelOptions({
     schemaOptions: { collection: "ivr_call_request", timestamps: true }
   })
 ], IvrCallRequestClass);
-var IvrCallRequest_default = import_typegoose15.getModelForClass(IvrCallRequestClass);
+var IvrCallRequest_default = import_typegoose16.getModelForClass(IvrCallRequestClass);
 
 // src/api/webhook/bolna/bolna.service.ts
 var IVR_UNKNOWN_PATIENT_NAME = "Unknown Caller";
@@ -186686,97 +186734,97 @@ var webhook_log_schema_default = {
 };
 
 // src/models/clicknic/WebhookLog.ts
-var import_typegoose16 = __toESM(require_typegoose());
+var import_typegoose17 = __toESM(require_typegoose());
 var WEBHOOK_LOG_TTL_SECONDS = 60 * 60 * 24 * 30;
 
 class WebhookLogClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose16.prop({ ref: () => ClinicClass }),
+  import_typegoose17.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], WebhookLogClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({ ref: () => TenantClass }),
+  import_typegoose17.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], WebhookLogClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({ ref: () => PatientClass }),
+  import_typegoose17.prop({ ref: () => PatientClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], WebhookLogClass.prototype, "patient", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({ ref: () => IvrCallRequestClass }),
+  import_typegoose17.prop({ ref: () => IvrCallRequestClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], WebhookLogClass.prototype, "ivr_call_request", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({ required: true }),
+  import_typegoose17.prop({ required: true }),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "provider", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({ required: true }),
+  import_typegoose17.prop({ required: true }),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "event", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "method", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "path", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({ default: "received" /* RECEIVED */ }),
+  import_typegoose17.prop({ default: "received" /* RECEIVED */ }),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "status", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], WebhookLogClass.prototype, "http_status", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "execution_id", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "contact_number", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({ default: "" }),
+  import_typegoose17.prop({ default: "" }),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "logs", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "error", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], WebhookLogClass.prototype, "duration_ms", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "ip", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", Object)
 ], WebhookLogClass.prototype, "query", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", Object)
 ], WebhookLogClass.prototype, "body", undefined);
 __legacyDecorateClassTS([
-  import_typegoose16.prop({}),
+  import_typegoose17.prop({}),
   __legacyMetadataTS("design:type", Object)
 ], WebhookLogClass.prototype, "response", undefined);
 WebhookLogClass = __legacyDecorateClassTS([
-  import_typegoose16.index({ createdAt: 1 }, { expireAfterSeconds: WEBHOOK_LOG_TTL_SECONDS }),
-  import_typegoose16.index({ execution_id: 1 }),
-  import_typegoose16.index({ clinic: 1, createdAt: -1 }),
-  import_typegoose16.modelOptions({
+  import_typegoose17.index({ createdAt: 1 }, { expireAfterSeconds: WEBHOOK_LOG_TTL_SECONDS }),
+  import_typegoose17.index({ execution_id: 1 }),
+  import_typegoose17.index({ clinic: 1, createdAt: -1 }),
+  import_typegoose17.modelOptions({
     schemaOptions: { collection: "webhook_log", timestamps: true },
-    options: { allowMixed: import_typegoose16.Severity.ALLOW }
+    options: { allowMixed: import_typegoose17.Severity.ALLOW }
   })
 ], WebhookLogClass);
-var WebhookLog_default = import_typegoose16.getModelForClass(WebhookLogClass);
+var WebhookLog_default = import_typegoose17.getModelForClass(WebhookLogClass);
 
 // src/api/admin/webhook-log/webhook-log.routes.ts
 var scopeFilter2 = (user) => {
@@ -187213,35 +187261,35 @@ var contribution_schema_default = {
 };
 
 // src/models/ManglamCityContribution.ts
-var import_typegoose17 = __toESM(require_typegoose());
+var import_typegoose18 = __toESM(require_typegoose());
 class ManglamCityContributionClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "name", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "phone", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], ManglamCityContributionClass.prototype, "amount", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "area", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "ip", undefined);
 ManglamCityContributionClass = __legacyDecorateClassTS([
-  import_typegoose17.modelOptions({
+  import_typegoose18.modelOptions({
     schemaOptions: { collection: "manglam_city_contribution", timestamps: true }
   })
 ], ManglamCityContributionClass);
-var ManglamCityContribution_default = import_typegoose17.getModelForClass(ManglamCityContributionClass);
+var ManglamCityContribution_default = import_typegoose18.getModelForClass(ManglamCityContributionClass);
 
 // src/api/manglam-city/contribution/contribution.routes.ts
 function maskPhone(phone) {
@@ -187932,8 +187980,277 @@ var webhookRoutes = createElysia({ prefix: "/webhook" });
 webhookRoutes.use(bolna_routes_default);
 webhookRoutes.use(vobiz_routes_default);
 
+// src/api/public/ground/ground.routes.ts
+var import_mongoose7 = __toESM(require_mongoose2());
+import { randomUUID } from "crypto";
+
+// src/api/public/ground/ground.schema.ts
+var name18 = "ground";
+var clinicSchema = t2.Object({
+  _id: t2.String(),
+  id: t2.Optional(t2.Number()),
+  name: t2.Optional(t2.String()),
+  logo: t2.Optional(t2.String())
+});
+var volunteerSchema = t2.Object({
+  _id: t2.String(),
+  name: t2.String(),
+  phone: t2.String(),
+  token: t2.Optional(t2.String()),
+  clinic: t2.Optional(clinicSchema)
+});
+var villageSchema = t2.Object({
+  _id: t2.String(),
+  id: t2.Optional(t2.Number()),
+  name: t2.String()
+});
+var patientSchema = t2.Object({
+  _id: t2.String(),
+  id: t2.Optional(t2.Number()),
+  name: t2.String(),
+  phone: t2.String(),
+  age: t2.Optional(t2.Number()),
+  gender: t2.Optional(t2.Number()),
+  village: t2.Optional(t2.Union([villageSchema, t2.String(), t2.Null()])),
+  createdAt: t2.String()
+});
+var ok = (data, description) => ({
+  200: t2.Object({ status: t2.Boolean(), message: t2.String(), data }, { description })
+});
+var ground_schema_default = {
+  meta: { name: name18 },
+  clinic: {
+    query: t2.Object({ c: t2.Optional(t2.String()) }),
+    response: ok(clinicSchema, `${name18} clinic response`),
+    detail: { operationId: "clinic" }
+  },
+  register: {
+    body: t2.Object({
+      name: t2.String({ minLength: 2, maxLength: 60 }),
+      phone: t2.String({ minLength: 10, maxLength: 15 }),
+      c: t2.Optional(t2.String())
+    }),
+    response: ok(volunteerSchema, `${name18} register response`),
+    detail: { operationId: "register" }
+  },
+  me: {
+    response: ok(volunteerSchema, `${name18} me response`),
+    detail: { operationId: "me" }
+  },
+  villages: {
+    response: ok(t2.Array(villageSchema), `${name18} villages response`),
+    detail: { operationId: "villages" }
+  },
+  createVillage: {
+    body: t2.Object({ name: t2.String({ minLength: 2, maxLength: 60 }) }),
+    response: ok(villageSchema, `${name18} create village response`),
+    detail: { operationId: "createVillage" }
+  },
+  createPatient: {
+    body: t2.Object({
+      name: t2.String({ minLength: 2, maxLength: 80 }),
+      phone: t2.String({ minLength: 10, maxLength: 15 }),
+      age: t2.Number({ minimum: 0, maximum: 120 }),
+      gender: t2.Number({ minimum: 1, maximum: 3 }),
+      village: t2.Optional(t2.String())
+    }),
+    response: ok(t2.Object({ patient: patientSchema, duplicate: t2.Boolean() }), `${name18} create patient response`),
+    detail: { operationId: "createPatient" }
+  },
+  myPatients: {
+    response: ok(t2.Object({
+      today: t2.Number(),
+      total: t2.Number(),
+      recent: t2.Array(patientSchema)
+    }), `${name18} my patients response`),
+    detail: { operationId: "myPatients" }
+  }
+};
+
+// src/api/public/ground/ground.routes.ts
+var TOKEN_HEADER = "x-volunteer-token";
+var normalizePhone2 = (raw) => {
+  const digits = `${raw ?? ""}`.replace(/\D/g, "").slice(-10);
+  return /^[6-9]\d{9}$/.test(digits) ? digits : null;
+};
+var escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+var toJSON = (doc) => JSON.parse(JSON.stringify(doc));
+var resolveClinic = async (c) => {
+  if (c) {
+    const byKey = import_mongoose7.isValidObjectId(c) ? await Clinic_default.findById(c).lean() : /^\d+$/.test(c) ? await Clinic_default.findOne({ id: Number(c) }).lean() : null;
+    if (byKey)
+      return byKey;
+  }
+  return await Clinic_default.findOne({ default: true }).lean() ?? await Clinic_default.findOne().sort({ createdAt: 1 }).lean();
+};
+var clinicView = (clinic) => ({
+  _id: String(clinic._id),
+  id: clinic.id,
+  name: clinic.name,
+  logo: clinic.logo
+});
+var patientView = (p) => ({
+  _id: String(p._id),
+  id: p.id,
+  name: p.name,
+  phone: p.phone,
+  age: p.age,
+  gender: p.gender,
+  village: p.village && typeof p.village === "object" ? { _id: String(p.village._id), id: p.village.id, name: p.village.name } : p.village ?? null,
+  createdAt: new Date(p.createdAt).toISOString()
+});
+var startOfToday = () => {
+  const d = new Date;
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+var ground_routes_default = createElysia({ prefix: ground_schema_default.meta.name }).guard({ detail: { tags: ["public-ground"] } }, (app) => app.get("/clinic", async ({ query }) => {
+  const clinic = await resolveClinic(query.c);
+  if (!clinic)
+    return customError("क्लिनिक नहीं मिला");
+  return R3("clinic", clinicView(clinic));
+}, ground_schema_default.clinic).post("/volunteer", async ({ body }) => {
+  const phone = normalizePhone2(body.phone);
+  if (!phone)
+    return customError("सही 10 अंकों का मोबाइल नंबर डालें");
+  const clinic = await resolveClinic(body.c);
+  if (!clinic)
+    return customError("क्लिनिक नहीं मिला");
+  let volunteer = await Volunteer_default.findOne({
+    clinic: clinic._id,
+    phone
+  }).select("+token");
+  if (volunteer?.deleted) {
+    return customError("आपका खाता बंद है, क्लिनिक से संपर्क करें");
+  }
+  if (volunteer) {
+    volunteer.name = body.name.trim();
+    volunteer.last_active_at = new Date;
+    await volunteer.save();
+  } else {
+    volunteer = await Volunteer_default.create({
+      clinic: clinic._id,
+      tenant: clinic.tenant,
+      name: body.name.trim(),
+      phone,
+      token: randomUUID(),
+      last_active_at: new Date
+    });
+  }
+  return R3("स्वागत है", {
+    _id: String(volunteer._id),
+    name: volunteer.name,
+    phone: volunteer.phone,
+    token: volunteer.token,
+    clinic: clinicView(clinic)
+  });
+}, ground_schema_default.register).derive(async ({ headers }) => {
+  const token = headers[TOKEN_HEADER];
+  const volunteer = token ? await Volunteer_default.findOne({ token, deleted: false }).lean() : null;
+  return { volunteer };
+}).onBeforeHandle(({ volunteer }) => {
+  if (!volunteer)
+    return R3("दोबारा नाम और नंबर डालें", null, false);
+}).get("/me", async ({ volunteer }) => {
+  const v = volunteer;
+  const clinic = await Clinic_default.findById(v.clinic).lean();
+  return R3("me", {
+    _id: String(v._id),
+    name: v.name,
+    phone: v.phone,
+    ...clinic && { clinic: clinicView(clinic) }
+  });
+}, ground_schema_default.me).get("/villages", async ({ volunteer }) => {
+  const v = volunteer;
+  const list = await Village_default.find({
+    clinic: v.clinic,
+    deleted: false
+  }).sort({ name: 1 }).lean();
+  return R3("villages", list.map((x) => ({ _id: String(x._id), id: x.id, name: x.name })));
+}, ground_schema_default.villages).post("/village", async ({ body, volunteer }) => {
+  const v = volunteer;
+  const name = body.name.trim().replace(/\s+/g, " ");
+  const existing = await Village_default.findOne({
+    clinic: v.clinic,
+    deleted: false,
+    name: { $regex: new RegExp(`^${escapeRegex(name)}$`, "i") }
+  }).lean();
+  const village = existing ?? toJSON(await Village_default.create({ name, clinic: v.clinic, tenant: v.tenant }));
+  return R3("गाँव जुड़ गया", {
+    _id: String(village._id),
+    id: village.id,
+    name: village.name
+  });
+}, ground_schema_default.createVillage).post("/patient", async ({ body, volunteer }) => {
+  const v = volunteer;
+  const phone = normalizePhone2(body.phone);
+  if (!phone)
+    return customError("सही 10 अंकों का मोबाइल नंबर डालें");
+  const name = body.name.trim().replace(/\s+/g, " ");
+  let village;
+  if (body.village) {
+    if (!import_mongoose7.isValidObjectId(body.village))
+      return customError("गाँव सही नहीं है");
+    const found = await Village_default.exists({
+      _id: body.village,
+      clinic: v.clinic
+    });
+    if (!found)
+      return customError("गाँव सही नहीं है");
+    village = body.village;
+  }
+  const duplicate = await Patient_default.findOne({
+    clinic: v.clinic,
+    phone,
+    deleted: false,
+    name: { $regex: new RegExp(`^${escapeRegex(name)}$`, "i") }
+  }).populate("village").lean();
+  if (duplicate) {
+    return R3("यह मरीज़ पहले से जुड़ा है", {
+      patient: patientView(duplicate),
+      duplicate: true
+    });
+  }
+  const created = await Patient_default.create({
+    name,
+    phone,
+    age: body.age,
+    gender: body.gender,
+    ...village && { village },
+    clinic: v.clinic,
+    tenant: v.tenant,
+    volunteer: v._id
+  });
+  await Volunteer_default.updateOne({ _id: v._id }, { last_active_at: new Date });
+  const entry = await Patient_default.findById(created._id).populate("village").lean();
+  return R3("मरीज़ जुड़ गया", {
+    patient: patientView(entry),
+    duplicate: false
+  });
+}, ground_schema_default.createPatient).get("/my-patients", async ({ volunteer }) => {
+  const v = volunteer;
+  const base = { volunteer: v._id, deleted: false };
+  const [today, total, recent] = await Promise.all([
+    Patient_default.countDocuments({
+      ...base,
+      createdAt: { $gte: startOfToday() }
+    }),
+    Patient_default.countDocuments(base),
+    Patient_default.find(base).populate("village").sort({ createdAt: -1 }).limit(10).lean()
+  ]);
+  return R3("my patients", {
+    today,
+    total,
+    recent: recent.map(patientView)
+  });
+}, ground_schema_default.myPatients));
+
+// src/api/public/public.index.ts
+var publicRoutes = createElysia({ prefix: "/public" });
+publicRoutes.use(ground_routes_default);
+
 // src/api/webhook/knowlarity/knowlarity.schema.ts
-var name18 = "get-agent";
+var name19 = "get-agent";
 var callParams = {
   caller_number: t2.Optional(t2.String()),
   knowlarity_number: t2.Optional(t2.String()),
@@ -187957,7 +188274,7 @@ var getAgent = {
           hold_sound: t2.String()
         })
       ])
-    }, { description: `${name18} response, tells the IVR which agent to dial` }),
+    }, { description: `${name19} response, tells the IVR which agent to dial` }),
     401: t2.Object({
       status: t2.Boolean(),
       message: t2.String(),
@@ -187968,7 +188285,7 @@ var getAgent = {
 };
 var knowlarity_schema_default = {
   meta: {
-    name: name18
+    name: name19
   },
   getAgent,
   getAgentQuery: {
@@ -188338,6 +188655,7 @@ api.use(swagger({
 api.use(adminRoutes);
 api.use(manglamCityRoutes);
 api.use(webhookRoutes);
+api.use(publicRoutes);
 api.use(knowlarity_routes_default);
 api.get("/admin-doc", () => `<!doctype html>
 <html lang="en">
