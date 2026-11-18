@@ -25,6 +25,13 @@ const detailSchema = t.Object({
 		]),
 	),
 	profile_pic: t.String(),
+	volunteer: t.Optional(
+		t.Union([
+			t.String(),
+			t.Object({ _id: t.String(), name: t.String(), phone: t.String() }),
+			t.Null(),
+		]),
+	),
 	deleted: t.Boolean(),
 	recent_appointment: appointmentSchema.meta.detail,
 	vitals: patientHealthRecordSchema.meta.detail,

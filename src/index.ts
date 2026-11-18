@@ -15,6 +15,7 @@ import { R } from "./utils/response-helpers";
 import { adminRoutes } from "./api/admin/admin.index";
 import { manglamCityRoutes } from "./api/manglam-city/manglam-city.index";
 import { webhookRoutes } from "./api/webhook/webhook.index";
+import { publicRoutes } from "./api/public/public.index";
 import knowlarityRoutes from "./api/webhook/knowlarity/knowlarity.routes";
 import { startKnowlarityStream } from "./api/webhook/knowlarity/knowlarity.stream";
 import { staticPlugin } from "@elysiajs/static";
@@ -287,6 +288,7 @@ api
 api.use(adminRoutes);
 api.use(manglamCityRoutes);
 api.use(webhookRoutes);
+api.use(publicRoutes);
 // Knowlarity calls /get-agent at the root, not under /webhook
 api.use(knowlarityRoutes);
 

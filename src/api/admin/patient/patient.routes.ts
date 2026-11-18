@@ -51,6 +51,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 					const [list, total] = await Promise.all([
 						Patient.find(filter)
 							.populate("village")
+							.populate("volunteer", "name phone")
 							.skip(page * size)
 							.limit(size)
 							.sort({ createdAt: -1 }),

@@ -12,6 +12,7 @@ import { ClinicClass } from "./Clinic";
 import { AdminClass } from "./Admin";
 import { TenantClass } from "./Tenant";
 import { VillageClass } from "./Village";
+import { VolunteerClass } from "./Volunteer";
 
 @pre<PatientClass>("save", async function (next) {
 	if (!this.id) {
@@ -48,6 +49,10 @@ export class PatientClass {
 
 	@prop({})
 	public profile_pic!: string;
+
+	/** Ground-team member who added this patient from the public form. */
+	@prop({ ref: () => VolunteerClass })
+	public volunteer?: Ref<VolunteerClass>;
 
 	@prop({ default: false })
 	public deleted!: boolean;
