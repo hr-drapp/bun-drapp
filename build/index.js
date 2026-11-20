@@ -187089,12 +187089,17 @@ var playHangupXml = (audioUrl) => `<?xml version="1.0" encoding="UTF-8"?>
   <Hangup/>
 </Response>`;
 var IVR_AUDIO = {
-  greetings: "public/matrashakti-greetings.mpeg",
-  unregistered: "public/matrashakti-v1.mpeg"
+  greetings: "public/matrashakti-greetings.mp3",
+  unregistered: "public/matrashakti-v1.mp3"
 };
+var AUDIO_ROOTS = Array.from(new Set([process.cwd(), path.resolve(import.meta.dir, ".."), path.resolve(import.meta.dir, "../..")]));
 var ivrAudioFile = async (name) => {
-  const file2 = Bun.file(path.join(process.cwd(), IVR_AUDIO[name]));
-  return await file2.exists() ? file2 : null;
+  for (const root of AUDIO_ROOTS) {
+    const file2 = Bun.file(path.join(root, IVR_AUDIO[name]));
+    if (await file2.exists())
+      return file2;
+  }
+  return null;
 };
 var ivrAudioUrl = (name) => `${env5().publicUrl}/webhook/vobiz/audio/${name}.mp3`;
 var missingClickToCallConfig2 = () => ["VOBIZ_AUTH_ID", "VOBIZ_AUTH_TOKEN", "VOBIZ_NUMBER"].filter((key) => !cleanEnv(key));
