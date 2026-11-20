@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "crypto";
+import path from "path";
 import { normalizePhone } from "src/api/webhook/bolna/bolna.service";
 
 /**
@@ -133,14 +134,17 @@ export const dialXml = ({
 	actionUrl,
 	callbackUrl,
 	record = true,
+	playUrl,
 }: {
 	number: string;
 	callerId: string;
 	actionUrl: string;
 	callbackUrl: string;
 	record?: boolean;
+	/** Audio played to the caller before the doctor's phone rings. */
+	playUrl?: string;
 }) => `<?xml version="1.0" encoding="UTF-8"?>
-<Response>${record ? recordXml() : ""}
+<Response>${record ? recordXml() : ""}${playUrl ? `\n  <Play>${escapeXml(playUrl)}</Play>` : ""}
   <Dial callerId="${escapeXml(callerId)}" timeout="${dialTimeout()}" action="${escapeXml(actionUrl)}" method="POST" redirect="true" callbackUrl="${escapeXml(callbackUrl)}" callbackMethod="POST">
     <Number>${escapeXml(number)}</Number>
   </Dial>
@@ -150,6 +154,35 @@ export const hangupXml = (message?: string) => `<?xml version="1.0" encoding="UT
 <Response>${message ? `\n  <Speak>${escapeXml(message)}</Speak>` : ""}
   <Hangup/>
 </Response>`;
+
+/** Plays an audio file (public URL) and ends the call. */
+export const playHangupXml = (audioUrl: string) => `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Play>${escapeXml(audioUrl)}</Play>
+  <Hangup/>
+</Response>`;
+
+/**
+ * Recorded IVR messages (repo public/ folder), served to Vobiz by
+ * GET /webhook/vobiz/audio/:name.mp3. Only these names are served.
+ */
+export const IVR_AUDIO = {
+	/** Played to registered patients before their call is routed to a doctor. */
+	greetings: "public/matrashakti-greetings.mpeg",
+	/** Played to callers who aren't registered patients; the call then ends. */
+	unregistered: "public/matrashakti-v1.mpeg",
+} as const;
+
+export type IvrAudio = keyof typeof IVR_AUDIO;
+
+/** Local file of a recorded message, or null when it's missing on this server. */
+export const ivrAudioFile = async (name: IvrAudio) => {
+	const file = Bun.file(path.join(process.cwd(), IVR_AUDIO[name]));
+	return (await file.exists()) ? file : null;
+};
+
+/** Public URL Vobiz fetches a recorded message from. */
+export const ivrAudioUrl = (name: IvrAudio) => `${env().publicUrl}/webhook/vobiz/audio/${name}.mp3`;
 
 // ── REST: click-to-call ──────────────────────────────────────
 

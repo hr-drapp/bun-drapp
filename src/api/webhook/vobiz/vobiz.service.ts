@@ -7,7 +7,18 @@ import { RoleLevel } from "src/models/clicknic/Role";
 import { WebhookTrace } from "src/utils/webhook-trace";
 import { isActiveStatus, normalizePhone } from "../bolna/bolna.service";
 import { lookupCaller } from "../knowlarity/knowlarity.service";
-import { cleanEnv, dialXml, hangupXml, recordingProxyUrl, toE164India, webhookUrl } from "src/utils/Vobiz";
+import {
+	cleanEnv,
+	dialXml,
+	hangupXml,
+	IVR_AUDIO,
+	ivrAudioFile,
+	ivrAudioUrl,
+	playHangupXml,
+	recordingProxyUrl,
+	toE164India,
+	webhookUrl,
+} from "src/utils/Vobiz";
 
 /** Vobiz posts form fields; every value arrives as a string. */
 export type VobizParams = Record<string, string | undefined>;
@@ -52,9 +63,19 @@ const nextAgent = async (clinic: any, agents: string[]) => {
 /** Same clinic Knowlarity's /get-agent is pinned to. */
 const VOBIZ_CLINIC_ID = "69de8c299b532254712e76c0";
 
-/** Spoken to callers who aren't registered patients; the call then ends. */
+/** Spoken (TTS) to unregistered callers only if the recorded audio file is missing. */
 export const UNREGISTERED_MESSAGE =
 	"Thank you for calling. This line is only for registered patients. Please visit the clinic to register. Goodbye.";
+
+/** Unregistered callers hear the recorded Matrashakti message, then the call ends. */
+const unregisteredXml = async (trace: WebhookTrace) => {
+	if (await ivrAudioFile("unregistered")) {
+		trace.step("Not a registered patient: playing the recorded message and hanging up");
+		return playHangupXml(ivrAudioUrl("unregistered"));
+	}
+	trace.step(`Not a registered patient: ${IVR_AUDIO.unregistered} missing, speaking the message and hanging up`);
+	return hangupXml(UNREGISTERED_MESSAGE);
+};
 
 /**
  * Registered = a patient with this number already exists in the clinic.
@@ -92,7 +113,7 @@ const findRegisteredPatient = async (callerNumber: string, trace: WebhookTrace) 
 /**
  * Registered patients only: records the call exactly like Knowlarity's
  * /get-agent (ivr_call_request per CallUUID) and rings the next doctor.
- * Unregistered callers hear UNREGISTERED_MESSAGE and the call ends — no
+ * Unregistered callers hear the recorded message and the call ends — no
  * patient, no ivr_call_request (only the webhook log). Returns Vobiz XML.
  */
 export const handleIncomingCall = async (params: VobizParams, trace: WebhookTrace) => {
@@ -103,10 +124,7 @@ export const handleIncomingCall = async (params: VobizParams, trace: WebhookTrac
 	trace.set({ execution_id: callUuid });
 
 	const patient = from ? await findRegisteredPatient(from, trace) : (trace.step("From missing"), null);
-	if (!patient) {
-		trace.step("Not a registered patient: playing the unregistered message and hanging up");
-		return hangupXml(UNREGISTERED_MESSAGE);
-	}
+	if (!patient) return unregisteredXml(trace);
 	trace.set({ patient: patient._id });
 
 	// Patient exists, so lookupCaller only records the call (it never creates a patient here).
@@ -145,7 +163,10 @@ export const handleIncomingCall = async (params: VobizParams, trace: WebhookTrac
 
 	// Caller ID on the doctor's phone is the clinic's Vobiz number (E.164).
 	const callerId = toE164India(to) || `+${normalizePhone(to).display.replace(/^\+/, "")}`;
+	const greeting = (await ivrAudioFile("greetings")) ? ivrAudioUrl("greetings") : undefined;
+	trace.step(greeting ? "Playing the greeting, then ringing the doctor" : `${IVR_AUDIO.greetings} missing, ringing the doctor without a greeting`);
 	return dialXml({
+		playUrl: greeting,
 		number: `+91${agent}`,
 		callerId,
 		actionUrl: webhookUrl("/dial-result"),

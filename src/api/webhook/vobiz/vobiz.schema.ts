@@ -33,6 +33,11 @@ export default {
 		),
 		detail: { operationId: "vobizClickAnswer" },
 	},
+	// Recorded IVR messages Vobiz <Play>s
+	audioFile: {
+		params: t.Object({ file: t.String() }),
+		detail: { operationId: "vobizAudioFile" },
+	},
 	// Signed recording proxy the dashboard's <audio> plays
 	recordingFile: {
 		params: t.Object({ id: t.String() }),
