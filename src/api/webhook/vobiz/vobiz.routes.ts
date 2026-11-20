@@ -3,15 +3,12 @@ import { createElysia } from "src/utils/createElysia";
 import { WebhookTrace } from "src/utils/webhook-trace";
 import { WebhookLogStatus } from "src/models/clicknic/WebhookLog";
 import {
-	IVR_AUDIO,
 	VOBIZ_PROVIDER,
 	cleanEnv,
 	dialXml,
 	fetchRecording,
 	hangupXml,
 	isValidWebhookToken,
-	ivrAudioFile,
-	type IvrAudio,
 	verifySignature,
 	webhookUrl,
 } from "src/utils/Vobiz";
@@ -181,22 +178,6 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 				set.headers["content-type"] = "application/xml";
 				return hangupXml();
 			}, schema.dialResult)
-			// Recorded IVR messages Vobiz <Play>s (no token: Vobiz fetches them like any media URL).
-			.get(
-				"/audio/:file",
-				async ({ params, set }) => {
-					const name = params.file.replace(/\.mp3$/, "");
-					const file = name in IVR_AUDIO ? await ivrAudioFile(name as IvrAudio) : null;
-					if (!file) {
-						set.status = 404;
-						return "audio not available";
-					}
-					return new Response(file, {
-						headers: { "content-type": "audio/mpeg", "cache-control": "public, max-age=86400" },
-					});
-				},
-				schema.audioFile,
-			)
 			.get(
 				"/recording/:id",
 				async ({ params, query, set }) => {

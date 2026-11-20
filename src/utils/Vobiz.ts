@@ -1,5 +1,4 @@
 import { createHmac, timingSafeEqual } from "crypto";
-import path from "path";
 import { normalizePhone } from "src/api/webhook/bolna/bolna.service";
 
 /**
@@ -162,39 +161,13 @@ export const playHangupXml = (audioUrl: string) => `<?xml version="1.0" encoding
   <Hangup/>
 </Response>`;
 
-/**
- * Recorded IVR messages (repo public/ folder), served to Vobiz by
- * GET /webhook/vobiz/audio/:name.mp3. Only these names are served.
- */
+/** Recorded IVR messages (MP3 on Cloudflare R2, public) that Vobiz <Play>s. */
 export const IVR_AUDIO = {
 	/** Played to registered patients before their call is routed to a doctor. */
-	greetings: "public/matrashakti-greetings.mp3",
+	greetings: "https://pub-774909be42b649c5b90e8024f64ed26a.r2.dev/matrashakti-greetings.mp3",
 	/** Played to callers who aren't registered patients; the call then ends. */
-	unregistered: "public/matrashakti-v1.mp3",
+	unregistered: "https://pub-774909be42b649c5b90e8024f64ed26a.r2.dev/matrashakti-v1.mp3",
 } as const;
-
-export type IvrAudio = keyof typeof IVR_AUDIO;
-
-/**
- * Folders public/ may sit under: the start folder, or the repo root found from
- * this file (build/index.js → .., src/utils/Vobiz.ts → ../..), so the server
- * finds the audio whatever folder it was started from.
- */
-const AUDIO_ROOTS = Array.from(
-	new Set([process.cwd(), path.resolve(import.meta.dir, ".."), path.resolve(import.meta.dir, "../..")]),
-);
-
-/** Local file of a recorded message, or null when it's missing on this server. */
-export const ivrAudioFile = async (name: IvrAudio) => {
-	for (const root of AUDIO_ROOTS) {
-		const file = Bun.file(path.join(root, IVR_AUDIO[name]));
-		if (await file.exists()) return file;
-	}
-	return null;
-};
-
-/** Public URL Vobiz fetches a recorded message from. */
-export const ivrAudioUrl = (name: IvrAudio) => `${env().publicUrl}/webhook/vobiz/audio/${name}.mp3`;
 
 // ── REST: click-to-call ──────────────────────────────────────
 

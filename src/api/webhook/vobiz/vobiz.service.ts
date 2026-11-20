@@ -12,8 +12,6 @@ import {
 	dialXml,
 	hangupXml,
 	IVR_AUDIO,
-	ivrAudioFile,
-	ivrAudioUrl,
 	playHangupXml,
 	recordingProxyUrl,
 	toE164India,
@@ -63,20 +61,6 @@ const nextAgent = async (clinic: any, agents: string[]) => {
 /** Same clinic Knowlarity's /get-agent is pinned to. */
 const VOBIZ_CLINIC_ID = "69de8c299b532254712e76c0";
 
-/** Spoken (TTS) to unregistered callers only if the recorded audio file is missing. */
-export const UNREGISTERED_MESSAGE =
-	"Thank you for calling. This line is only for registered patients. Please visit the clinic to register. Goodbye.";
-
-/** Unregistered callers hear the recorded Matrashakti message, then the call ends. */
-const unregisteredXml = async (trace: WebhookTrace) => {
-	if (await ivrAudioFile("unregistered")) {
-		trace.step("Not a registered patient: playing the recorded message and hanging up");
-		return playHangupXml(ivrAudioUrl("unregistered"));
-	}
-	trace.step(`Not a registered patient: ${IVR_AUDIO.unregistered} missing, speaking the message and hanging up`);
-	return hangupXml(UNREGISTERED_MESSAGE);
-};
-
 /**
  * Registered = a patient with this number already exists in the clinic.
  * Read-only: unlike Knowlarity's lookupCaller, an unknown number is NOT
@@ -124,7 +108,10 @@ export const handleIncomingCall = async (params: VobizParams, trace: WebhookTrac
 	trace.set({ execution_id: callUuid });
 
 	const patient = from ? await findRegisteredPatient(from, trace) : (trace.step("From missing"), null);
-	if (!patient) return unregisteredXml(trace);
+	if (!patient) {
+		trace.step("Not a registered patient: playing the recorded message and hanging up");
+		return playHangupXml(IVR_AUDIO.unregistered);
+	}
 	trace.set({ patient: patient._id });
 
 	// Patient exists, so lookupCaller only records the call (it never creates a patient here).
@@ -163,10 +150,9 @@ export const handleIncomingCall = async (params: VobizParams, trace: WebhookTrac
 
 	// Caller ID on the doctor's phone is the clinic's Vobiz number (E.164).
 	const callerId = toE164India(to) || `+${normalizePhone(to).display.replace(/^\+/, "")}`;
-	const greeting = (await ivrAudioFile("greetings")) ? ivrAudioUrl("greetings") : undefined;
-	trace.step(greeting ? "Playing the greeting, then ringing the doctor" : `${IVR_AUDIO.greetings} missing, ringing the doctor without a greeting`);
+	trace.step("Playing the greeting, then ringing the doctor");
 	return dialXml({
-		playUrl: greeting,
+		playUrl: IVR_AUDIO.greetings,
 		number: `+91${agent}`,
 		callerId,
 		actionUrl: webhookUrl("/dial-result"),

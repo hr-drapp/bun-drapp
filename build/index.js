@@ -161960,8 +161960,6 @@ __export(exports_Vobiz, {
   fetchRecording: () => fetchRecording,
   hangupXml: () => hangupXml,
   isValidWebhookToken: () => isValidWebhookToken,
-  ivrAudioFile: () => ivrAudioFile,
-  ivrAudioUrl: () => ivrAudioUrl,
   makeClickToCall: () => makeClickToCall2,
   missingClickToCallConfig: () => missingClickToCallConfig2,
   playHangupXml: () => playHangupXml,
@@ -187008,7 +187006,6 @@ var makeClickToCall = async ({
 
 // src/utils/Vobiz.ts
 import { createHmac, timingSafeEqual } from "crypto";
-import path from "path";
 var API_BASE = "https://api.vobiz.ai/api/v1";
 var VOBIZ_PROVIDER = "vobiz";
 var VOBIZ_DEFAULT_PUBLIC_URL = "https://test-api.clicknic.site";
@@ -187040,13 +187037,13 @@ var isValidWebhookToken = (received) => {
   const b = Buffer.from(expected);
   return a.length === b.length && timingSafeEqual(a, b);
 };
-var webhookUrl = (path2, params = {}) => {
+var webhookUrl = (path, params = {}) => {
   const query = new URLSearchParams(params);
   const { webhookToken, publicUrl } = env5();
   if (webhookToken)
     query.set("token", webhookToken);
   const qs = query.toString();
-  return `${publicUrl}/webhook/vobiz${path2}${qs ? `?${qs}` : ""}`;
+  return `${publicUrl}/webhook/vobiz${path}${qs ? `?${qs}` : ""}`;
 };
 var sign = (value) => createHmac("sha256", `vobiz:${env5().authToken || env5().webhookToken}`).update(value).digest("hex").slice(0, 32);
 var verifySignature = (value, signature) => {
@@ -187089,19 +187086,9 @@ var playHangupXml = (audioUrl) => `<?xml version="1.0" encoding="UTF-8"?>
   <Hangup/>
 </Response>`;
 var IVR_AUDIO = {
-  greetings: "public/matrashakti-greetings.mp3",
-  unregistered: "public/matrashakti-v1.mp3"
+  greetings: "https://pub-774909be42b649c5b90e8024f64ed26a.r2.dev/matrashakti-greetings.mp3",
+  unregistered: "https://pub-774909be42b649c5b90e8024f64ed26a.r2.dev/matrashakti-v1.mp3"
 };
-var AUDIO_ROOTS = Array.from(new Set([process.cwd(), path.resolve(import.meta.dir, ".."), path.resolve(import.meta.dir, "../..")]));
-var ivrAudioFile = async (name) => {
-  for (const root of AUDIO_ROOTS) {
-    const file2 = Bun.file(path.join(root, IVR_AUDIO[name]));
-    if (await file2.exists())
-      return file2;
-  }
-  return null;
-};
-var ivrAudioUrl = (name) => `${env5().publicUrl}/webhook/vobiz/audio/${name}.mp3`;
 var missingClickToCallConfig2 = () => ["VOBIZ_AUTH_ID", "VOBIZ_AUTH_TOKEN", "VOBIZ_NUMBER"].filter((key) => !cleanEnv(key));
 var makeClickToCall2 = async ({
   agentNumber,
@@ -187532,10 +187519,6 @@ var vobiz_schema_default = {
     query: t2.Object({ token: t2.Optional(t2.String()), to: t2.Optional(t2.String()), sig: t2.Optional(t2.String()) }, { additionalProperties: true }),
     detail: { operationId: "vobizClickAnswer" }
   },
-  audioFile: {
-    params: t2.Object({ file: t2.String() }),
-    detail: { operationId: "vobizAudioFile" }
-  },
   recordingFile: {
     params: t2.Object({ id: t2.String() }),
     query: t2.Object({ sig: t2.Optional(t2.String()) }),
@@ -187741,15 +187724,6 @@ var nextAgent = async (clinic, agents) => {
   return agents[((counter?.seq ?? 1) - 1) % agents.length];
 };
 var VOBIZ_CLINIC_ID = "69de8c299b532254712e76c0";
-var UNREGISTERED_MESSAGE = "Thank you for calling. This line is only for registered patients. Please visit the clinic to register. Goodbye.";
-var unregisteredXml = async (trace) => {
-  if (await ivrAudioFile("unregistered")) {
-    trace.step("Not a registered patient: playing the recorded message and hanging up");
-    return playHangupXml(ivrAudioUrl("unregistered"));
-  }
-  trace.step(`Not a registered patient: ${IVR_AUDIO.unregistered} missing, speaking the message and hanging up`);
-  return hangupXml(UNREGISTERED_MESSAGE);
-};
 var findRegisteredPatient = async (callerNumber, trace) => {
   const phone = normalizePhone(callerNumber);
   if (phone.local.length < 10) {
@@ -187778,8 +187752,10 @@ var handleIncomingCall = async (params, trace) => {
   trace.step(`Incoming call: From="${from}", To="${to}", CallUUID="${callUuid ?? "-"}"`);
   trace.set({ execution_id: callUuid });
   const patient = from ? await findRegisteredPatient(from, trace) : (trace.step("From missing"), null);
-  if (!patient)
-    return unregisteredXml(trace);
+  if (!patient) {
+    trace.step("Not a registered patient: playing the recorded message and hanging up");
+    return playHangupXml(IVR_AUDIO.unregistered);
+  }
   trace.set({ patient: patient._id });
   await lookupCaller({ callerNumber: from, knowlarityNumber: to, callUuid, trace });
   const call = callUuid ? await IvrCallRequest_default.findOne({ execution_id: callUuid }).lean() : null;
@@ -187811,10 +187787,9 @@ var handleIncomingCall = async (params, trace) => {
   if (call)
     await updateCall(call, { status: "ringing", agent }, trace);
   const callerId = toE164India2(to) || `+${normalizePhone(to).display.replace(/^\+/, "")}`;
-  const greeting = await ivrAudioFile("greetings") ? ivrAudioUrl("greetings") : undefined;
-  trace.step(greeting ? "Playing the greeting, then ringing the doctor" : `${IVR_AUDIO.greetings} missing, ringing the doctor without a greeting`);
+  trace.step("Playing the greeting, then ringing the doctor");
   return dialXml({
-    playUrl: greeting,
+    playUrl: IVR_AUDIO.greetings,
     number: `+91${agent}`,
     callerId,
     actionUrl: webhookUrl("/dial-result"),
@@ -187996,17 +187971,7 @@ var vobiz_routes_default = createElysia({ prefix: vobiz_schema_default.meta.name
 }), vobiz_schema_default.clickAnswer).post("/click-event", () => EMPTY, vobiz_schema_default.dialEvent).post("/click-result", ({ set }) => {
   set.headers["content-type"] = "application/xml";
   return hangupXml();
-}, vobiz_schema_default.dialResult).get("/audio/:file", async ({ params, set }) => {
-  const name = params.file.replace(/\.mp3$/, "");
-  const file2 = name in IVR_AUDIO ? await ivrAudioFile(name) : null;
-  if (!file2) {
-    set.status = 404;
-    return "audio not available";
-  }
-  return new Response(file2, {
-    headers: { "content-type": "audio/mpeg", "cache-control": "public, max-age=86400" }
-  });
-}, vobiz_schema_default.audioFile).get("/recording/:id", async ({ params, query, set }) => {
+}, vobiz_schema_default.dialResult).get("/recording/:id", async ({ params, query, set }) => {
   if (!verifySignature(params.id, query.sig)) {
     set.status = 403;
     return "forbidden";
