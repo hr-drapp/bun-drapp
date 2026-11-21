@@ -78,6 +78,17 @@ export class AdminClass {
 	@prop({ required: false, default: "" })
 	public ivr_agent_number?: string;
 
+	/**
+	 * Doctor is on a break from IVR calls: Vobiz round robin skips them.
+	 * Default false, so every doctor is online until they take a break.
+	 * The break history lives in ivr_break.
+	 */
+	@prop({ default: false })
+	public ivr_on_break!: boolean;
+
+	@prop({ required: false })
+	public ivr_break_since?: Date;
+
 	@prop()
 	public games?: string[];
 }

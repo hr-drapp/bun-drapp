@@ -23,6 +23,9 @@ export type VobizParams = Record<string, string | undefined>;
 
 const NO_AGENT_MESSAGE = "Sorry, no one is available to take your call right now. Please call again later.";
 
+/** Every doctor is on a break. */
+const ALL_BUSY_MESSAGE = "All our doctors are busy right now. Please call again later.";
+
 /** Missed-agent DialStatus values; anything else means the doctor was reached or the caller left. */
 const AGENT_MISSED = new Set(["busy", "failed", "timeout", "no-answer"]);
 
@@ -32,9 +35,16 @@ const AGENT_MISSED = new Set(["busy", "failed", "timeout", "no-answer"]);
  * Doctors who take IVR calls: doctor logins (role level L2, same rule the IVR
  * dashboard uses) in the clinic. Agent number = ivr_agent_number, else phone,
  * so the call lands on the dashboard of the doctor whose phone rings.
+ * Doctors on a break (ivr_on_break) are skipped.
  */
 export const clinicAgents = async (clinic: any, tenant: any) => {
-	const admins = await Admin.find({ clinic, tenant, deleted: false, super_admin: { $ne: true } })
+	const admins = await Admin.find({
+		clinic,
+		tenant,
+		deleted: false,
+		super_admin: { $ne: true },
+		ivr_on_break: { $ne: true },
+	})
 		.populate({ path: "role", select: "level" })
 		.select("_id name phone ivr_agent_number role")
 		.sort({ _id: 1 })
@@ -44,6 +54,17 @@ export const clinicAgents = async (clinic: any, tenant: any) => {
 		.map((a: any) => normalizePhone(a.ivr_agent_number || a.phone || "").local)
 		.filter((n) => n.length === 10);
 	return Array.from(new Set(numbers));
+};
+
+/** True when a login on break answers on this number (agent number or phone). */
+const isOnBreak = async (local: string) => {
+	const { variants } = normalizePhone(local);
+	const admin = await Admin.exists({
+		deleted: false,
+		ivr_on_break: true,
+		$or: [{ ivr_agent_number: { $in: variants } }, { phone: { $in: variants } }],
+	});
+	return !!admin;
 };
 
 /** Atomic counter per clinic, so concurrent calls never pick the same slot. */
@@ -126,7 +147,7 @@ export const handleIncomingCall = async (params: VobizParams, trace: WebhookTrac
 			agent = await nextAgent(call.clinic, agents);
 			trace.step(`Round robin over ${agents.length} doctor(s) [${agents.join(", ")}] → ${agent}`);
 		} else {
-			trace.step("Clinic has no doctor login with a valid phone");
+			trace.step("No online doctor (all on break, or no doctor login with a valid phone)");
 		}
 	} else {
 		trace.step("No IVR call request (no CallUUID or clinic), cannot pick a clinic doctor");
@@ -134,16 +155,18 @@ export const handleIncomingCall = async (params: VobizParams, trace: WebhookTrac
 
 	if (!agent) {
 		const fallback = normalizePhone(cleanEnv("VOBIZ_FALLBACK_AGENT_NUMBER")).local;
-		if (fallback.length === 10) {
+		if (fallback.length === 10 && (await isOnBreak(fallback))) {
+			trace.step(`VOBIZ_FALLBACK_AGENT_NUMBER ${fallback} belongs to a doctor on break, not dialled`);
+		} else if (fallback.length === 10) {
 			agent = fallback;
 			trace.step(`Using VOBIZ_FALLBACK_AGENT_NUMBER ${agent}`);
 		}
 	}
 
 	if (!agent) {
-		trace.step("No agent to dial, apologising and hanging up");
+		trace.step("No agent to dial, saying all doctors are busy and hanging up");
 		if (call) await updateCall(call, { status: "no-answer" }, trace);
-		return hangupXml(NO_AGENT_MESSAGE);
+		return hangupXml(ALL_BUSY_MESSAGE);
 	}
 
 	if (call) await updateCall(call, { status: "ringing", agent }, trace);

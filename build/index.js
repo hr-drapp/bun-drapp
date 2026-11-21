@@ -182554,6 +182554,14 @@ __legacyDecorateClassTS([
   __legacyMetadataTS("design:type", String)
 ], AdminClass.prototype, "ivr_agent_number", undefined);
 __legacyDecorateClassTS([
+  import_typegoose6.prop({ default: false }),
+  __legacyMetadataTS("design:type", Boolean)
+], AdminClass.prototype, "ivr_on_break", undefined);
+__legacyDecorateClassTS([
+  import_typegoose6.prop({ required: false }),
+  __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
+], AdminClass.prototype, "ivr_break_since", undefined);
+__legacyDecorateClassTS([
   import_typegoose6.prop(),
   __legacyMetadataTS("design:type", Array)
 ], AdminClass.prototype, "games", undefined);
@@ -186672,8 +186680,259 @@ var ivr_call_request_routes_default = createElysia({ prefix: ivr_call_request_sc
   return R3("entry deleted", entry);
 }, ivr_call_request_schema_default.delete));
 
+// src/api/admin/ivr-break/ivr-break.routes.ts
+var import_moment6 = __toESM(require_moment());
+
+// src/api/admin/ivr-break/ivr-break.schema.ts
+var name13 = "ivr-break";
+var statusSchema = t2.Object({
+  on_break: t2.Boolean(),
+  break_since: t2.Optional(t2.Union([t2.String(), t2.Null()])),
+  today_seconds: t2.Number(),
+  today_count: t2.Number()
+});
+var breakSchema = t2.Object({
+  _id: t2.String(),
+  admin: t2.Union([
+    t2.String(),
+    t2.Object({
+      _id: t2.String(),
+      name: t2.Optional(t2.String()),
+      phone: t2.Optional(t2.String())
+    }),
+    t2.Null()
+  ]),
+  started_at: t2.String(),
+  ended_at: t2.Optional(t2.Union([t2.String(), t2.Null()])),
+  duration: t2.Number(),
+  is_open: t2.Boolean(),
+  createdAt: t2.String(),
+  updatedAt: t2.String()
+});
+var summarySchema = t2.Object({
+  admin: t2.Object({
+    _id: t2.String(),
+    name: t2.Optional(t2.String()),
+    phone: t2.Optional(t2.String())
+  }),
+  on_break: t2.Boolean(),
+  break_since: t2.Optional(t2.Union([t2.String(), t2.Null()])),
+  total_seconds: t2.Number(),
+  count: t2.Number()
+});
+var ivr_break_schema_default = {
+  meta: {
+    name: name13,
+    detail: breakSchema,
+    module: 20 /* IVR_CALL_REQUESTS */
+  },
+  status: {
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: statusSchema }, { description: `${name13} status response` })
+    },
+    detail: { operationId: "status" }
+  },
+  setStatus: {
+    body: t2.Object({ on_break: t2.Boolean() }),
+    response: {
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: statusSchema }, { description: `${name13} set status response` })
+    },
+    detail: { operationId: "setStatus" }
+  },
+  list: {
+    query: t2.Object({
+      page: t2.String(),
+      size: t2.String(),
+      admin: t2.Optional(t2.String()),
+      from: t2.Optional(t2.String()),
+      to: t2.Optional(t2.String())
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Array(breakSchema),
+        meta: MetaPaginationSchema
+      }, { description: `${name13} list response` })
+    },
+    detail: { operationId: "list" }
+  },
+  summary: {
+    query: t2.Object({
+      date: t2.Optional(t2.String())
+    }),
+    response: {
+      200: t2.Object({
+        status: t2.Boolean(),
+        message: t2.String(),
+        data: t2.Array(summarySchema)
+      }, { description: `${name13} summary response` })
+    },
+    detail: { operationId: "summary" }
+  }
+};
+
+// src/models/clicknic/IvrBreak.ts
+var import_typegoose17 = __toESM(require_typegoose());
+class IvrBreakClass {
+}
+__legacyDecorateClassTS([
+  import_typegoose17.prop({ ref: () => AdminClass, required: true }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], IvrBreakClass.prototype, "admin", undefined);
+__legacyDecorateClassTS([
+  import_typegoose17.prop({ ref: () => ClinicClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], IvrBreakClass.prototype, "clinic", undefined);
+__legacyDecorateClassTS([
+  import_typegoose17.prop({ ref: () => TenantClass }),
+  __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
+], IvrBreakClass.prototype, "tenant", undefined);
+__legacyDecorateClassTS([
+  import_typegoose17.prop({ required: true }),
+  __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
+], IvrBreakClass.prototype, "started_at", undefined);
+__legacyDecorateClassTS([
+  import_typegoose17.prop({ required: false }),
+  __legacyMetadataTS("design:type", typeof Date === "undefined" ? Object : Date)
+], IvrBreakClass.prototype, "ended_at", undefined);
+__legacyDecorateClassTS([
+  import_typegoose17.prop({ required: false, default: 0 }),
+  __legacyMetadataTS("design:type", Number)
+], IvrBreakClass.prototype, "duration", undefined);
+IvrBreakClass = __legacyDecorateClassTS([
+  import_typegoose17.index({ admin: 1, ended_at: 1 }),
+  import_typegoose17.index({ clinic: 1, tenant: 1, started_at: -1 }),
+  import_typegoose17.modelOptions({
+    schemaOptions: { collection: "ivr_break", timestamps: true }
+  })
+], IvrBreakClass);
+var IvrBreak_default = import_typegoose17.getModelForClass(IvrBreakClass);
+
+// src/api/admin/ivr-break/ivr-break.routes.ts
+var adminPopulate = { path: "admin", select: "_id name phone" };
+var isDoctorLogin2 = (user) => !user?.super_admin && user?.role?.level === 2 /* L2 */;
+var scope = (user) => {
+  const { doctor, ...filter } = normalizeQuery({}, user);
+  return filter;
+};
+var plain = (value) => JSON.parse(JSON.stringify(value));
+var seconds = (from, to) => Math.max(0, Math.round((to.getTime() - from.getTime()) / 1000));
+var overlap = (b, start, end, now) => {
+  const from = new Date(Math.max(new Date(b.started_at).getTime(), start.getTime()));
+  const to = new Date(Math.min((b.ended_at ? new Date(b.ended_at) : now).getTime(), end.getTime()));
+  return seconds(from, to);
+};
+var overlapFilter = (start, end) => ({
+  started_at: { $lt: end },
+  $or: [{ ended_at: { $exists: false } }, { ended_at: null }, { ended_at: { $gte: start } }]
+});
+var withLiveDuration = (b, now) => ({
+  ...b,
+  is_open: !b.ended_at,
+  duration: b.ended_at ? b.duration : seconds(new Date(b.started_at), now)
+});
+var statusOf = async (adminId) => {
+  const admin = await Admin_default.findById(adminId).select("ivr_on_break ivr_break_since").lean();
+  const now = new Date;
+  const start = import_moment6.default().startOf("day").toDate();
+  const end = import_moment6.default().endOf("day").toDate();
+  const breaks = await IvrBreak_default.find({ admin: adminId, ...overlapFilter(start, end) }).lean();
+  return plain({
+    on_break: !!admin?.ivr_on_break,
+    break_since: admin?.ivr_on_break && admin?.ivr_break_since ? admin.ivr_break_since : null,
+    today_seconds: breaks.reduce((sum, b) => sum + overlap(b, start, end, now), 0),
+    today_count: breaks.length
+  });
+};
+var closeOpenBreaks = async (adminId, now) => {
+  const open = await IvrBreak_default.find({
+    admin: adminId,
+    $or: [{ ended_at: { $exists: false } }, { ended_at: null }]
+  });
+  for (const b of open) {
+    b.ended_at = now;
+    b.duration = seconds(b.started_at, now);
+    await b.save();
+  }
+};
+var dayRange = (date) => {
+  const day = date ? import_moment6.default(date, "YYYY-MM-DD", true) : import_moment6.default();
+  const base = day.isValid() ? day : import_moment6.default();
+  return { start: base.clone().startOf("day").toDate(), end: base.clone().endOf("day").toDate() };
+};
+var ivr_break_routes_default = createElysia({ prefix: ivr_break_schema_default.meta.name }).guard({
+  detail: {
+    tags: [ivr_break_schema_default.meta.name],
+    summary: Summary([ivr_break_schema_default.meta.module])
+  },
+  beforeHandle: isAdminAuthenticated
+}, (app) => app.get("/status", async ({ user }) => R3("ivr break status", await statusOf(user._id)), ivr_break_schema_default.status).put("/status", async ({ body, user }) => {
+  const now = new Date;
+  if (body.on_break) {
+    const started = await Admin_default.findOneAndUpdate({ _id: user._id, ivr_on_break: { $ne: true } }, { ivr_on_break: true, ivr_break_since: now }).lean();
+    if (started) {
+      await closeOpenBreaks(user._id, now);
+      await IvrBreak_default.create({
+        admin: user._id,
+        clinic: user.clinic,
+        tenant: user.tenant,
+        started_at: now
+      });
+    }
+  } else {
+    await Admin_default.updateOne({ _id: user._id }, { ivr_on_break: false, $unset: { ivr_break_since: 1 } });
+    await closeOpenBreaks(user._id, now);
+  }
+  const status2 = await statusOf(user._id);
+  return R3(status2.on_break ? "on break, calls paused" : "online, taking calls", status2);
+}, ivr_break_schema_default.setStatus).get("/", async ({ query, user }) => {
+  const page = parseInt(query.page);
+  const size = parseInt(query.size);
+  const filter = { ...scope(user) };
+  if (isDoctorLogin2(user))
+    filter.admin = user._id;
+  else if (query.admin)
+    filter.admin = query.admin;
+  if (query.from || query.to) {
+    const start = query.from ? dayRange(query.from).start : new Date(0);
+    const end = query.to ? dayRange(query.to).end : new Date;
+    Object.assign(filter, overlapFilter(start, end));
+  }
+  const [list, total] = await Promise.all([
+    IvrBreak_default.find(filter).populate(adminPopulate).skip(page * size).limit(size).sort({ started_at: -1 }).lean(),
+    IvrBreak_default.countDocuments(filter)
+  ]);
+  const now = new Date;
+  return R3(`${ivr_break_schema_default.meta.name} list data`, plain(list.map((b) => withLiveDuration(b, now))), true, { pages: Math.ceil(total / size), total, page, size });
+}, ivr_break_schema_default.list).get("/summary", async ({ query, user }) => {
+  const { start, end } = dayRange(query.date);
+  const now = new Date;
+  const admins = (await Admin_default.find({
+    ...scope(user),
+    deleted: false,
+    super_admin: { $ne: true },
+    ...isDoctorLogin2(user) && { _id: user._id }
+  }).populate({ path: "role", select: "level" }).select("_id name phone role ivr_on_break ivr_break_since").sort({ name: 1 }).lean()).filter((a) => a.role?.level === 2 /* L2 */);
+  const breaks = await IvrBreak_default.find({
+    admin: { $in: admins.map((a) => a._id) },
+    ...overlapFilter(start, end)
+  }).lean();
+  const data = admins.map((a) => {
+    const own = breaks.filter((b) => `${b.admin}` === `${a._id}`);
+    return {
+      admin: { _id: a._id, name: a.name, phone: a.phone },
+      on_break: !!a.ivr_on_break,
+      break_since: a.ivr_on_break && a.ivr_break_since ? a.ivr_break_since : null,
+      total_seconds: own.reduce((sum, b) => sum + overlap(b, start, end, now), 0),
+      count: own.length
+    };
+  });
+  return R3(`${ivr_break_schema_default.meta.name} summary`, plain(data));
+}, ivr_break_schema_default.summary));
+
 // src/api/admin/webhook-log/webhook-log.schema.ts
-var name13 = "webhook-log";
+var name14 = "webhook-log";
 var detailSchema10 = t2.Object({
   _id: t2.String(),
   clinic: t2.Optional(t2.String()),
@@ -186704,7 +186963,7 @@ var detailSchema10 = t2.Object({
 });
 var webhook_log_schema_default = {
   meta: {
-    name: name13,
+    name: name14,
     detail: detailSchema10,
     module: 21 /* WEBHOOK_LOGS */
   },
@@ -186722,111 +186981,111 @@ var webhook_log_schema_default = {
         message: t2.String(),
         data: t2.Array(detailSchema10),
         meta: MetaPaginationSchema
-      }, { description: `${name13} list response` })
+      }, { description: `${name14} list response` })
     },
     detail: { operationId: "list" }
   },
   detail: {
     query: t2.Object({ id: t2.String() }),
     response: {
-      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: detailSchema10 }, { description: `${name13} detail response` })
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: detailSchema10 }, { description: `${name14} detail response` })
     },
     detail: { operationId: "detail" }
   }
 };
 
 // src/models/clicknic/WebhookLog.ts
-var import_typegoose17 = __toESM(require_typegoose());
+var import_typegoose18 = __toESM(require_typegoose());
 var WEBHOOK_LOG_TTL_SECONDS = 60 * 60 * 24 * 30;
 
 class WebhookLogClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose17.prop({ ref: () => ClinicClass }),
+  import_typegoose18.prop({ ref: () => ClinicClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], WebhookLogClass.prototype, "clinic", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({ ref: () => TenantClass }),
+  import_typegoose18.prop({ ref: () => TenantClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], WebhookLogClass.prototype, "tenant", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({ ref: () => PatientClass }),
+  import_typegoose18.prop({ ref: () => PatientClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], WebhookLogClass.prototype, "patient", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({ ref: () => IvrCallRequestClass }),
+  import_typegoose18.prop({ ref: () => IvrCallRequestClass }),
   __legacyMetadataTS("design:type", typeof Ref === "undefined" ? Object : Ref)
 ], WebhookLogClass.prototype, "ivr_call_request", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({ required: true }),
+  import_typegoose18.prop({ required: true }),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "provider", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({ required: true }),
+  import_typegoose18.prop({ required: true }),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "event", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "method", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "path", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({ default: "received" /* RECEIVED */ }),
+  import_typegoose18.prop({ default: "received" /* RECEIVED */ }),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "status", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], WebhookLogClass.prototype, "http_status", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "execution_id", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "contact_number", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({ default: "" }),
+  import_typegoose18.prop({ default: "" }),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "logs", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "error", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], WebhookLogClass.prototype, "duration_ms", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", String)
 ], WebhookLogClass.prototype, "ip", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", Object)
 ], WebhookLogClass.prototype, "query", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", Object)
 ], WebhookLogClass.prototype, "body", undefined);
 __legacyDecorateClassTS([
-  import_typegoose17.prop({}),
+  import_typegoose18.prop({}),
   __legacyMetadataTS("design:type", Object)
 ], WebhookLogClass.prototype, "response", undefined);
 WebhookLogClass = __legacyDecorateClassTS([
-  import_typegoose17.index({ createdAt: 1 }, { expireAfterSeconds: WEBHOOK_LOG_TTL_SECONDS }),
-  import_typegoose17.index({ execution_id: 1 }),
-  import_typegoose17.index({ clinic: 1, createdAt: -1 }),
-  import_typegoose17.modelOptions({
+  import_typegoose18.index({ createdAt: 1 }, { expireAfterSeconds: WEBHOOK_LOG_TTL_SECONDS }),
+  import_typegoose18.index({ execution_id: 1 }),
+  import_typegoose18.index({ clinic: 1, createdAt: -1 }),
+  import_typegoose18.modelOptions({
     schemaOptions: { collection: "webhook_log", timestamps: true },
-    options: { allowMixed: import_typegoose17.Severity.ALLOW }
+    options: { allowMixed: import_typegoose18.Severity.ALLOW }
   })
 ], WebhookLogClass);
-var WebhookLog_default = import_typegoose17.getModelForClass(WebhookLogClass);
+var WebhookLog_default = import_typegoose18.getModelForClass(WebhookLogClass);
 
 // src/api/admin/webhook-log/webhook-log.routes.ts
 var scopeFilter2 = (user) => {
@@ -186875,10 +187134,10 @@ var webhook_log_routes_default = createElysia({ prefix: webhook_log_schema_defau
 }, webhook_log_schema_default.detail));
 
 // src/api/admin/call/call.schema.ts
-var name14 = "call";
+var name15 = "call";
 var call_schema_default = {
   meta: {
-    name: name14,
+    name: name15,
     module: 18 /* APPOINTMENTS */
   },
   patient: {
@@ -186895,7 +187154,7 @@ var call_schema_default = {
           agent_number: t2.String(),
           customer_number: t2.String()
         })
-      }, { description: `${name14} patient response` })
+      }, { description: `${name15} patient response` })
     },
     detail: { operationId: "patient" }
   }
@@ -187129,8 +187388,7 @@ var fetchRecording = async (recordingId) => {
 };
 
 // src/api/admin/call/call.routes.ts
-var FORCE_KNOWLARITY_CLICK_TO_CALL = true;
-var callProvider = () => !FORCE_KNOWLARITY_CLICK_TO_CALL && cleanEnv("CALL_PROVIDER") === "vobiz" ? { name: "vobiz", label: "Vobiz", ...exports_Vobiz } : { name: "knowlarity", label: "Knowlarity", ...exports_Knowlarity };
+var callProvider = () => cleanEnv("CALL_PROVIDER") === "knowlarity" ? { name: "knowlarity", label: "Knowlarity", ...exports_Knowlarity } : { name: "vobiz", label: "Vobiz", ...exports_Vobiz };
 var { toE164India: toE164India3 } = exports_Knowlarity;
 var call_routes_default = createElysia({ prefix: call_schema_default.meta.name }).guard({
   detail: {
@@ -187206,12 +187464,13 @@ adminRoutes.use(patient_health_record_routes_default);
 adminRoutes.use(media_routes_default);
 adminRoutes.use(dashboard_routes_default);
 adminRoutes.use(ivr_call_request_routes_default);
+adminRoutes.use(ivr_break_routes_default);
 adminRoutes.use(webhook_log_routes_default);
 adminRoutes.use(call_routes_default);
 adminRoutes.use(schema_visualizer_routes_default);
 
 // src/api/manglam-city/contribution/contribution.schema.ts
-var name15 = "contribution";
+var name16 = "contribution";
 var publicDetailSchema = t2.Object({
   _id: t2.String(),
   name: t2.String(),
@@ -187221,7 +187480,7 @@ var publicDetailSchema = t2.Object({
   createdAt: t2.String()
 });
 var contribution_schema_default = {
-  meta: { name: name15 },
+  meta: { name: name16 },
   submit: {
     body: t2.Object({
       name: t2.String({ minLength: 1 }),
@@ -187274,35 +187533,35 @@ var contribution_schema_default = {
 };
 
 // src/models/ManglamCityContribution.ts
-var import_typegoose18 = __toESM(require_typegoose());
+var import_typegoose19 = __toESM(require_typegoose());
 class ManglamCityContributionClass {
 }
 __legacyDecorateClassTS([
-  import_typegoose18.prop({}),
+  import_typegoose19.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "name", undefined);
 __legacyDecorateClassTS([
-  import_typegoose18.prop({}),
+  import_typegoose19.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "phone", undefined);
 __legacyDecorateClassTS([
-  import_typegoose18.prop({}),
+  import_typegoose19.prop({}),
   __legacyMetadataTS("design:type", Number)
 ], ManglamCityContributionClass.prototype, "amount", undefined);
 __legacyDecorateClassTS([
-  import_typegoose18.prop({}),
+  import_typegoose19.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "area", undefined);
 __legacyDecorateClassTS([
-  import_typegoose18.prop({}),
+  import_typegoose19.prop({}),
   __legacyMetadataTS("design:type", String)
 ], ManglamCityContributionClass.prototype, "ip", undefined);
 ManglamCityContributionClass = __legacyDecorateClassTS([
-  import_typegoose18.modelOptions({
+  import_typegoose19.modelOptions({
     schemaOptions: { collection: "manglam_city_contribution", timestamps: true }
   })
 ], ManglamCityContributionClass);
-var ManglamCityContribution_default = import_typegoose18.getModelForClass(ManglamCityContributionClass);
+var ManglamCityContribution_default = import_typegoose19.getModelForClass(ManglamCityContributionClass);
 
 // src/api/manglam-city/contribution/contribution.routes.ts
 function maskPhone(phone) {
@@ -187377,10 +187636,10 @@ var manglamCityRoutes = createElysia({ prefix: "/manglam-city" });
 manglamCityRoutes.use(contribution_routes_default);
 
 // src/api/webhook/bolna/bolna.schema.ts
-var name16 = "bolna";
+var name17 = "bolna";
 var bolna_schema_default = {
   meta: {
-    name: name16
+    name: name17
   },
   caller: {
     query: t2.Object({
@@ -187399,7 +187658,7 @@ var bolna_schema_default = {
         patient_gender: t2.String(),
         clinic_name: t2.String()
       }, {
-        description: `${name16} caller lookup response, merged into the agent prompt`
+        description: `${name17} caller lookup response, merged into the agent prompt`
       })
     },
     detail: { operationId: "caller" }
@@ -187410,7 +187669,7 @@ var bolna_schema_default = {
     }),
     body: t2.Any(),
     response: {
-      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: t2.Any() }, { description: `${name16} execution webhook response` })
+      200: t2.Object({ status: t2.Boolean(), message: t2.String(), data: t2.Any() }, { description: `${name17} execution webhook response` })
     },
     detail: { operationId: "execution" }
   }
@@ -187499,7 +187758,7 @@ var bolna_routes_default = createElysia({ prefix: bolna_schema_default.meta.name
 }), bolna_schema_default.execution));
 
 // src/api/webhook/vobiz/vobiz.schema.ts
-var name17 = "vobiz";
+var name18 = "vobiz";
 var params = t2.Optional(t2.Record(t2.String(), t2.Any()));
 var query = t2.Object({ token: t2.Optional(t2.String()) }, { additionalProperties: true });
 var webhook = (operationId) => ({
@@ -187508,7 +187767,7 @@ var webhook = (operationId) => ({
   detail: { operationId }
 });
 var vobiz_schema_default = {
-  meta: { name: name17 },
+  meta: { name: name18 },
   answer: webhook("vobizAnswer"),
   dialEvent: webhook("vobizDialEvent"),
   dialResult: webhook("vobizDialResult"),
@@ -187713,11 +187972,27 @@ var applyStreamEvent = async (event, trace) => {
 
 // src/api/webhook/vobiz/vobiz.service.ts
 var NO_AGENT_MESSAGE = "Sorry, no one is available to take your call right now. Please call again later.";
+var ALL_BUSY_MESSAGE = "All our doctors are busy right now. Please call again later.";
 var AGENT_MISSED = new Set(["busy", "failed", "timeout", "no-answer"]);
 var clinicAgents = async (clinic, tenant) => {
-  const admins = await Admin_default.find({ clinic, tenant, deleted: false, super_admin: { $ne: true } }).populate({ path: "role", select: "level" }).select("_id name phone ivr_agent_number role").sort({ _id: 1 }).lean();
+  const admins = await Admin_default.find({
+    clinic,
+    tenant,
+    deleted: false,
+    super_admin: { $ne: true },
+    ivr_on_break: { $ne: true }
+  }).populate({ path: "role", select: "level" }).select("_id name phone ivr_agent_number role").sort({ _id: 1 }).lean();
   const numbers = admins.filter((a) => a.role?.level === 2 /* L2 */).map((a) => normalizePhone(a.ivr_agent_number || a.phone || "").local).filter((n) => n.length === 10);
   return Array.from(new Set(numbers));
+};
+var isOnBreak = async (local) => {
+  const { variants } = normalizePhone(local);
+  const admin = await Admin_default.exists({
+    deleted: false,
+    ivr_on_break: true,
+    $or: [{ ivr_agent_number: { $in: variants } }, { phone: { $in: variants } }]
+  });
+  return !!admin;
 };
 var nextAgent = async (clinic, agents) => {
   const counter = await AutoIncementalId_default.findOneAndUpdate({ id: `vobiz-round-robin-${clinic}` }, { $inc: { seq: 1 } }, { upsert: true, new: true }).lean();
@@ -187766,23 +188041,25 @@ var handleIncomingCall = async (params, trace) => {
       agent = await nextAgent(call.clinic, agents);
       trace.step(`Round robin over ${agents.length} doctor(s) [${agents.join(", ")}] → ${agent}`);
     } else {
-      trace.step("Clinic has no doctor login with a valid phone");
+      trace.step("No online doctor (all on break, or no doctor login with a valid phone)");
     }
   } else {
     trace.step("No IVR call request (no CallUUID or clinic), cannot pick a clinic doctor");
   }
   if (!agent) {
     const fallback = normalizePhone(cleanEnv("VOBIZ_FALLBACK_AGENT_NUMBER")).local;
-    if (fallback.length === 10) {
+    if (fallback.length === 10 && await isOnBreak(fallback)) {
+      trace.step(`VOBIZ_FALLBACK_AGENT_NUMBER ${fallback} belongs to a doctor on break, not dialled`);
+    } else if (fallback.length === 10) {
       agent = fallback;
       trace.step(`Using VOBIZ_FALLBACK_AGENT_NUMBER ${agent}`);
     }
   }
   if (!agent) {
-    trace.step("No agent to dial, apologising and hanging up");
+    trace.step("No agent to dial, saying all doctors are busy and hanging up");
     if (call)
       await updateCall(call, { status: "no-answer" }, trace);
-    return hangupXml(NO_AGENT_MESSAGE);
+    return hangupXml(ALL_BUSY_MESSAGE);
   }
   if (call)
     await updateCall(call, { status: "ringing", agent }, trace);
@@ -187999,7 +188276,7 @@ var import_mongoose7 = __toESM(require_mongoose2());
 import { randomUUID } from "crypto";
 
 // src/api/public/ground/ground.schema.ts
-var name18 = "ground";
+var name19 = "ground";
 var clinicSchema = t2.Object({
   _id: t2.String(),
   id: t2.Optional(t2.Number()),
@@ -188032,10 +188309,10 @@ var ok = (data, description) => ({
   200: t2.Object({ status: t2.Boolean(), message: t2.String(), data }, { description })
 });
 var ground_schema_default = {
-  meta: { name: name18 },
+  meta: { name: name19 },
   clinic: {
     query: t2.Object({ c: t2.Optional(t2.String()) }),
-    response: ok(clinicSchema, `${name18} clinic response`),
+    response: ok(clinicSchema, `${name19} clinic response`),
     detail: { operationId: "clinic" }
   },
   register: {
@@ -188044,20 +188321,20 @@ var ground_schema_default = {
       phone: t2.String({ minLength: 10, maxLength: 15 }),
       c: t2.Optional(t2.String())
     }),
-    response: ok(volunteerSchema, `${name18} register response`),
+    response: ok(volunteerSchema, `${name19} register response`),
     detail: { operationId: "register" }
   },
   me: {
-    response: ok(volunteerSchema, `${name18} me response`),
+    response: ok(volunteerSchema, `${name19} me response`),
     detail: { operationId: "me" }
   },
   villages: {
-    response: ok(t2.Array(villageSchema), `${name18} villages response`),
+    response: ok(t2.Array(villageSchema), `${name19} villages response`),
     detail: { operationId: "villages" }
   },
   createVillage: {
     body: t2.Object({ name: t2.String({ minLength: 2, maxLength: 60 }) }),
-    response: ok(villageSchema, `${name18} create village response`),
+    response: ok(villageSchema, `${name19} create village response`),
     detail: { operationId: "createVillage" }
   },
   createPatient: {
@@ -188068,7 +188345,7 @@ var ground_schema_default = {
       gender: t2.Number({ minimum: 1, maximum: 3 }),
       village: t2.Optional(t2.String())
     }),
-    response: ok(t2.Object({ patient: patientSchema, duplicate: t2.Boolean() }), `${name18} create patient response`),
+    response: ok(t2.Object({ patient: patientSchema, duplicate: t2.Boolean() }), `${name19} create patient response`),
     detail: { operationId: "createPatient" }
   },
   myPatients: {
@@ -188076,7 +188353,7 @@ var ground_schema_default = {
       today: t2.Number(),
       total: t2.Number(),
       recent: t2.Array(patientSchema)
-    }), `${name18} my patients response`),
+    }), `${name19} my patients response`),
     detail: { operationId: "myPatients" }
   }
 };
@@ -188264,7 +188541,7 @@ var publicRoutes = createElysia({ prefix: "/public" });
 publicRoutes.use(ground_routes_default);
 
 // src/api/webhook/knowlarity/knowlarity.schema.ts
-var name19 = "get-agent";
+var name20 = "get-agent";
 var callParams = {
   caller_number: t2.Optional(t2.String()),
   knowlarity_number: t2.Optional(t2.String()),
@@ -188288,7 +188565,7 @@ var getAgent = {
           hold_sound: t2.String()
         })
       ])
-    }, { description: `${name19} response, tells the IVR which agent to dial` }),
+    }, { description: `${name20} response, tells the IVR which agent to dial` }),
     401: t2.Object({
       status: t2.Boolean(),
       message: t2.String(),
@@ -188299,7 +188576,7 @@ var getAgent = {
 };
 var knowlarity_schema_default = {
   meta: {
-    name: name19
+    name: name20
   },
   getAgent,
   getAgentQuery: {

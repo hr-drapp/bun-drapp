@@ -11,17 +11,11 @@ import { WebhookLogStatus } from "src/models/clicknic/WebhookLog";
 import * as Knowlarity from "src/utils/Knowlarity";
 import * as Vobiz from "src/utils/Vobiz";
 
-/**
- * TEMP: click-to-call is pinned to Knowlarity (Vobiz balance), CALL_PROVIDER is ignored.
- * Set to false to let CALL_PROVIDER=vobiz switch it to Vobiz again.
- */
-const FORCE_KNOWLARITY_CLICK_TO_CALL = true;
-
-/** CALL_PROVIDER=vobiz switches click-to-call to Vobiz; Knowlarity stays the default. */
+/** Click-to-call goes through Vobiz; CALL_PROVIDER=knowlarity switches back to Knowlarity. */
 const callProvider = () =>
-	!FORCE_KNOWLARITY_CLICK_TO_CALL && Vobiz.cleanEnv("CALL_PROVIDER") === "vobiz"
-		? { name: "vobiz", label: "Vobiz", ...Vobiz }
-		: { name: "knowlarity", label: "Knowlarity", ...Knowlarity };
+	Vobiz.cleanEnv("CALL_PROVIDER") === "knowlarity"
+		? { name: "knowlarity", label: "Knowlarity", ...Knowlarity }
+		: { name: "vobiz", label: "Vobiz", ...Vobiz };
 const { toE164India } = Knowlarity;
 
 export default createElysia({ prefix: schema.meta.name }).guard(
@@ -54,7 +48,7 @@ export default createElysia({ prefix: schema.meta.name }).guard(
 					return customError("Patient does not have a valid phone number");
 				}
 
-				// The doctor's Knowlarity agent number, falling back to their login phone.
+				// The doctor's IVR agent number, falling back to their login phone.
 				const agentNumber = toE164India(
 					user.ivr_agent_number || user.phone || "",
 				);
